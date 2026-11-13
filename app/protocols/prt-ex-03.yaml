@@ -1,0 +1,28 @@
+# Bibliothèque de protocoles (F4.1) — exemple F4.4 du cahier des charges (scénario S5).
+code: PRT-EX-03
+version: "1.0"
+title: Plan d'exercice de rattrapage progressif
+description: >
+  Séances manquées consécutives : reprise progressive de la charge pour limiter
+  la perte osseuse et musculaire.
+domain: musculoskeletal
+severity: warning
+trigger:
+  rules: [EX-MISSED-01]
+  summary: Au moins 2 séances de résistance manquées consécutives
+expected_duration_min: 225
+steps:
+  - code: day1
+    title: J+1 — ARED 30 min à 70 % de la charge
+    duration_min: 30
+  - code: day2
+    title: J+2 — ARED 40 min à 80 % de la charge
+    duration_min: 40
+  - code: day3
+    title: J+3 — ARED 45 min + tapis T2 20 min
+    duration_min: 65
+  - code: back_to_plan
+    title: J+4 et J+5 — retour au planning nominal
+    duration_min: 90
+exit_criterion: Adhérence hebdomadaire ≥ 90 %
+requirements: []

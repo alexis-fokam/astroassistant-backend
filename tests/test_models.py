@@ -3,14 +3,13 @@ import hashlib
 from datetime import UTC, date, datetime, timedelta
 
 import pytest
-from sqlalchemy import create_engine, event, inspect, select, text
+from sqlalchemy import inspect, select, text
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
 from app.models import (
     Alert,
     AuditLog,
-    Base,
     Checkin,
     CrewMember,
     InventoryItem,
@@ -40,20 +39,6 @@ from app.models.enums import (
 from app.models.sync import PRIORITY_CRITICAL, PRIORITY_LOW
 
 NOW = datetime(2026, 10, 13, 14, 5, tzinfo=UTC)
-
-
-@pytest.fixture
-def db() -> Session:
-    engine = create_engine("sqlite://")
-
-    @event.listens_for(engine, "connect")
-    def _fk(dbapi_connection, _record) -> None:
-        dbapi_connection.execute("PRAGMA foreign_keys=ON")
-
-    Base.metadata.create_all(engine)
-    with Session(engine) as session:
-        yield session
-    engine.dispose()
 
 
 def _crew(db: Session, code: str = "AV-02", access: AccessRole = AccessRole.ASTRONAUT):

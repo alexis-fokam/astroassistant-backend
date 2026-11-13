@@ -1,0 +1,29 @@
+# Bibliothèque de protocoles (F4.1) — exemple F4.2 du cahier des charges.
+code: PRT-STRESS-01
+version: "1.3"
+title: Respiration guidée et récupération du sommeil
+description: >
+  VFC basse et stress élevé : séance de cohérence cardiaque, puis ajustement du
+  planning de sommeil. Ne prescrit aucun médicament (F4.6).
+domain: behavioral
+severity: warning
+trigger:
+  rules: [HRV-01]
+  summary: VFC < 80 % de la baseline et stress déclaré ≥ 7/10, ou sommeil < 6 h trois nuits
+expected_duration_min: 9
+steps:
+  - code: settle
+    title: S'installer au calme, sangles de maintien
+    duration_min: 1
+  - code: breathing
+    title: Respiration guidée — cohérence cardiaque (6 cycles/min)
+    duration_min: 5
+    timer: true
+  - code: hrv_check
+    title: Mesure de la VFC post-exercice (60 s)
+    duration_min: 1
+  - code: sleep_plan
+    title: Avancer le coucher de 45 min pendant 3 nuits
+    duration_min: 2
+exit_criterion: VFC ≥ 80 % de la baseline sur 2 mesures consécutives
+requirements: []

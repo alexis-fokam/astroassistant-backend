@@ -1,0 +1,31 @@
+# Bibliothèque de protocoles (F4.1) — exemple F4.3 du cahier des charges (scénario S3).
+code: PRT-RAD-02
+version: "1.0"
+title: Abri lors d'un événement à particules solaires
+description: >
+  Pic de débit de dose : rejoindre la zone la mieux blindée, suivre la dose,
+  ressortir quand le débit est revenu sous le seuil.
+domain: radiation
+severity: critical
+trigger:
+  rules: [RAD-SPE-01]
+  summary: Débit de dose anormal ou alerte SPE de la météo spatiale
+expected_duration_min: 120
+steps:
+  - code: shelter
+    title: Rejoindre l'abri blindé (module B2) avant la fin du compte à rebours
+    duration_min: 10
+    timer: true
+  - code: notify
+    title: Confirmer la présence à l'abri de chaque membre d'équipage
+    duration_min: 2
+  - code: dosimeter
+    title: Porter le dosimètre actif et relever le débit toutes les 15 min
+    duration_min: 90
+  - code: exit
+    title: Sortir de l'abri quand le débit est < 0,05 mSv/h depuis 30 min
+    duration_min: 5
+exit_criterion: Débit de dose < 0,05 mSv/h pendant 30 min
+requirements:
+  - item: EQ-DOSI-ACT
+    quantity: 1
