@@ -1,0 +1,43 @@
+# Bibliothèque de protocoles (F4.1) — premiers secours du mode urgence (F12.2).
+code: EMRG-01
+version: "1.0"
+title: Premiers secours — détresse cardio-respiratoire
+description: >
+  Étapes affichées en plein écran pendant le mode urgence. Toute administration
+  de médicament relève du médecin de bord (F4.6).
+domain: cardio
+severity: critical
+trigger:
+  rules: [EMERGENCY]
+  summary: Déclenchement manuel du mode urgence ou FC > 120 bpm avec SpO2 ≤ 90 %
+expected_duration_min: 15
+steps:
+  - code: secure
+    title: Sécuriser la zone et fixer la victime
+    duration_min: 1
+  - code: assess
+    title: Vérifier conscience et respiration
+    duration_min: 1
+  - code: sensors
+    title: Placer l'oxymètre et le brassard
+    duration_min: 2
+  - code: oxygen
+    title: Administrer l'oxygène si SpO2 < 90 %
+    duration_min: 2
+  - code: call_cmo
+    title: Appeler le médecin de bord
+    duration_min: 1
+  - code: monitor
+    title: Surveiller les constantes jusqu'à l'arrivée du CMO
+    duration_min: 8
+exit_criterion: Prise en charge par le CMO
+requirements:
+  - item: EQ-OXIMETER
+    quantity: 1
+  - item: EQ-BP-CUFF
+    quantity: 1
+  - item: EQ-O2-PORT
+    quantity: 1
+  - item: MED-ADRE-SYR
+    quantity: 1
+    optional: true

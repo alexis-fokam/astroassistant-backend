@@ -1,0 +1,37 @@
+# Bibliothèque de protocoles (F4.1) — scénario S4 (suspicion SANS).
+code: PRT-SANS-01
+version: "1.1"
+title: Test visuel guidé — suspicion de SANS
+description: >
+  Vision floue déclarée et maux de tête répétés : test visuel guidé puis
+  notification du médecin de bord.
+severity: warning
+trigger:
+  rules: [SANS-01]
+  summary: Vision modifiée au check-in et céphalées deux jours de suite
+expected_duration_min: 15
+steps:
+  - code: acuity
+    title: Mesurer l'acuité visuelle, œil par œil
+    duration_min: 4
+  - code: amsler
+    title: Test de la grille d'Amsler
+    duration_min: 3
+  - code: oct
+    title: Imagerie OCT si disponible
+    duration_min: 6
+  - code: notify_cmo
+    title: Transmettre les résultats au CMO
+    duration_min: 2
+exit_criterion: Résultats transmis au CMO
+requirements:
+  - item: EQ-ACUITY
+    quantity: 1
+  - item: EQ-AMSLER
+    quantity: 1
+  - item: EQ-OCT
+    quantity: 1
+    optional: true
+  - item: MED-COLLY-LUB
+    quantity: 1
+    optional: true
