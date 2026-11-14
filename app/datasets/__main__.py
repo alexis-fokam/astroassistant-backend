@@ -2,7 +2,7 @@
 
 python -m app.datasets fetch donki      # NASA DONKI (SEP + CME), reference windows
 python -m app.datasets fetch goes       # NOAA GOES proton flux snapshot
-python -m app.datasets fetch msl-rad    # Curiosity RAD cruise dose (streams ~9 GB)
+python -m app.datasets fetch msl-rad    # Curiosity RAD cruise dose (streams ~9 GB, resumable)
 python -m app.datasets catalog          # list every dataset and where to get it
 """
 
@@ -23,6 +23,9 @@ def main() -> None:
     fetch = sub.add_parser("fetch", help="download a bundled dataset into data/nasa/")
     fetch.add_argument("source", choices=["donki", "goes", "msl-rad", "all"])
     fetch.add_argument("--every", type=int, default=1, help="msl-rad: keep one cruise day out of N")
+    fetch.add_argument(
+        "--restart", action="store_true", help="msl-rad: ignore the existing CSV and start over"
+    )
     sub.add_parser("catalog", help="list every dataset")
     args = parser.parse_args()
 
@@ -39,7 +42,7 @@ def main() -> None:
     if "goes" in sources:
         print(f"GOES  -> {goes.fetch()}")
     if "msl-rad" in sources:
-        path, count = msl_rad.fetch(every_nth_day=args.every)
+        path, count = msl_rad.fetch(every_nth_day=args.every, resume=not args.restart)
         print(f"RAD   -> {path} ({count} samples)")
 
 

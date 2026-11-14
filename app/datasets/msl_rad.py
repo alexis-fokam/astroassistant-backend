@@ -13,10 +13,12 @@ Dose equivalent: during cruise RAD measured an average quality factor of about 3
 from __future__ import annotations
 
 import csv
+import http.client
 import re
+import time
 from collections.abc import Iterable, Iterator
 from dataclasses import dataclass
-from datetime import UTC, datetime
+from datetime import UTC, date, datetime
 from pathlib import Path
 
 from app.datasets.http import get_text, iter_lines
@@ -27,6 +29,7 @@ CRUISE_QUALITY_FACTOR = 3.8
 
 _FILE_RE = re.compile(r'href="(RAD_RDR_\d{4}_\d{3}_\d{2}_\d{2}_C\d{3}_V\d{2}\.TXT)"')
 _SECTION_RE = re.compile(r"^\[(\w+): \d+\]$")
+CSV_HEADER = ["utc", "dose_rate_b_ugy_h", "dose_rate_e_ugy_h", "dose_equivalent_usv_h"]
 
 
 @dataclass(frozen=True)
@@ -77,26 +80,84 @@ def parse_lines(lines: Iterable[str]) -> Iterator[DoseSample]:
                 yield DoseSample(utc, dose_b, dose_e)
 
 
-def fetch(every_nth_day: int = 1, output: Path = MSL_RAD_CSV) -> tuple[Path, int]:
-    """Stream cruise files (optionally one day out of N) and write the dose CSV."""
-    ensure_dir(output.parent)
-    files = list_cruise_files()[::every_nth_day]
-    count = 0
+def file_date(name: str) -> date:
+    """Observation day encoded in a cruise file name (``RAD_RDR_YYYY_DDD_...``)."""
+    _, _, year, doy, *_ = name.split("_")
+    return datetime.strptime(f"{year}-{doy}", "%Y-%j").date()
+
+
+def fetch_file(name: str, retries: int = 4) -> list[DoseSample]:
+    """Stream one cruise file; the PDS server sometimes resets long transfers, so retry."""
+    for attempt in range(retries):
+        try:
+            return list(parse_lines(iter_lines(ROOT + name)))
+        except (OSError, http.client.HTTPException) as error:
+            if attempt == retries - 1:
+                raise
+            wait = 10 * 2**attempt
+            print(f"  {name}: {error.__class__.__name__}, retry in {wait} s")
+            time.sleep(wait)
+    raise RuntimeError("unreachable")
+
+
+def _resume_point(output: Path) -> date | None:
+    """Last day already in the CSV; its rows are dropped so that day is fetched again."""
+    if not output.exists():
+        return None
+    with output.open(encoding="utf-8") as handle:
+        rows = list(csv.reader(handle))[1:]
+    if not rows:
+        return None
+    last = datetime.fromisoformat(rows[-1][0]).date()
+    kept = [r for r in rows if datetime.fromisoformat(r[0]).date() < last]
     with output.open("w", newline="", encoding="utf-8") as handle:
         writer = csv.writer(handle)
-        writer.writerow(["utc", "dose_rate_b_ugy_h", "dose_rate_e_ugy_h", "dose_equivalent_usv_h"])
-        for name in files:
-            for sample in parse_lines(iter_lines(ROOT + name)):
-                writer.writerow(
-                    [
-                        sample.utc.isoformat(),
-                        f"{sample.dose_rate_b_ugy_h:.4f}",
-                        f"{sample.dose_rate_e_ugy_h:.4f}",
-                        f"{sample.dose_equivalent_usv_h:.4f}",
-                    ]
-                )
-                count += 1
+        writer.writerow(CSV_HEADER)
+        writer.writerows(kept)
+    return last
+
+
+def fetch(
+    every_nth_day: int = 1, output: Path = MSL_RAD_CSV, *, resume: bool = True
+) -> tuple[Path, int]:
+    """Stream cruise files (optionally one day out of N) and write the dose CSV.
+
+    With ``resume`` (default) an interrupted download continues from the last day in
+    the CSV instead of starting over. A file that keeps failing is skipped and reported.
+    """
+    ensure_dir(output.parent)
+    files = list_cruise_files()[::every_nth_day]
+    since = _resume_point(output) if resume else None
+    if since:
+        files = [f for f in files if file_date(f) >= since]
+        print(f"Resuming from {since} ({len(files)} files left)")
+    else:
+        with output.open("w", newline="", encoding="utf-8") as handle:
+            csv.writer(handle).writerow(CSV_HEADER)
+    count, skipped = 0, []
+    with output.open("a", newline="", encoding="utf-8") as handle:
+        writer = csv.writer(handle)
+        for i, name in enumerate(files, 1):
+            try:
+                samples = fetch_file(name)
+            except (OSError, http.client.HTTPException) as error:
+                skipped.append(name)
+                print(f"  {name}: skipped ({error})")
+                continue
+            writer.writerows(
+                [
+                    s.utc.isoformat(),
+                    f"{s.dose_rate_b_ugy_h:.4f}",
+                    f"{s.dose_rate_e_ugy_h:.4f}",
+                    f"{s.dose_equivalent_usv_h:.4f}",
+                ]
+                for s in samples
+            )
             handle.flush()
+            count += len(samples)
+            print(f"[{i}/{len(files)}] {name}: {len(samples)} samples")
+    if skipped:
+        print(f"{len(skipped)} file(s) skipped; run the command again to retry them.")
     return output, count
 
 
