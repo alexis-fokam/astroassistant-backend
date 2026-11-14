@@ -1,4 +1,4 @@
-# AstroVitals — Backend (FastAPI)
+# Astro Assistant — Backend (FastAPI)
 
 Moteur Mentor IA : API REST + WebSocket, pipeline de données, scoring, règles cliniques, simulateur.
 
@@ -18,8 +18,33 @@ uvicorn app.main:app --reload
 ```
 
 - Swagger : http://localhost:8000/docs
-- Santé : `GET /api/health`
-- Temps réel : `ws://localhost:8000/ws`
+- Santé : `GET /api/v1/health`
+- Temps réel : `ws://localhost:8000/ws/telemetry` (mesures, alertes, urgences)
+
+## API REST (`/api/v1`, cahier des charges §10)
+
+Authentification : `POST /api/v1/auth/login` avec `{"code": "AV-02", "pin": "2222"}`
+renvoie un jeton à passer dans `Authorization: Bearer <jeton>`. Un astronaute ne voit que ses
+propres données ; le médecin de bord (AV-04) voit tout l'équipage et est seul à pouvoir
+acquitter une alerte, enregistrer un usage de pharmacie, clôturer une urgence ou lire l'audit.
+
+| Domaine | Routes |
+|---|---|
+| Profil | `POST /auth/login`, `GET /auth/me`, `GET /mission` |
+| Équipage | `GET /crew`, `GET /crew/{code}/status` |
+| Mesures | `POST /vitals`, `GET /vitals/{code}?type=&from=&to=`, `GET /radiation/{code}` |
+| Auto-déclaration | `POST /checkins`, `POST /exercises`, `POST /pvt` |
+| Alertes | `GET /alerts?status=active`, `GET` / `PATCH /alerts/{id}` |
+| Protocoles | `GET /protocols`, `GET /protocols/{code}`, `POST /protocols/{code}/runs`, `PATCH /protocols/runs/{id}` |
+| Pharmacie | `GET /inventory`, `POST /inventory` |
+| Urgence | `POST` / `GET /emergency`, `POST /emergency/{id}/steps`, `POST /emergency/{id}/close` |
+| Rapports | `GET /reports/{code}?period=week` |
+| Liaison sol | `POST /sync/export`, `GET /sync/packets`, `POST /sync/import`, `GET /sync/messages`, `GET /sync/windows` |
+| Simulation | `GET /sim/scenarios`, `POST /sim/scenario`, `POST /sim/speed`, `GET /sim/runs`, `POST /sim/runs/{id}/stop` |
+| Traçabilité | `GET /audit`, `GET /audit/verify`, `GET /datasets` |
+
+L'horloge de mission suit la dernière télémétrie reçue : avec la base de démo, l'API répond
+à J+142 · 14:05, comme le frontend.
 
 ## Tests et lint
 

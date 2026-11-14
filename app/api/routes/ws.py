@@ -6,7 +6,7 @@ router = APIRouter(tags=["realtime"])
 
 
 class ConnectionManager:
-    """Diffuse les nouveaux états (scores, alertes) vers le dashboard — §8.1."""
+    """Push new states (vitals, scores, alerts, emergencies) to the dashboards (spec §8.1)."""
 
     def __init__(self) -> None:
         self.active: set[WebSocket] = set()
@@ -30,6 +30,7 @@ manager = ConnectionManager()
 
 
 @router.websocket("/ws")
+@router.websocket("/ws/telemetry")
 async def websocket_endpoint(websocket: WebSocket) -> None:
     await manager.connect(websocket)
     try:
