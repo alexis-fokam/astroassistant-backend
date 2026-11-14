@@ -43,3 +43,7 @@ target-version = "py312"
 
 [tool.ruff.lint]
 select = ["E", "F", "I", "UP", "B"]
+
+[tool.ruff.lint.flake8-bugbear]
+# FastAPI declares parameters through default values.
+extend-immutable-calls = ["fastapi.Query", "fastapi.Depends", "fastapi.Body"]

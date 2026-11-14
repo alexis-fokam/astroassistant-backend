@@ -5,17 +5,21 @@ from sqlalchemy.orm import Session
 
 from app.core.config import BASE_DIR
 from app.core.security import hash_pin, verify_pin
+from app.datasets.catalog import CATALOG
 from app.models import (
     AuditLog,
     Baseline,
     ContactWindow,
     CrewMember,
+    DatasetSource,
     InventoryItem,
+    Mission,
     Protocol,
     SimScenario,
 )
 from app.models.enums import AccessRole
 from app.seed import BASELINES, CREW, DEMO_PINS, INVENTORY, SCENARIOS, load_protocol_files, seed
+from app.sim.history import HISTORY_DAYS
 
 
 def _count(db: Session, model) -> int:
@@ -29,8 +33,11 @@ def test_seed_loads_reference_data(db: Session) -> None:
     assert _count(db, Baseline) == len(CREW) * len(BASELINES)
     assert _count(db, InventoryItem) == len(INVENTORY)
     assert _count(db, SimScenario) == len(SCENARIOS) == 6
-    assert _count(db, ContactWindow) == 6
-    assert db.scalars(select(AuditLog.action)).one() == "seed.load"
+    assert _count(db, ContactWindow) == 2 * HISTORY_DAYS + 6
+    assert _count(db, Mission) == 1
+    assert _count(db, DatasetSource) == len(CATALOG)
+    last = db.scalars(select(AuditLog).order_by(AuditLog.id.desc())).first()
+    assert last.action == "seed.load"
 
     cmo = db.scalars(select(CrewMember).where(CrewMember.access_role == AccessRole.CMO)).one()
     assert cmo.code == "AV-04"
@@ -39,7 +46,7 @@ def test_seed_loads_reference_data(db: Session) -> None:
 
 
 def test_seed_is_idempotent(db: Session) -> None:
-    assert seed(db) is True
+    assert seed(db, history=False) is True
     assert seed(db) is False
     assert _count(db, CrewMember) == len(CREW)
 

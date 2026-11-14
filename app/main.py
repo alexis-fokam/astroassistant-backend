@@ -4,7 +4,7 @@ from contextlib import asynccontextmanager
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
-from app.api import api_router, ws_router
+from app.api import api_router, legacy_router, ws_router
 from app.core.config import get_settings
 from app.core.database import engine
 from app.models import Base
@@ -20,6 +20,7 @@ async def lifespan(_app: FastAPI) -> AsyncIterator[None]:
 
 app = FastAPI(
     title=settings.app_name,
+    summary="Mentor IA de surveillance de santé de l'équipage (NASA Space Apps 2026)",
     version=settings.version,
     debug=settings.debug,
     lifespan=lifespan,
@@ -34,4 +35,5 @@ app.add_middleware(
 )
 
 app.include_router(api_router)
+app.include_router(legacy_router, include_in_schema=False)
 app.include_router(ws_router)

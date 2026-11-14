@@ -1,18 +1,20 @@
-"""Données de démonstration : équipage, pharmacie, protocoles, scénarios S1 à S6.
+"""Demo database: mission, crew, pharmacy, protocols, scenarios, open datasets and
+a fictional 14-day history.
 
-Usage :
-    python -m app.seed           # remplit une base vide (ne fait rien si l'équipage existe)
-    python -m app.seed --reset   # supprime toutes les tables, les recrée puis remplit
+Usage:
+    python -m app.seed                # fill an empty database (no-op if the crew exists)
+    python -m app.seed --reset        # drop and recreate every table, then fill
+    python -m app.seed --no-history   # reference data and datasets only
 
-Seules des données de référence sont créées ; la télémétrie est produite par le
-simulateur (F15). Les PIN de démo sont dans ``DEMO_PINS``.
+Demo PINs are in ``DEMO_PINS``. Every person and value of the history is fictional;
+only the space-environment tables hold real NASA/NOAA measurements.
 """
 
 from __future__ import annotations
 
 import argparse
 import hashlib
-from datetime import UTC, date, datetime, timedelta
+from datetime import date, datetime, timedelta
 from pathlib import Path
 
 import yaml
@@ -21,6 +23,7 @@ from sqlalchemy.orm import Session
 
 from app.core.config import BASE_DIR
 from app.core.security import hash_pin
+from app.datasets.importer import import_all
 from app.models import (
     AuditLog,
     Base,
@@ -28,8 +31,8 @@ from app.models import (
     ContactWindow,
     CrewMember,
     Device,
-    GroundMessage,
     InventoryItem,
+    Mission,
     Protocol,
     ProtocolRequirement,
     SimScenario,
@@ -42,14 +45,27 @@ from app.models.enums import (
     DeviceKind,
     HealthLevel,
     Metric,
+    MissionDestination,
     RiskDomain,
     Sex,
 )
+from app.sim.history import DEMO_NOW, HISTORY_DAYS, generate_history
 
 PROTOCOLS_DIR = BASE_DIR / "app" / "protocols"
 MISSION_START = date(2026, 5, 24)
 
-# Profils fictifs. PIN de démonstration uniquement.
+MISSION = {
+    "code": "ARTEMIS-M",
+    "name": "Artemis-M",
+    "destination": MissionDestination.MARS_TRANSIT,
+    "start_date": MISSION_START,
+    "planned_duration_days": 210,
+    "flight_profile": "Transit Terre-Mars, habitat avec abri anti-radiations B2",
+    "one_way_latency_s": 720,
+    "day_length_min": 1440,
+}
+
+# Fictional profiles. Demo PINs only.
 DEMO_PINS = {"AV-01": "1111", "AV-02": "2222", "AV-03": "3333", "AV-04": "4444"}
 
 CREW = [
@@ -100,7 +116,7 @@ CREW = [
     },
 ]
 
-# Baselines de repos (moyenne, écart-type) ; légère variation par membre.
+# Resting baselines (mean, std); slight per-member variation.
 BASELINES: dict[Metric, tuple[float, float]] = {
     Metric.HEART_RATE: (64, 6),
     Metric.HRV_RMSSD: (48, 6),
@@ -113,7 +129,7 @@ BASELINES: dict[Metric, tuple[float, float]] = {
 BASELINE_OFFSETS = {"AV-01": -0.04, "AV-02": 0.0, "AV-03": 0.05, "AV-04": 0.02}
 
 INVENTORY = [
-    # code, nom, catégorie, unité, quantité, seuil, péremption, emplacement
+    # code, name, category, unit, quantity, threshold, expiry, location
     (
         "MED-PARA-500",
         "Paracétamol 500 mg",
@@ -254,7 +270,7 @@ SCENARIOS = [
 
 
 def load_protocol_files(directory: Path = PROTOCOLS_DIR) -> list[tuple[Path, dict, str]]:
-    """Lit chaque YAML de la bibliothèque : (chemin, contenu, SHA-256 du fichier)."""
+    """Read every library YAML: (path, content, SHA-256 of the file)."""
     files = []
     for path in sorted(directory.glob("*.yaml")):
         raw = path.read_bytes()
@@ -262,16 +278,22 @@ def load_protocol_files(directory: Path = PROTOCOLS_DIR) -> list[tuple[Path, dic
     return files
 
 
-def seed(session: Session, now: datetime | None = None) -> bool:
-    """Remplit une base vide. Renvoie False sans rien faire si l'équipage existe déjà."""
+def seed(session: Session, now: datetime | None = None, *, history: bool = True) -> bool:
+    """Fill an empty database. Returns False and does nothing if the crew already exists."""
     if session.scalar(select(func.count()).select_from(CrewMember)):
         return False
-    now = now or datetime.now(UTC)
+    now = now or DEMO_NOW
+
+    mission = Mission(**MISSION)
+    session.add(mission)
 
     crew: dict[str, CrewMember] = {}
     for spec in CREW:
         member = CrewMember(
-            **spec, pin_hash=hash_pin(DEMO_PINS[spec["code"]]), mission_start_date=MISSION_START
+            **spec,
+            mission=mission,
+            pin_hash=hash_pin(DEMO_PINS[spec["code"]]),
+            mission_start_date=MISSION_START,
         )
         crew[member.code] = member
         session.add(member)
@@ -281,6 +303,14 @@ def seed(session: Session, now: datetime | None = None) -> bool:
                 kind=DeviceKind.WEARABLE,
                 serial_number=f"WR-{member.code}",
                 firmware_version="2.4.1",
+            )
+        )
+        session.add(
+            Device(
+                crew_member=member,
+                kind=DeviceKind.DOSIMETER,
+                serial_number=f"DOS-{member.code}",
+                firmware_version="1.2.0",
             )
         )
         offset = BASELINE_OFFSETS[member.code]
@@ -340,12 +370,13 @@ def seed(session: Session, now: datetime | None = None) -> bool:
     for spec in SCENARIOS:
         session.add(SimScenario(**spec))
 
-    # Fenêtres de contact sur 3 jours, toutes les 12 h, latence vers Mars ~12 min (F10.3).
+    # Contact windows every 12 h, from the start of the history to 3 days ahead (F10.3).
     first = now.replace(minute=0, second=0, microsecond=0) + timedelta(hours=2)
-    for i in range(6):
+    for i in range(-2 * HISTORY_DAYS, 6):
         start = first + timedelta(hours=12 * i)
         session.add(
             ContactWindow(
+                mission=mission,
                 starts_at=start,
                 ends_at=start + timedelta(minutes=45),
                 one_way_latency_s=720,
@@ -353,38 +384,30 @@ def seed(session: Session, now: datetime | None = None) -> bool:
             )
         )
 
-    body = (
-        "Prolonger la fenêtre de sommeil de 45 min pendant 3 nuits. Réévaluer la VFC dans 3 jours."
-    )
+    datasets = import_all(session)
     session.flush()
-    session.add(
-        GroundMessage(
-            crew_member_id=crew["AV-02"].id,
-            author="Dr M. Reyes · Houston",
-            subject="Consigne sommeil",
-            body=body,
-            sha256=hashlib.sha256(body.encode()).hexdigest(),
-            sent_at=now - timedelta(hours=21),
-            received_at=now - timedelta(hours=21) + timedelta(seconds=720),
-        )
-    )
+    if history:
+        generate_history(session, now=now)
 
-    session.flush()
+    prev = (
+        session.scalars(select(AuditLog.entry_hash).order_by(AuditLog.id.desc())).first()
+        or GENESIS_HASH
+    )
     entry = {
         "at": now,
         "actor_label": "Système",
         "action": "seed.load",
         "entity_type": None,
         "entity_id": None,
-        "details": {"crew": len(crew), "items": len(items), "scenarios": len(SCENARIOS)},
+        "details": {
+            "crew": len(crew),
+            "items": len(items),
+            "scenarios": len(SCENARIOS),
+            "datasets": datasets,
+            "history": history,
+        },
     }
-    session.add(
-        AuditLog(
-            prev_hash=GENESIS_HASH,
-            entry_hash=AuditLog.compute_hash(GENESIS_HASH, **entry),
-            **entry,
-        )
-    )
+    session.add(AuditLog(prev_hash=prev, entry_hash=AuditLog.compute_hash(prev, **entry), **entry))
     session.commit()
     return True
 
@@ -398,7 +421,8 @@ def main() -> None:
     from app.core.database import SessionLocal, engine
 
     parser = argparse.ArgumentParser(description=__doc__.splitlines()[0])
-    parser.add_argument("--reset", action="store_true", help="recrée toutes les tables")
+    parser.add_argument("--reset", action="store_true", help="drop and recreate every table")
+    parser.add_argument("--no-history", action="store_true", help="skip the fictional history")
     args = parser.parse_args()
 
     if args.reset:
@@ -406,8 +430,8 @@ def main() -> None:
     else:
         Base.metadata.create_all(engine)
     with SessionLocal() as session:
-        created = seed(session)
-    print("Données de démo chargées." if created else "Équipage déjà présent : rien à faire.")
+        created = seed(session, history=not args.no_history)
+    print("Demo data loaded." if created else "Crew already present: nothing to do.")
 
 
 if __name__ == "__main__":

@@ -1,14 +1,16 @@
-"""Modèles SQLAlchemy d'AstroVitals (cahier des charges §9).
+"""SQLAlchemy models of Astro Assistant (spec §9).
 
-Tous les modèles sont importés ici pour être enregistrés dans ``Base.metadata``
-avant ``Base.metadata.create_all`` (voir ``app.main``).
+Every model is imported here so it is registered in ``Base.metadata`` before
+``Base.metadata.create_all`` (see ``app.main``).
 """
 
 from app.models.alerts import Alert, EmergencyEvent
 from app.models.audit import AuditLog
 from app.models.base import Base
 from app.models.crew import Baseline, CrewMember, Device
+from app.models.datasets import CruiseDoseSample, DatasetSource, ProtonFluxReading
 from app.models.medical import ConsultationNote, InventoryItem, InventoryUsage
+from app.models.mission import Mission
 from app.models.protocols import Protocol, ProtocolRequirement, ProtocolRun
 from app.models.radiation import RadiationDose, SpaceWeatherEvent
 from app.models.scoring import FeatureSnapshot, RiskScore
@@ -26,6 +28,8 @@ __all__ = [
     "ConsultationNote",
     "ContactWindow",
     "CrewMember",
+    "CruiseDoseSample",
+    "DatasetSource",
     "Device",
     "EmergencyEvent",
     "ExerciseSession",
@@ -34,9 +38,11 @@ __all__ = [
     "IntakeLog",
     "InventoryItem",
     "InventoryUsage",
+    "Mission",
     "Protocol",
     "ProtocolRequirement",
     "ProtocolRun",
+    "ProtonFluxReading",
     "PvtResult",
     "RadiationDose",
     "RiskScore",
