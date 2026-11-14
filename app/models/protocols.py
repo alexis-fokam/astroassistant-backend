@@ -1,8 +1,8 @@
-"""Protocoles de contre-mesures (F4) : registre des versions, matériel requis, exécutions.
+"""Countermeasure protocols (spec F4): version registry, required materials, executions.
 
-Le contenu des protocoles (déclencheur, étapes, critère de sortie) vit dans les
-fichiers YAML de ``app/protocols/`` ; la table ``protocols`` garde la trace de la
-version chargée, pour que chaque exécution reste rattachée au texte exact suivi.
+Protocol content (trigger, steps, exit criterion) lives in the YAML files of
+``app/protocols/``; the ``protocols`` table records the loaded version so every
+execution stays tied to the exact text that was followed.
 """
 
 from __future__ import annotations
@@ -33,18 +33,26 @@ class Protocol(Base):
         ),
     )
 
-    id: Mapped[int] = mapped_column(primary_key=True)
-    code: Mapped[str] = mapped_column(String(64), index=True)  # ex. « PRT-STRESS-01 »
-    version: Mapped[str] = mapped_column(String(16))
-    title: Mapped[str] = mapped_column(String(160))
-    description: Mapped[str | None] = mapped_column(Text)
-    domain: Mapped[RiskDomain | None] = mapped_column(enum_type(RiskDomain))
-    severity: Mapped[AlertLevel] = mapped_column(enum_type(AlertLevel))
-    expected_duration_min: Mapped[int | None]
-    file_path: Mapped[str] = mapped_column(String(255))
-    checksum: Mapped[str] = mapped_column(String(64))  # SHA-256 du YAML chargé
-    is_active: Mapped[bool] = mapped_column(default=True)
-    loaded_at: Mapped[datetime] = mapped_column(default=utcnow)
+    id: Mapped[int] = mapped_column(primary_key=True, comment="Identifiant technique")
+    code: Mapped[str] = mapped_column(
+        String(64), index=True, comment="Code du protocole (ex. PRT-STRESS-01)"
+    )
+    version: Mapped[str] = mapped_column(String(16), comment="Version du fichier YAML")
+    title: Mapped[str] = mapped_column(String(160), comment="Titre affiché")
+    description: Mapped[str | None] = mapped_column(Text, comment="Résumé du protocole")
+    domain: Mapped[RiskDomain | None] = mapped_column(
+        enum_type(RiskDomain), comment="Domaine de risque traité"
+    )
+    severity: Mapped[AlertLevel] = mapped_column(
+        enum_type(AlertLevel), comment="Gravité pour laquelle il est conçu"
+    )
+    expected_duration_min: Mapped[int | None] = mapped_column(comment="Durée prévue en minutes")
+    file_path: Mapped[str] = mapped_column(String(255), comment="Chemin du fichier YAML source")
+    checksum: Mapped[str] = mapped_column(
+        String(64), comment="Empreinte SHA-256 du fichier YAML chargé"
+    )
+    is_active: Mapped[bool] = mapped_column(default=True, comment="Version utilisable")
+    loaded_at: Mapped[datetime] = mapped_column(default=utcnow, comment="Date de chargement (UTC)")
 
     requirements: Mapped[list[ProtocolRequirement]] = relationship(
         back_populates="protocol", cascade="all, delete-orphan", passive_deletes=True
@@ -60,25 +68,24 @@ class ProtocolRequirement(Base):
         CheckConstraint("quantity > 0", name="quantity_positive"),
     )
 
-    id: Mapped[int] = mapped_column(primary_key=True)
-    protocol_id: Mapped[int] = mapped_column(ForeignKey("protocols.id", ondelete="CASCADE"))
-    item_id: Mapped[int] = mapped_column(
-        ForeignKey("inventory_items.id", ondelete="CASCADE"), index=True
+    id: Mapped[int] = mapped_column(primary_key=True, comment="Identifiant technique")
+    protocol_id: Mapped[int] = mapped_column(
+        ForeignKey("protocols.id", ondelete="CASCADE"), comment="Protocole concerné"
     )
-    quantity: Mapped[float] = mapped_column(default=1)
-    is_optional: Mapped[bool] = mapped_column(default=False)
+    item_id: Mapped[int] = mapped_column(
+        ForeignKey("inventory_items.id", ondelete="CASCADE"),
+        index=True,
+        comment="Article de pharmacie requis",
+    )
+    quantity: Mapped[float] = mapped_column(default=1, comment="Quantité nécessaire")
+    is_optional: Mapped[bool] = mapped_column(default=False, comment="Matériel facultatif")
 
     protocol: Mapped[Protocol] = relationship(back_populates="requirements")
     item: Mapped[InventoryItem] = relationship()
 
 
 class ProtocolRun(Base):
-    """Exécution d'un protocole par un astronaute (F4.5, §9 ``protocol_run``).
-
-    ``steps`` suit l'avancement étape par étape :
-    ``[{"code": "breathing", "done_at": "2026-10-13T14:12:00Z"}, ...]``.
-    ``efficacy`` est réévaluée après le protocole (0 = sans effet, 1 = objectif atteint).
-    """
+    """Exécution d'un protocole par un astronaute, étape par étape (F4.5, §9 protocol_run)."""
 
     __tablename__ = "protocol_runs"
     __table_args__ = (
@@ -87,22 +94,34 @@ class ProtocolRun(Base):
         CheckConstraint("ended_at IS NULL OR ended_at >= started_at", name="chronology"),
     )
 
-    id: Mapped[int] = mapped_column(primary_key=True)
-    protocol_id: Mapped[int] = mapped_column(ForeignKey("protocols.id", ondelete="RESTRICT"))
-    alert_id: Mapped[int | None] = mapped_column(
-        ForeignKey("alerts.id", ondelete="SET NULL"), index=True
+    id: Mapped[int] = mapped_column(primary_key=True, comment="Identifiant technique")
+    protocol_id: Mapped[int] = mapped_column(
+        ForeignKey("protocols.id", ondelete="RESTRICT"), comment="Version du protocole suivie"
     )
-    crew_member_id: Mapped[int] = mapped_column(ForeignKey("crew_members.id", ondelete="CASCADE"))
+    alert_id: Mapped[int | None] = mapped_column(
+        ForeignKey("alerts.id", ondelete="SET NULL"),
+        index=True,
+        comment="Alerte qui a déclenché le protocole",
+    )
+    crew_member_id: Mapped[int] = mapped_column(
+        ForeignKey("crew_members.id", ondelete="CASCADE"), comment="Membre qui exécute"
+    )
     sim_run_id: Mapped[int | None] = mapped_column(
-        ForeignKey("sim_runs.id", ondelete="CASCADE"), index=True
+        ForeignKey("sim_runs.id", ondelete="CASCADE"), index=True, comment="Simulation d'origine"
     )
     status: Mapped[ProtocolRunStatus] = mapped_column(
-        enum_type(ProtocolRunStatus), default=ProtocolRunStatus.IN_PROGRESS
+        enum_type(ProtocolRunStatus),
+        default=ProtocolRunStatus.IN_PROGRESS,
+        comment="En cours, terminé ou abandonné",
     )
-    steps: Mapped[list[Any]] = mapped_column(default=list)
-    started_at: Mapped[datetime] = mapped_column(default=utcnow)
-    ended_at: Mapped[datetime | None]
-    efficacy: Mapped[float | None]
+    steps: Mapped[list[Any]] = mapped_column(
+        default=list, comment="Avancement (JSON) : code de chaque étape et heure de validation"
+    )
+    started_at: Mapped[datetime] = mapped_column(default=utcnow, comment="Début (UTC)")
+    ended_at: Mapped[datetime | None] = mapped_column(comment="Fin (UTC)")
+    efficacy: Mapped[float | None] = mapped_column(
+        comment="Efficacité réévaluée après le protocole, de 0 à 1"
+    )
 
     protocol: Mapped[Protocol] = relationship()
     alert: Mapped[Alert | None] = relationship(back_populates="protocol_runs")

@@ -19,6 +19,9 @@ class Settings(BaseSettings):
     # Intervalle du pipeline IA (secondes) — cahier des charges §8.1
     pipeline_interval_seconds: int = 5
 
+    # NASA open APIs (DONKI). DEMO_KEY works but is rate limited; get a free key at api.nasa.gov.
+    nasa_api_key: str = "DEMO_KEY"
+
 
 @lru_cache
 def get_settings() -> Settings:

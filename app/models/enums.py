@@ -1,4 +1,4 @@
-"""Énumérations métier partagées par les modèles, les schémas et le moteur."""
+"""Business enumerations shared by models, schemas and the engine."""
 
 from enum import StrEnum
 
@@ -10,7 +10,7 @@ class Sex(StrEnum):
 
 
 class CrewRole(StrEnum):
-    """Fonction à bord (information de profil)."""
+    """Function on board (profile information)."""
 
     COMMANDER = "commander"
     PILOT = "pilot"
@@ -20,10 +20,10 @@ class CrewRole(StrEnum):
 
 
 class AccessRole(StrEnum):
-    """Droits du profil local (§7, RBAC) : l'astronaute ne voit que ses données."""
+    """Local profile rights (spec §7, RBAC): an astronaut only sees their own data."""
 
     ASTRONAUT = "astronaut"
-    CMO = "cmo"  # Crew Medical Officer : toutes les données de l'équipage
+    CMO = "cmo"  # Crew Medical Officer: access to the whole crew
 
 
 class DeviceKind(StrEnum):
@@ -38,9 +38,9 @@ class DeviceKind(StrEnum):
 
 
 class Metric(StrEnum):
-    """Mesures physiologiques en série temporelle. L'unité est fixée par la métrique.
+    """Physiological time series. The unit is fixed by the metric (see METRIC_UNITS).
 
-    La dose de rayonnement a sa propre table (``radiation_doses``), cumuls compris.
+    Radiation dose has its own table (``radiation_doses``), cumulative values included.
     """
 
     HEART_RATE = "heart_rate"
@@ -73,10 +73,11 @@ class DataSource(StrEnum):
     SENSOR = "sensor"
     SIMULATOR = "simulator"
     MANUAL = "manual"
+    DATASET = "dataset"  # imported from an open dataset (see dataset_sources)
 
 
 class HealthLevel(StrEnum):
-    """Statut à 3 niveaux (F1.1) — seuils de score : 0-39 | 40-69 | 70-100 (§6.3)."""
+    """Three-level status (F1.1); score thresholds 0-39 | 40-69 | 70-100 (spec §6.3)."""
 
     NOMINAL = "nominal"
     WARNING = "warning"
@@ -84,7 +85,7 @@ class HealthLevel(StrEnum):
 
 
 class RiskDomain(StrEnum):
-    """Domaines de risque scorés par le moteur (F2.5) ; GLOBAL = agrégation (F2.6)."""
+    """Risk domains scored by the engine (F2.5); GLOBAL is the aggregate (F2.6)."""
 
     GLOBAL = "global"
     CARDIO = "cardio"
@@ -95,14 +96,14 @@ class RiskDomain(StrEnum):
 
 
 class DetectionMethod(StrEnum):
-    """Origine d'une alerte (F2.2 à F2.4), affichée dans l'explication (F2.7)."""
+    """Origin of an alert (F2.2-F2.4), shown in the explanation (F2.7)."""
 
-    THRESHOLD = "threshold"  # seuil clinique
-    ROBUST_ZSCORE = "robust_zscore"  # médiane / MAD vs baseline
-    ISOLATION_FOREST = "isolation_forest"  # multivarié
-    TREND = "trend"  # pente sur fenêtre glissante
-    CHECKIN = "checkin"  # réponses du check-in (F3.4)
-    MANUAL = "manual"  # signalement par le CMO
+    THRESHOLD = "threshold"  # clinical threshold
+    ROBUST_ZSCORE = "robust_zscore"  # median / MAD vs baseline
+    ISOLATION_FOREST = "isolation_forest"  # multivariate
+    TREND = "trend"  # slope over a sliding window
+    CHECKIN = "checkin"  # check-in answers (F3.4)
+    MANUAL = "manual"  # reported by the CMO
 
 
 class AlertLevel(StrEnum):
@@ -126,6 +127,15 @@ class ProtocolRunStatus(StrEnum):
 class EmergencyStatus(StrEnum):
     ACTIVE = "active"
     CLOSED = "closed"
+
+
+class MissionDestination(StrEnum):
+    """Mission profile chosen at setup (A-03); drives latency and day/night cycle."""
+
+    LOW_EARTH_ORBIT = "low_earth_orbit"
+    MOON = "moon"
+    MARS_TRANSIT = "mars_transit"
+    MARS_SURFACE = "mars_surface"
 
 
 class SpaceWeatherKind(StrEnum):

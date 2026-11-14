@@ -9,3 +9,5 @@ htmlcov/
 
 .env
 data/*.db*
+# Large third-party datasets (see app/datasets/catalog.py)
+data/external/

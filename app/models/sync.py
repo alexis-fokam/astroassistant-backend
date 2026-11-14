@@ -1,16 +1,20 @@
-"""Synchronisation différée avec la Terre, en « store-and-forward » (F10, §9 ``sync_packet``)."""
+"""Delayed synchronisation with Earth, store-and-forward (spec F10, §9 sync_packet)."""
 
 from __future__ import annotations
 
 from datetime import datetime
+from typing import TYPE_CHECKING
 
 from sqlalchemy import CheckConstraint, ForeignKey, Index, SmallInteger, String, Text
-from sqlalchemy.orm import Mapped, mapped_column
+from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.models.base import Base, enum_type, utcnow
 from app.models.enums import SyncPacketKind, SyncPacketStatus
 
-# Priorités d'export : les alertes CRITICAL passent en tête de file (F10.2).
+if TYPE_CHECKING:
+    from app.models.mission import Mission
+
+# Export priorities: CRITICAL alerts go first (spec F10.2).
 PRIORITY_CRITICAL = 0
 PRIORITY_HIGH = 1
 PRIORITY_NORMAL = 2
@@ -18,10 +22,9 @@ PRIORITY_LOW = 3
 
 
 class SyncPacket(Base):
-    """Paquet de la file d'export persistante : JSON compressé (gzip) et horodaté (F10.1).
+    """Paquet de la file d'export : JSON compressé gzip, horodaté et signé SHA-256 (F10.1, F10.5).
 
-    La file se lit par ``status = 'queued'`` puis ``priority`` croissante puis ancienneté.
-    ``sha256`` est l'empreinte du contenu compressé (F10.5).
+    La file se lit par statut « queued », puis priorité croissante, puis ancienneté.
     """
 
     __tablename__ = "sync_packets"
@@ -33,24 +36,38 @@ class SyncPacket(Base):
         CheckConstraint("size_bytes >= 0", name="size_positive"),
     )
 
-    id: Mapped[int] = mapped_column(primary_key=True)
+    id: Mapped[int] = mapped_column(primary_key=True, comment="Identifiant technique")
     crew_member_id: Mapped[int | None] = mapped_column(
-        ForeignKey("crew_members.id", ondelete="SET NULL"), index=True
-    )  # NULL = paquet d'équipage
+        ForeignKey("crew_members.id", ondelete="SET NULL"),
+        index=True,
+        comment="Membre concerné (vide pour un paquet d'équipage)",
+    )
     sim_run_id: Mapped[int | None] = mapped_column(
-        ForeignKey("sim_runs.id", ondelete="CASCADE"), index=True
+        ForeignKey("sim_runs.id", ondelete="CASCADE"), index=True, comment="Simulation d'origine"
     )
-    kind: Mapped[SyncPacketKind] = mapped_column(enum_type(SyncPacketKind))
-    priority: Mapped[int] = mapped_column(SmallInteger, default=PRIORITY_NORMAL)
+    kind: Mapped[SyncPacketKind] = mapped_column(
+        enum_type(SyncPacketKind), comment="Nature du contenu"
+    )
+    priority: Mapped[int] = mapped_column(
+        SmallInteger,
+        default=PRIORITY_NORMAL,
+        comment="Priorité d'envoi : 0 critique, 1 haute, 2 normale, 3 basse",
+    )
     status: Mapped[SyncPacketStatus] = mapped_column(
-        enum_type(SyncPacketStatus), default=SyncPacketStatus.QUEUED
+        enum_type(SyncPacketStatus),
+        default=SyncPacketStatus.QUEUED,
+        comment="En file, envoyé, acquitté ou échoué",
     )
-    payload_gz: Mapped[bytes]
-    size_bytes: Mapped[int]
-    sha256: Mapped[str] = mapped_column(String(64), unique=True)
-    created_at: Mapped[datetime] = mapped_column(default=utcnow)
-    sent_at: Mapped[datetime | None]
-    acknowledged_at: Mapped[datetime | None]
+    payload_gz: Mapped[bytes] = mapped_column(comment="Contenu JSON compressé (gzip)")
+    size_bytes: Mapped[int] = mapped_column(comment="Taille compressée en octets")
+    sha256: Mapped[str] = mapped_column(
+        String(64), unique=True, comment="Empreinte SHA-256 du contenu compressé"
+    )
+    created_at: Mapped[datetime] = mapped_column(default=utcnow, comment="Création du paquet (UTC)")
+    sent_at: Mapped[datetime | None] = mapped_column(comment="Envoi vers le sol (UTC)")
+    acknowledged_at: Mapped[datetime | None] = mapped_column(
+        comment="Accusé de réception du sol (UTC)"
+    )
 
 
 class GroundMessage(Base):
@@ -58,24 +75,33 @@ class GroundMessage(Base):
 
     __tablename__ = "ground_messages"
 
-    id: Mapped[int] = mapped_column(primary_key=True)
+    id: Mapped[int] = mapped_column(primary_key=True, comment="Identifiant technique")
     crew_member_id: Mapped[int | None] = mapped_column(
-        ForeignKey("crew_members.id", ondelete="SET NULL"), index=True
-    )  # NULL = toute l'équipe
-    sim_run_id: Mapped[int | None] = mapped_column(
-        ForeignKey("sim_runs.id", ondelete="CASCADE"), index=True
+        ForeignKey("crew_members.id", ondelete="SET NULL"),
+        index=True,
+        comment="Destinataire (vide pour tout l'équipage)",
     )
-    author: Mapped[str] = mapped_column(String(120))  # ex. « Dr M. Reyes · Houston »
-    subject: Mapped[str | None] = mapped_column(String(160))
-    body: Mapped[str] = mapped_column(Text)
-    sha256: Mapped[str] = mapped_column(String(64), unique=True)  # intégrité de l'import
-    sent_at: Mapped[datetime | None]  # horodatage d'émission au sol
-    received_at: Mapped[datetime] = mapped_column(default=utcnow)
-    read_at: Mapped[datetime | None]
+    sim_run_id: Mapped[int | None] = mapped_column(
+        ForeignKey("sim_runs.id", ondelete="CASCADE"), index=True, comment="Simulation d'origine"
+    )
+    author: Mapped[str] = mapped_column(
+        String(120), comment="Auteur au sol (ex. Dr M. Reyes · Houston)"
+    )
+    subject: Mapped[str | None] = mapped_column(String(160), comment="Objet")
+    body: Mapped[str] = mapped_column(Text, comment="Texte de la consigne")
+    is_instruction: Mapped[bool] = mapped_column(
+        default=False, comment="Consigne médicale à appliquer"
+    )
+    sha256: Mapped[str] = mapped_column(
+        String(64), unique=True, comment="Empreinte d'intégrité de l'import"
+    )
+    sent_at: Mapped[datetime | None] = mapped_column(comment="Émission au sol (UTC)")
+    received_at: Mapped[datetime] = mapped_column(default=utcnow, comment="Réception à bord (UTC)")
+    read_at: Mapped[datetime | None] = mapped_column(comment="Lecture par le destinataire (UTC)")
 
 
 class ContactWindow(Base):
-    """Fenêtre de contact simulée avec latence configurable (F10.3)."""
+    """Fenêtre de contact avec la Terre et latence associée (F10.3)."""
 
     __tablename__ = "contact_windows"
     __table_args__ = (
@@ -84,12 +110,17 @@ class ContactWindow(Base):
         CheckConstraint("bandwidth_kbps IS NULL OR bandwidth_kbps > 0", name="bandwidth_positive"),
     )
 
-    id: Mapped[int] = mapped_column(primary_key=True)
-    sim_run_id: Mapped[int | None] = mapped_column(
-        ForeignKey("sim_runs.id", ondelete="CASCADE"), index=True
+    id: Mapped[int] = mapped_column(primary_key=True, comment="Identifiant technique")
+    mission_id: Mapped[int] = mapped_column(
+        ForeignKey("missions.id", ondelete="CASCADE"), index=True, comment="Mission concernée"
     )
-    starts_at: Mapped[datetime] = mapped_column(index=True)
-    ends_at: Mapped[datetime]
-    one_way_latency_s: Mapped[int]  # ex. 240 à 1 320 s vers Mars
-    bandwidth_kbps: Mapped[float | None]
-    notes: Mapped[str | None] = mapped_column(Text)
+    sim_run_id: Mapped[int | None] = mapped_column(
+        ForeignKey("sim_runs.id", ondelete="CASCADE"), index=True, comment="Simulation d'origine"
+    )
+    starts_at: Mapped[datetime] = mapped_column(index=True, comment="Ouverture de la fenêtre (UTC)")
+    ends_at: Mapped[datetime] = mapped_column(comment="Fermeture de la fenêtre (UTC)")
+    one_way_latency_s: Mapped[int] = mapped_column(comment="Latence aller simple en secondes")
+    bandwidth_kbps: Mapped[float | None] = mapped_column(comment="Débit estimé (kb/s)")
+    notes: Mapped[str | None] = mapped_column(Text, comment="Remarque")
+
+    mission: Mapped[Mission] = relationship()

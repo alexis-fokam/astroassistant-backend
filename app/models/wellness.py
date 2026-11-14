@@ -1,5 +1,5 @@
-"""Contre-mesures et hygiène de vie : exercice (F6), sommeil (F7), vigilance PVT (F8),
-nutrition et hydratation (F13)."""
+"""Countermeasures and daily life: exercise (F6), sleep (F7), vigilance PVT (F8),
+nutrition and hydration (F13)."""
 
 from __future__ import annotations
 
@@ -10,23 +10,14 @@ from sqlalchemy import CheckConstraint, ForeignKey, Index, SmallInteger, String,
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.models.base import Base, enum_type, utcnow
-from app.models.enums import (
-    DataSource,
-    ExerciseIntensity,
-    ExerciseKind,
-    IntakeKind,
-    SessionStatus,
-)
+from app.models.enums import DataSource, ExerciseIntensity, ExerciseKind, IntakeKind, SessionStatus
 
 if TYPE_CHECKING:
     from app.models.crew import CrewMember
 
 
 class ExerciseSession(Base):
-    """Séance d'exercice planifiée puis réalisée ou manquée (F6.1, §9 ``exercise_session``).
-
-    Les séances ``missed`` consécutives déclenchent l'alerte de rattrapage (F6.3).
-    """
+    """Séance d'exercice planifiée puis réalisée ou manquée (F6.1, §9 exercise_session)."""
 
     __tablename__ = "exercise_sessions"
     __table_args__ = (
@@ -38,27 +29,37 @@ class ExerciseSession(Base):
         ),
     )
 
-    id: Mapped[int] = mapped_column(primary_key=True)
-    crew_member_id: Mapped[int] = mapped_column(ForeignKey("crew_members.id", ondelete="CASCADE"))
+    id: Mapped[int] = mapped_column(primary_key=True, comment="Identifiant technique")
+    crew_member_id: Mapped[int] = mapped_column(
+        ForeignKey("crew_members.id", ondelete="CASCADE"), comment="Membre concerné"
+    )
     sim_run_id: Mapped[int | None] = mapped_column(
-        ForeignKey("sim_runs.id", ondelete="CASCADE"), index=True
+        ForeignKey("sim_runs.id", ondelete="CASCADE"), index=True, comment="Simulation d'origine"
     )
-    kind: Mapped[ExerciseKind] = mapped_column(enum_type(ExerciseKind))
+    kind: Mapped[ExerciseKind] = mapped_column(
+        enum_type(ExerciseKind), comment="Appareil : résistance ARED, tapis T2, vélo CEVIS"
+    )
     status: Mapped[SessionStatus] = mapped_column(
-        enum_type(SessionStatus), default=SessionStatus.PLANNED
+        enum_type(SessionStatus),
+        default=SessionStatus.PLANNED,
+        comment="Planifiée, réalisée ou manquée",
     )
-    scheduled_at: Mapped[datetime]
-    started_at: Mapped[datetime | None]
-    duration_min: Mapped[int | None]
-    intensity: Mapped[ExerciseIntensity | None] = mapped_column(enum_type(ExerciseIntensity))
-    avg_heart_rate: Mapped[float | None]
-    notes: Mapped[str | None] = mapped_column(Text)
+    scheduled_at: Mapped[datetime] = mapped_column(comment="Créneau planifié (UTC)")
+    started_at: Mapped[datetime | None] = mapped_column(comment="Début réel (UTC)")
+    duration_min: Mapped[int | None] = mapped_column(comment="Durée réalisée en minutes")
+    intensity: Mapped[ExerciseIntensity | None] = mapped_column(
+        enum_type(ExerciseIntensity), comment="Intensité de la séance"
+    )
+    avg_heart_rate: Mapped[float | None] = mapped_column(
+        comment="Fréquence cardiaque moyenne (bpm)"
+    )
+    notes: Mapped[str | None] = mapped_column(Text, comment="Commentaire")
 
     crew_member: Mapped[CrewMember] = relationship()
 
 
 class SleepSession(Base):
-    """Période de sommeil (F7.1, §9 ``sleep_session``)."""
+    """Période de sommeil mesurée ou déclarée (F7.1, §9 sleep_session)."""
 
     __tablename__ = "sleep_sessions"
     __table_args__ = (
@@ -68,23 +69,29 @@ class SleepSession(Base):
         CheckConstraint("awakenings IS NULL OR awakenings >= 0", name="awakenings_positive"),
     )
 
-    id: Mapped[int] = mapped_column(primary_key=True)
-    crew_member_id: Mapped[int] = mapped_column(ForeignKey("crew_members.id", ondelete="CASCADE"))
-    sim_run_id: Mapped[int | None] = mapped_column(
-        ForeignKey("sim_runs.id", ondelete="CASCADE"), index=True
+    id: Mapped[int] = mapped_column(primary_key=True, comment="Identifiant technique")
+    crew_member_id: Mapped[int] = mapped_column(
+        ForeignKey("crew_members.id", ondelete="CASCADE"), comment="Membre concerné"
     )
-    started_at: Mapped[datetime]
-    ended_at: Mapped[datetime]
-    quality: Mapped[int | None] = mapped_column(SmallInteger)  # score de sommeil 0..100
-    awakenings: Mapped[int | None] = mapped_column(SmallInteger)
-    latency_min: Mapped[int | None]  # délai d'endormissement
-    source: Mapped[DataSource] = mapped_column(enum_type(DataSource), default=DataSource.SENSOR)
+    sim_run_id: Mapped[int | None] = mapped_column(
+        ForeignKey("sim_runs.id", ondelete="CASCADE"), index=True, comment="Simulation d'origine"
+    )
+    started_at: Mapped[datetime] = mapped_column(comment="Endormissement (UTC)")
+    ended_at: Mapped[datetime] = mapped_column(comment="Réveil (UTC)")
+    quality: Mapped[int | None] = mapped_column(SmallInteger, comment="Score de sommeil, 0 à 100")
+    awakenings: Mapped[int | None] = mapped_column(SmallInteger, comment="Nombre de réveils")
+    latency_min: Mapped[int | None] = mapped_column(comment="Délai d'endormissement en minutes")
+    source: Mapped[DataSource] = mapped_column(
+        enum_type(DataSource),
+        default=DataSource.SENSOR,
+        comment="Origine : capteur, saisie, simulateur",
+    )
 
     crew_member: Mapped[CrewMember] = relationship()
 
 
 class PvtResult(Base):
-    """Résultat d'un test de vigilance psychomotrice (F8, §9 ``pvt_result``)."""
+    """Résultat d'un test de vigilance psychomotrice de 3 minutes (F8, §9 pvt_result)."""
 
     __tablename__ = "pvt_results"
     __table_args__ = (
@@ -95,17 +102,21 @@ class PvtResult(Base):
         ),
     )
 
-    id: Mapped[int] = mapped_column(primary_key=True)
-    crew_member_id: Mapped[int] = mapped_column(ForeignKey("crew_members.id", ondelete="CASCADE"))
-    sim_run_id: Mapped[int | None] = mapped_column(
-        ForeignKey("sim_runs.id", ondelete="CASCADE"), index=True
+    id: Mapped[int] = mapped_column(primary_key=True, comment="Identifiant technique")
+    crew_member_id: Mapped[int] = mapped_column(
+        ForeignKey("crew_members.id", ondelete="CASCADE"), comment="Membre testé"
     )
-    taken_at: Mapped[datetime] = mapped_column(default=utcnow)
-    duration_seconds: Mapped[int] = mapped_column(default=180)  # test court de 3 min (F8.1)
-    stimuli_count: Mapped[int]
-    median_rt_ms: Mapped[float]
-    lapses: Mapped[int]  # temps de réaction > 500 ms (F8.2)
-    false_starts: Mapped[int] = mapped_column(default=0)
+    sim_run_id: Mapped[int | None] = mapped_column(
+        ForeignKey("sim_runs.id", ondelete="CASCADE"), index=True, comment="Simulation d'origine"
+    )
+    taken_at: Mapped[datetime] = mapped_column(default=utcnow, comment="Date du test (UTC)")
+    duration_seconds: Mapped[int] = mapped_column(
+        default=180, comment="Durée du test en secondes (F8.1)"
+    )
+    stimuli_count: Mapped[int] = mapped_column(comment="Nombre de stimuli présentés")
+    median_rt_ms: Mapped[float] = mapped_column(comment="Temps de réaction médian (ms)")
+    lapses: Mapped[int] = mapped_column(comment="Inattentions : réactions de plus de 500 ms (F8.2)")
+    false_starts: Mapped[int] = mapped_column(default=0, comment="Réponses avant le stimulus")
 
     crew_member: Mapped[CrewMember] = relationship()
 
@@ -123,15 +134,21 @@ class IntakeLog(Base):
         CheckConstraint("kind != 'water' OR water_ml IS NOT NULL", name="water_has_volume"),
     )
 
-    id: Mapped[int] = mapped_column(primary_key=True)
-    crew_member_id: Mapped[int] = mapped_column(ForeignKey("crew_members.id", ondelete="CASCADE"))
-    sim_run_id: Mapped[int | None] = mapped_column(
-        ForeignKey("sim_runs.id", ondelete="CASCADE"), index=True
+    id: Mapped[int] = mapped_column(primary_key=True, comment="Identifiant technique")
+    crew_member_id: Mapped[int] = mapped_column(
+        ForeignKey("crew_members.id", ondelete="CASCADE"), comment="Membre concerné"
     )
-    logged_at: Mapped[datetime] = mapped_column(default=utcnow)
-    kind: Mapped[IntakeKind] = mapped_column(enum_type(IntakeKind))
-    portion_code: Mapped[str | None] = mapped_column(String(64))  # ex. « main_dish »
-    energy_kcal: Mapped[float | None]
-    water_ml: Mapped[float | None]
+    sim_run_id: Mapped[int | None] = mapped_column(
+        ForeignKey("sim_runs.id", ondelete="CASCADE"), index=True, comment="Simulation d'origine"
+    )
+    logged_at: Mapped[datetime] = mapped_column(default=utcnow, comment="Heure de la prise (UTC)")
+    kind: Mapped[IntakeKind] = mapped_column(
+        enum_type(IntakeKind), comment="Repas, collation ou eau"
+    )
+    portion_code: Mapped[str | None] = mapped_column(
+        String(64), comment="Portion prédéfinie (ex. main_dish)"
+    )
+    energy_kcal: Mapped[float | None] = mapped_column(comment="Apport énergétique (kcal)")
+    water_ml: Mapped[float | None] = mapped_column(comment="Volume d'eau (ml)")
 
     crew_member: Mapped[CrewMember] = relationship()

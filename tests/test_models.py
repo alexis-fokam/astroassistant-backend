@@ -13,6 +13,7 @@ from app.models import (
     Checkin,
     CrewMember,
     InventoryItem,
+    Mission,
     Protocol,
     ProtocolRun,
     RadiationDose,
@@ -32,6 +33,7 @@ from app.models.enums import (
     DetectionMethod,
     HealthLevel,
     Metric,
+    MissionDestination,
     ProtocolRunStatus,
     RiskDomain,
     SyncPacketKind,
@@ -41,8 +43,26 @@ from app.models.sync import PRIORITY_CRITICAL, PRIORITY_LOW
 NOW = datetime(2026, 10, 13, 14, 5, tzinfo=UTC)
 
 
+def _mission(db: Session) -> Mission:
+    mission = db.scalars(select(Mission)).first()
+    if mission is None:
+        mission = Mission(
+            code="ARTEMIS-M",
+            name="Artemis-M",
+            destination=MissionDestination.MARS_TRANSIT,
+            start_date=date(2026, 5, 24),
+            planned_duration_days=210,
+            flight_profile="Transit Terre-Mars",
+            one_way_latency_s=720,
+        )
+        db.add(mission)
+        db.flush()
+    return mission
+
+
 def _crew(db: Session, code: str = "AV-02", access: AccessRole = AccessRole.ASTRONAUT):
     crew = CrewMember(
+        mission=_mission(db),
         code=code,
         first_name="Léo",
         last_name="Martin",

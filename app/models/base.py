@@ -1,4 +1,8 @@
-"""Socle commun des modèles SQLAlchemy : Base déclarative, conventions, mixins."""
+"""Shared foundation of the SQLAlchemy models: declarative base, conventions, mixins.
+
+Every column carries a ``comment``: it is written into the database schema and is the
+single source of the generated data dictionary (``python -m app.docs``).
+"""
 
 from datetime import UTC, datetime
 from enum import StrEnum
@@ -8,7 +12,7 @@ from sqlalchemy import JSON, DateTime, MetaData
 from sqlalchemy import Enum as SAEnum
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column
 
-# Noms de contraintes stables (utile pour de futures migrations Alembic).
+# Stable constraint names (ready for future Alembic migrations).
 NAMING_CONVENTION = {
     "ix": "ix_%(column_0_label)s",
     "uq": "uq_%(table_name)s_%(column_0_name)s",
@@ -23,7 +27,7 @@ def utcnow() -> datetime:
 
 
 class Base(DeclarativeBase):
-    """Base déclarative SQLAlchemy de tous les modèles AstroVitals."""
+    """Declarative base of every Astro Assistant model."""
 
     metadata = MetaData(naming_convention=NAMING_CONVENTION)
     type_annotation_map = {
@@ -34,7 +38,7 @@ class Base(DeclarativeBase):
 
 
 def enum_type[E: StrEnum](enum_cls: type[E]) -> SAEnum:
-    """Enum stocké en VARCHAR (valeur, pas nom) + contrainte CHECK — portable SQLite/Postgres."""
+    """Enum stored as VARCHAR (value, not name) plus a CHECK constraint (SQLite/Postgres)."""
     return SAEnum(
         enum_cls,
         native_enum=False,
@@ -46,5 +50,9 @@ def enum_type[E: StrEnum](enum_cls: type[E]) -> SAEnum:
 
 
 class TimestampMixin:
-    created_at: Mapped[datetime] = mapped_column(default=utcnow)
-    updated_at: Mapped[datetime] = mapped_column(default=utcnow, onupdate=utcnow)
+    created_at: Mapped[datetime] = mapped_column(
+        default=utcnow, comment="Date de création de la ligne (UTC)"
+    )
+    updated_at: Mapped[datetime] = mapped_column(
+        default=utcnow, onupdate=utcnow, comment="Date de dernière modification (UTC)"
+    )
