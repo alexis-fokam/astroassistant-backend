@@ -17,8 +17,8 @@ Ce rapport présente la base de données restructurée d'Astro Assistant. Il exp
 | Contraintes CHECK métier | 57 (plus 30 CHECK générées pour les énumérations) |
 | Index secondaires | 54 |
 | Énumérations | 22 |
-| Lignes dans la base de démonstration | ≈ 20 000 (détail au §6) |
-| Tests automatisés | 30, tous verts |
+| Lignes dans la base de démonstration | 22 250 (détail au §6) |
+| Tests automatisés | 34, tous verts |
 
 Trois points résument la base :
 
@@ -87,7 +87,7 @@ Transversal : Audit (toutes les actions) · Simulation (sim_run_id sur 16 tables
 
 | Source | Table | Nature | Licence |
 |---|---|---|---|
-| NASA PDS — Curiosity RAD, croisière vers Mars 2011-2012 (`MSL-M-RAD-3-RDR-V1.0`) | `cruise_dose_samples` | **Réelle.** Débits de dose B/E en µGy/h et équivalent de dose avec Q ≈ 3,8 (Zeitlin et al., *Science* 2013). Un jour sur trois est retenu. | Domaine public (US Gov) |
+| NASA PDS — Curiosity RAD, croisière vers Mars 2011-2012 (`MSL-M-RAD-3-RDR-V1.0`) | `cruise_dose_samples` | **Réelle.** 5 117 observations du 06/12/2011 au 13/07/2012 (toute la croisière, un jour sur trois). Débits de dose B/E en µGy/h et équivalent de dose avec Q ≈ 3,8 (Zeitlin et al., *Science* 2013). Moyenne de 2,1 mSv/jour, avec des pics jusqu'à 2,6 mSv/h pendant les éruptions solaires de janvier et mars 2012. | Domaine public (US Gov) |
 | NOAA SWPC — GOES, flux intégral de protons sur 7 jours | `proton_flux_readings` | **Réelle.** Bandes ≥ 10 MeV (seuil de tempête S1) et ≥ 100 MeV. | Domaine public |
 | NASA DONKI (SEP, CME) ou rapports NOAA | `space_weather_events` | **Réelle.** Éruptions X8.2 (sept. 2017) et X5.8 (mai 2024), et événement à protons du 10/09/2017 (≈ 1 490 pfu), rejoué par le scénario S3. | Domaine public |
 | WESAD, Sleep-EDF, BIDSleep, Monash PVT, NASA OSDR Inspiration4 | `dataset_sources`, sans import | Référencés pour entraîner et valider le moteur. Téléchargés à la demande dans `data/external/` (non versionné). | Selon chaque jeu |
@@ -111,13 +111,13 @@ Volumes principaux :
 
 | Table | Lignes |
 |---|---:|
-| `vital_readings` | ≈ 9 000 (1 point par heure par métrique, toutes les 5 min sur les 2 dernières heures) |
-| `proton_flux_readings` | ≈ 4 000 (réelles) |
-| `cruise_dose_samples` | ≈ 2 000 à 6 000 (réelles, selon la couverture du téléchargement RAD) |
+| `vital_readings` | 8 953 (1 point par heure par métrique, toutes les 5 min sur les 2 dernières heures) |
+| `proton_flux_readings` | 4 026 (réelles) |
+| `cruise_dose_samples` | 5 117 (réelles, toute la croisière) |
 | `risk_scores` / `feature_snapshots` | 1 440 / 240 (toutes les 6 h, 6 domaines par membre) |
-| `radiation_doses` | ≈ 1 400 (horaires, cumuls croissants) |
+| `radiation_doses` | 1 404 (horaires, cumuls croissants) |
 | `intake_logs`, `exercise_sessions`, `sleep_sessions`, `checkins`, `pvt_results` | 520, 120, 56, 56, 60 |
-| `audit_logs` | ≈ 80 entrées chaînées |
+| `audit_logs` | 79 entrées chaînées |
 
 La valeur exacte de chaque table figure dans le dictionnaire. Elle est recalculée à chaque génération.
 
@@ -127,6 +127,7 @@ La valeur exacte de chaque table figure dans le dictionnaire. Elle est recalcul�
 - **Contraintes de domaine** : 57 CHECK métier et 30 CHECK d'énumération. Une valeur hors plage est rejetée par la base, pas seulement par l'API.
 - **Journal d'audit** : il est en ajout seul, et des déclencheurs SQLite rejettent `UPDATE` et `DELETE`. Chaque entrée contient le SHA-256 de la précédente. Un test recharge la base et revérifie toute la chaîne.
 - **Paquets vers le sol** : le contenu est vraiment compressé en gzip et son empreinte SHA-256 est stockée. Un test décompresse chaque paquet et recalcule son empreinte.
+- **Données ouvertes** : les fichiers RDR entrelacent plusieurs séries d'observations et en répètent certaines. Le téléchargement trie et dédoublonne le CSV (5 218 lignes brutes, 5 117 uniques), et un test vérifie que le fichier versionné est ordonné et sans doublon.
 - **Reproductibilité** : deux générations avec la même graine produisent des bases identiques, ce qu'un test vérifie.
 - **Documentation** : des tests garantissent que chaque colonne a une description, que chaque table a une docstring et un domaine, et que le dictionnaire affiche les 31 tables.
 
@@ -155,5 +156,5 @@ cd backend
 python -m app.datasets fetch all --every 3   # données ouvertes (RAD, GOES, DONKI)
 python -m app.seed --reset                    # base de démonstration
 python -m app.docs                            # docs/dictionnaire-de-donnees.md
-pytest                                        # 30 tests
+pytest                                        # 34 tests
 ```

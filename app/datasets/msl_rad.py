@@ -117,6 +117,23 @@ def _resume_point(output: Path) -> date | None:
     return last
 
 
+def finalize(output: Path = MSL_RAD_CSV) -> int:
+    """Sort the CSV by time and drop repeated observations.
+
+    RDR files interleave several observation sequences and some observations appear
+    twice, so raw rows are neither ordered nor unique. Returns the number of rows kept.
+    """
+    with output.open(encoding="utf-8") as handle:
+        rows = list(csv.reader(handle))[1:]
+    unique = {row[0]: row for row in rows}
+    ordered = [unique[k] for k in sorted(unique, key=datetime.fromisoformat)]
+    with output.open("w", newline="", encoding="utf-8") as handle:
+        writer = csv.writer(handle)
+        writer.writerow(CSV_HEADER)
+        writer.writerows(ordered)
+    return len(ordered)
+
+
 def fetch(
     every_nth_day: int = 1, output: Path = MSL_RAD_CSV, *, resume: bool = True
 ) -> tuple[Path, int]:
@@ -158,6 +175,8 @@ def fetch(
             print(f"[{i}/{len(files)}] {name}: {len(samples)} samples")
     if skipped:
         print(f"{len(skipped)} file(s) skipped; run the command again to retry them.")
+    total = finalize(output)
+    print(f"{total} unique samples in {output.name} ({count} fetched in this run)")
     return output, count
 
 
