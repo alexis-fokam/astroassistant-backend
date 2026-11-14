@@ -62,3 +62,24 @@ def test_bundled_cruise_csv_is_clean() -> None:
     assert times == sorted(times)
     assert len(times) == len(set(times))
     assert times[0].date() < date(2012, 1, 1) < times[-1].date()
+
+
+def test_donki_events_are_imported_with_provenance(db) -> None:
+    from sqlalchemy import select
+
+    from app.datasets import donki
+    from app.datasets.importer import import_space_weather, seed_sources
+    from app.models import SpaceWeatherEvent
+    from app.models.enums import SpaceWeatherKind
+
+    cached = donki.load_cached()
+    source = seed_sources(db)["nasa-donki"]
+    count = import_space_weather(db, source)
+    events = db.scalars(select(SpaceWeatherEvent)).all()
+    assert len(events) == count
+    flares = [e for e in events if e.kind is SpaceWeatherKind.SOLAR_FLARE]
+    assert {f.flare_class for f in flares} >= {"X8.2", "X5.8"}
+    if cached:
+        assert source.record_count == len(cached)
+        from_donki = [e for e in events if e.source_id == source.id]
+        assert len({e.donki_id for e in from_donki}) == len(cached)

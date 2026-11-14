@@ -15,7 +15,7 @@ from sqlalchemy.orm import Session
 
 from app.datasets import donki, msl_rad
 from app.datasets.catalog import CATALOG
-from app.datasets.paths import GOES_DIR, MSL_RAD_CSV
+from app.datasets.paths import DONKI_DIR, GOES_DIR, MSL_RAD_CSV
 from app.models import CruiseDoseSample, DatasetSource, ProtonFluxReading, SpaceWeatherEvent
 from app.models.enums import SpaceWeatherKind
 
@@ -124,26 +124,34 @@ def import_goes(session: Session, source: DatasetSource, path: Path | None = Non
 
 
 def import_space_weather(session: Session, source: DatasetSource) -> int:
-    """DONKI events if cached, otherwise the NOAA reference events above."""
+    """DONKI events (SEP, CME) when cached, plus the reference flares.
+
+    The DONKI flare route (FLR) is not served by api.nasa.gov, so flares always come from
+    the NOAA reference list; without a DONKI cache the reference SEP is used as well.
+    """
     events = donki.load_cached()
-    if events:
-        kinds = {"SEP": SpaceWeatherKind.SOLAR_PARTICLE_EVENT, "CME": SpaceWeatherKind.CME}
-        for e in events:
-            session.add(
-                SpaceWeatherEvent(
-                    source=source,
-                    kind=kinds[e.kind],
-                    donki_id=e.donki_id,
-                    started_at=e.started_at,
-                    description=e.description,
-                )
+    for e in events:
+        session.add(
+            SpaceWeatherEvent(
+                source=source,
+                kind=e.kind,
+                donki_id=e.donki_id,
+                started_at=e.started_at,
+                description=e.description,
             )
-        source.record_count = len(events)
-        source.retrieved_at = datetime.now(UTC)
-        return len(events)
-    for spec in REFERENCE_EVENTS:
+        )
+    references = [
+        spec
+        for spec in REFERENCE_EVENTS
+        if not events or spec["kind"] is SpaceWeatherKind.SOLAR_FLARE
+    ]
+    for spec in references:
         session.add(SpaceWeatherEvent(**spec))
-    return len(REFERENCE_EVENTS)
+    if events:
+        files = sorted(DONKI_DIR.glob("*.json"))
+        source.record_count = len(events)
+        source.retrieved_at = max((_mtime(f) for f in files), default=None)
+    return len(events) + len(references)
 
 
 def import_all(session: Session) -> dict[str, int]:

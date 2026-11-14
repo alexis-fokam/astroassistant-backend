@@ -89,7 +89,7 @@ Transversal : Audit (toutes les actions) · Simulation (sim_run_id sur 16 tables
 |---|---|---|---|
 | NASA PDS — Curiosity RAD, croisière vers Mars 2011-2012 (`MSL-M-RAD-3-RDR-V1.0`) | `cruise_dose_samples` | **Réelle.** 5 117 observations du 06/12/2011 au 13/07/2012 (toute la croisière, un jour sur trois). Débits de dose B/E en µGy/h et équivalent de dose avec Q ≈ 3,8 (Zeitlin et al., *Science* 2013). Moyenne de 2,1 mSv/jour, avec des pics jusqu'à 2,6 mSv/h pendant les éruptions solaires de janvier et mars 2012. | Domaine public (US Gov) |
 | NOAA SWPC — GOES, flux intégral de protons sur 7 jours | `proton_flux_readings` | **Réelle.** Bandes ≥ 10 MeV (seuil de tempête S1) et ≥ 100 MeV. | Domaine public |
-| NASA DONKI (SEP, CME) ou rapports NOAA | `space_weather_events` | **Réelle.** Éruptions X8.2 (sept. 2017) et X5.8 (mai 2024), et événement à protons du 10/09/2017 (≈ 1 490 pfu), rejoué par le scénario S3. | Domaine public |
+| NASA DONKI — API api.nasa.gov (SEP, CME), septembre 2017 et mai 2024 | `space_weather_events` | **Réelle.** 197 événements : 24 événements à particules solaires (dont celui du 10/09/2017 rejoué par le scénario S3) et 173 éjections de masse coronale. La route des éruptions (FLR) n'étant pas servie, les éruptions X8.2 (2017) et X5.8 (2024) viennent des rapports NOAA. | Domaine public |
 | WESAD, Sleep-EDF, BIDSleep, Monash PVT, NASA OSDR Inspiration4 | `dataset_sources`, sans import | Référencés pour entraîner et valider le moteur. Téléchargés à la demande dans `data/external/` (non versionné). | Selon chaque jeu |
 | Générateur `app/sim/history.py` | Toutes les tables opérationnelles | **Fictive**, déterministe (graine 142) | — |
 
@@ -144,7 +144,7 @@ La valeur exacte de chaque table figure dans le dictionnaire. Elle est recalcul�
 | Limite | Piste |
 |---|---|
 | Pas de migrations : un changement de modèle impose de recréer la base | Ajouter Alembic avant toute donnée de production |
-| DONKI est limité par la clé `DEMO_KEY` ; les événements de référence NOAA prennent le relais | Créer une clé gratuite sur api.nasa.gov (`AV_NASA_API_KEY`) puis lancer `python -m app.datasets fetch donki` |
+| DONKI ne fournit pas les éruptions solaires (route FLR indisponible) | Compléter avec le catalogue d'éruptions GOES X-ray de la NOAA |
 | Les jeux physiologiques terrestres (WESAD, Sleep-EDF…) sont catalogués mais pas importés | Les importer dans `data/external/` pour entraîner et valider le moteur IA |
 | SQLite n'est pas chiffré au repos | SQLCipher, ou chiffrement du volume de l'appareil |
 | Les commentaires de colonnes ne sont pas écrits dans le fichier SQLite, qui ne les supporte pas | Ils sont repris dans le dictionnaire, et PostgreSQL les conserverait |
