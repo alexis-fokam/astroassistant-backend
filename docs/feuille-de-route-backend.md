@@ -1,6 +1,6 @@
 # Feuille de route backend — API pour le frontend
 
-**Responsable :** @Gazonsn-del
+**Responsable :** @gazonsn-del
 **Branche de départ :** `main` (après fusion de `feat/database-schema`)
 
 Ce document liste tout ce qu'il reste à faire sur le backend pour que le frontend (Nuxt) consomme l'API directement, avant l'intégration du moteur IA.
