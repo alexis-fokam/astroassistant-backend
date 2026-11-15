@@ -2,7 +2,7 @@
 
 > Document généré par `python -m app.docs` à partir des modèles SQLAlchemy (`backend/app/models`). Ne pas modifier à la main.
 
-Généré le 15/11/2026 à 13:06.
+Généré le 15/11/2026 à 14:51.
 
 ## Synthèse
 

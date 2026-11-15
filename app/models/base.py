@@ -8,7 +8,7 @@ from datetime import UTC, datetime
 from enum import StrEnum
 from typing import Any
 
-from sqlalchemy import JSON, DateTime, MetaData
+from sqlalchemy import JSON, DateTime, MetaData, TypeDecorator
 from sqlalchemy import Enum as SAEnum
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column
 
@@ -26,6 +26,28 @@ def utcnow() -> datetime:
     return datetime.now(UTC)
 
 
+class UTCDateTime(TypeDecorator):
+    """Timezone-aware UTC datetimes on every database.
+
+    SQLite does not store time zones and returns naive datetimes; every datetime of the
+    schema is UTC, so values are normalised to UTC on write and tagged UTC on read. The API
+    then always serialises ``...+00:00`` and clients never misread a time as local.
+    """
+
+    impl = DateTime(timezone=True)
+    cache_ok = True
+
+    def process_bind_param(self, value: datetime | None, dialect) -> datetime | None:
+        if value is not None and value.tzinfo is not None:
+            value = value.astimezone(UTC)
+        return value
+
+    def process_result_value(self, value: datetime | None, dialect) -> datetime | None:
+        if value is not None and value.tzinfo is None:
+            value = value.replace(tzinfo=UTC)
+        return value
+
+
 class Base(DeclarativeBase):
     """Declarative base of every Astro Assistant model."""
 
@@ -33,7 +55,7 @@ class Base(DeclarativeBase):
     type_annotation_map = {
         dict[str, Any]: JSON,
         list[Any]: JSON,
-        datetime: DateTime(timezone=True),
+        datetime: UTCDateTime(),
     }
 
 
