@@ -1,9 +1,9 @@
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
-from app.models import Baseline, VitalReading, CrewMember
-from app.models.enums import HealthLevel, Metric, METRIC_UNITS
-from app.schemas.telemetry import CrewVitalsLatest, VitalLatestItem, NormalBand, VitalPoint
+from app.models import Baseline, CrewMember, VitalReading
+from app.models.enums import METRIC_UNITS, HealthLevel, Metric
+from app.schemas.telemetry import CrewVitalsLatest, NormalBand, VitalLatestItem, VitalPoint
 
 
 def _eval_level(value: float, baseline: Baseline | None) -> HealthLevel:
@@ -30,9 +30,7 @@ def _eval_trend_pct(readings: list[VitalReading]) -> float | None:
 def crew_vitals_latest(db: Session, member: CrewMember) -> CrewVitalsLatest:
     baselines = {
         b.metric: b
-        for b in db.scalars(
-            select(Baseline).where(Baseline.crew_member_id == member.id)
-        ).all()
+        for b in db.scalars(select(Baseline).where(Baseline.crew_member_id == member.id)).all()
     }
 
     result: dict[Metric, VitalLatestItem] = {}

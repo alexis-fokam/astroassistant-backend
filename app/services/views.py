@@ -21,7 +21,7 @@ from app.models import (
 from app.models.enums import AccessRole, AlertLevel, AlertStatus, RiskDomain
 from app.schemas.alerts import AlertOut, EmergencyOut
 from app.schemas.care import RunOut
-from app.schemas.crew import CrewStatus, CrewSummary, Factor, CrewProfile
+from app.schemas.crew import CrewProfile, CrewStatus, CrewSummary, Factor
 from app.schemas.ground import GroundMessageOut, PacketOut, SimRunOut
 
 LEVEL_ORDER = {AlertLevel.CRITICAL: 0, AlertLevel.WARNING: 1, AlertLevel.INFO: 2}
@@ -130,11 +130,10 @@ def crew_status(db: Session, member: CrewMember) -> CrewStatus:
         active_alerts=[alert_out(a) for a in alerts],
     )
 
+
 def crew_profiles(db: Session) -> list[CrewProfile]:
     members = db.scalars(
-        select(CrewMember)
-        .where(CrewMember.is_active.is_(True))
-        .order_by(CrewMember.code)
+        select(CrewMember).where(CrewMember.is_active.is_(True)).order_by(CrewMember.code)
     ).all()
 
     profiles: list[CrewProfile] = []
@@ -229,4 +228,3 @@ def sim_run_out(run: SimRun) -> SimRunOut:
         started_at=as_utc(run.started_at),
         ended_at=as_utc(run.ended_at),
     )
-

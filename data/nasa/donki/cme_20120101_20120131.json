@@ -1,0 +1,2560 @@
+[
+  {
+    "activityID": "2012-01-01T13:36:00-CME-001",
+    "catalog": "M2M_CATALOG",
+    "startTime": "2012-01-01T13:36Z",
+    "instruments": [
+      {
+        "displayName": "STEREO A: SECCHI/COR2"
+      },
+      {
+        "displayName": "SOHO: LASCO/C2"
+      },
+      {
+        "displayName": "SOHO: LASCO/C3"
+      }
+    ],
+    "sourceLocation": "",
+    "activeRegionNum": null,
+    "note": "",
+    "cmeAnalyses": [
+      {
+        "isMostAccurate": true,
+        "levelOfData": 0,
+        "time21_5": "2012-01-01T18:17Z",
+        "latitude": 8.0,
+        "longitude": 142.0,
+        "halfAngle": 45.0,
+        "speed": 820.0,
+        "type": "C",
+        "featureCode": "null",
+        "imageType": "null",
+        "measurementTechnique": "null",
+        "note": "",
+        "minorHalfWidth": null,
+        "speedMeasuredAtHeight": null,
+        "tilt": null,
+        "submissionTime": "2013-08-07T14:53Z",
+        "link": "https://ccmc.gsfc.nasa.gov/DONKI/view/CMEAnalysis/2204/-1",
+        "enlilList": [
+          {
+            "modelCompletionTime": "2012-01-01T19:21Z",
+            "au": 2.0,
+            "estimatedShockArrivalTime": null,
+            "isEarthGB": false,
+            "isEarthMinorImpact": false,
+            "rmin_re": null,
+            "kp_18": null,
+            "kp_90": null,
+            "kp_135": null,
+            "kp_180": null,
+            "estimatedDuration": null,
+            "link": "https://ccmc.gsfc.nasa.gov/DONKI/view/WSA-ENLIL/2202/-1",
+            "impactList": [
+              {
+                "location": "MESSENGER",
+                "arrivalTime": "2012-01-02T11:46Z",
+                "isGlancingBlow": false,
+                "isMinorImpact": false
+              },
+              {
+                "location": "STEREO A",
+                "arrivalTime": "2012-01-03T18:46Z",
+                "isGlancingBlow": false,
+                "isMinorImpact": false
+              }
+            ],
+            "cmeIDs": [
+              "2012-01-01T13:36:00-CME-001"
+            ]
+          }
+        ]
+      }
+    ],
+    "linkedEvents": [
+      {
+        "activityID": "2012-01-02T18:28:00-IPS-001"
+      }
+    ],
+    "sentNotifications": null,
+    "link": "https://ccmc.gsfc.nasa.gov/DONKI/view/CME/2203/-1",
+    "submissionTime": "2013-08-07T14:53Z",
+    "versionId": 1
+  },
+  {
+    "activityID": "2012-01-02T02:12:00-CME-001",
+    "catalog": "M2M_CATALOG",
+    "startTime": "2012-01-02T02:12Z",
+    "instruments": [
+      {
+        "displayName": "SOHO: LASCO/C2"
+      },
+      {
+        "displayName": "SOHO: LASCO/C3"
+      },
+      {
+        "displayName": "STEREO A: SECCHI/COR2"
+      },
+      {
+        "displayName": "STEREO B: SECCHI/COR2"
+      }
+    ],
+    "sourceLocation": "",
+    "activeRegionNum": null,
+    "note": "",
+    "cmeAnalyses": [
+      {
+        "isMostAccurate": true,
+        "levelOfData": 0,
+        "time21_5": "2012-01-02T06:39Z",
+        "latitude": -18.0,
+        "longitude": 152.0,
+        "halfAngle": 51.0,
+        "speed": 683.0,
+        "type": "C",
+        "featureCode": "null",
+        "imageType": "null",
+        "measurementTechnique": "null",
+        "note": "",
+        "minorHalfWidth": null,
+        "speedMeasuredAtHeight": null,
+        "tilt": null,
+        "submissionTime": "2013-08-07T14:57Z",
+        "link": "https://ccmc.gsfc.nasa.gov/DONKI/view/CMEAnalysis/2208/-1",
+        "enlilList": [
+          {
+            "modelCompletionTime": "2012-01-03T17:13Z",
+            "au": 2.0,
+            "estimatedShockArrivalTime": null,
+            "isEarthGB": false,
+            "isEarthMinorImpact": false,
+            "rmin_re": null,
+            "kp_18": null,
+            "kp_90": null,
+            "kp_135": null,
+            "kp_180": null,
+            "estimatedDuration": null,
+            "link": "https://ccmc.gsfc.nasa.gov/DONKI/view/WSA-ENLIL/2206/-1",
+            "impactList": [
+              {
+                "location": "MESSENGER",
+                "arrivalTime": "2012-01-03T02:31Z",
+                "isGlancingBlow": false,
+                "isMinorImpact": false
+              },
+              {
+                "location": "STEREO A",
+                "arrivalTime": "2012-01-04T05:12Z",
+                "isGlancingBlow": false,
+                "isMinorImpact": false
+              }
+            ],
+            "cmeIDs": [
+              "2012-01-02T15:24:00-CME-001",
+              "2012-01-02T02:12:00-CME-001"
+            ]
+          }
+        ]
+      }
+    ],
+    "linkedEvents": [
+      {
+        "activityID": "2012-01-03T04:52:00-IPS-001"
+      },
+      {
+        "activityID": "2012-01-04T17:00:00-IPS-001"
+      }
+    ],
+    "sentNotifications": null,
+    "link": "https://ccmc.gsfc.nasa.gov/DONKI/view/CME/2207/-1",
+    "submissionTime": "2013-08-07T14:57Z",
+    "versionId": 1
+  },
+  {
+    "activityID": "2012-01-02T15:24:00-CME-001",
+    "catalog": "M2M_CATALOG",
+    "startTime": "2012-01-02T15:24Z",
+    "instruments": [
+      {
+        "displayName": "STEREO B: SECCHI/COR2"
+      },
+      {
+        "displayName": "STEREO A: SECCHI/COR2"
+      }
+    ],
+    "sourceLocation": "N170E36",
+    "activeRegionNum": null,
+    "note": "",
+    "cmeAnalyses": [
+      {
+        "isMostAccurate": false,
+        "levelOfData": 0,
+        "time21_5": "2012-01-02T20:15Z",
+        "latitude": -36.0,
+        "longitude": 170.0,
+        "halfAngle": 70.0,
+        "speed": 715.0,
+        "type": "C",
+        "featureCode": "null",
+        "imageType": "null",
+        "measurementTechnique": "null",
+        "note": "",
+        "minorHalfWidth": null,
+        "speedMeasuredAtHeight": null,
+        "tilt": null,
+        "submissionTime": "2014-07-15T18:04Z",
+        "link": "https://ccmc.gsfc.nasa.gov/DONKI/view/CMEAnalysis/1106/-1",
+        "enlilList": [
+          {
+            "modelCompletionTime": "2012-01-02T14:26Z",
+            "au": 2.0,
+            "estimatedShockArrivalTime": null,
+            "isEarthGB": false,
+            "isEarthMinorImpact": false,
+            "rmin_re": null,
+            "kp_18": null,
+            "kp_90": null,
+            "kp_135": null,
+            "kp_180": null,
+            "estimatedDuration": null,
+            "link": "https://ccmc.gsfc.nasa.gov/DONKI/view/WSA-ENLIL/2205/-1",
+            "impactList": [
+              {
+                "location": "MESSENGER",
+                "arrivalTime": "2012-01-03T16:30Z",
+                "isGlancingBlow": false,
+                "isMinorImpact": false
+              },
+              {
+                "location": "STEREO A",
+                "arrivalTime": "2012-01-04T22:06Z",
+                "isGlancingBlow": false,
+                "isMinorImpact": false
+              }
+            ],
+            "cmeIDs": [
+              "2012-01-02T15:24:00-CME-001"
+            ]
+          }
+        ]
+      },
+      {
+        "isMostAccurate": false,
+        "levelOfData": 0,
+        "time21_5": "2012-01-02T20:15Z",
+        "latitude": -17.0,
+        "longitude": 99.0,
+        "halfAngle": 50.0,
+        "speed": 1152.0,
+        "type": "O",
+        "featureCode": "null",
+        "imageType": "null",
+        "measurementTechnique": "null",
+        "note": "",
+        "minorHalfWidth": null,
+        "speedMeasuredAtHeight": null,
+        "tilt": null,
+        "submissionTime": "2014-07-15T18:04Z",
+        "link": "https://ccmc.gsfc.nasa.gov/DONKI/view/CMEAnalysis/1108/-1",
+        "enlilList": []
+      },
+      {
+        "isMostAccurate": true,
+        "levelOfData": 0,
+        "time21_5": "2012-01-02T18:09Z",
+        "latitude": -17.0,
+        "longitude": 99.0,
+        "halfAngle": 50.0,
+        "speed": 1152.0,
+        "type": "O",
+        "featureCode": "null",
+        "imageType": "null",
+        "measurementTechnique": "null",
+        "note": "",
+        "minorHalfWidth": null,
+        "speedMeasuredAtHeight": null,
+        "tilt": null,
+        "submissionTime": "2013-08-07T14:57Z",
+        "link": "https://ccmc.gsfc.nasa.gov/DONKI/view/CMEAnalysis/2210/-1",
+        "enlilList": [
+          {
+            "modelCompletionTime": "2012-01-03T17:13Z",
+            "au": 2.0,
+            "estimatedShockArrivalTime": null,
+            "isEarthGB": false,
+            "isEarthMinorImpact": false,
+            "rmin_re": null,
+            "kp_18": null,
+            "kp_90": null,
+            "kp_135": null,
+            "kp_180": null,
+            "estimatedDuration": null,
+            "link": "https://ccmc.gsfc.nasa.gov/DONKI/view/WSA-ENLIL/2206/-1",
+            "impactList": [
+              {
+                "location": "MESSENGER",
+                "arrivalTime": "2012-01-03T02:31Z",
+                "isGlancingBlow": false,
+                "isMinorImpact": false
+              },
+              {
+                "location": "STEREO A",
+                "arrivalTime": "2012-01-04T05:12Z",
+                "isGlancingBlow": false,
+                "isMinorImpact": false
+              }
+            ],
+            "cmeIDs": [
+              "2012-01-02T15:24:00-CME-001",
+              "2012-01-02T02:12:00-CME-001"
+            ]
+          }
+        ]
+      }
+    ],
+    "linkedEvents": [
+      {
+        "activityID": "2012-01-03T17:56:00-IPS-001"
+      },
+      {
+        "activityID": "2012-01-04T17:00:00-IPS-001"
+      }
+    ],
+    "sentNotifications": [
+      {
+        "messageID": "20120102-AL-001",
+        "messageIssueTime": "2012-01-02T20:15Z",
+        "messageURL": "https://ccmc.gsfc.nasa.gov/DONKI/view/Alert/1107/1"
+      },
+      {
+        "messageID": "20120103-AL-001",
+        "messageIssueTime": "2012-01-03T23:50Z",
+        "messageURL": "https://ccmc.gsfc.nasa.gov/DONKI/view/Alert/1109/1"
+      }
+    ],
+    "link": "https://ccmc.gsfc.nasa.gov/DONKI/view/CME/43/-1",
+    "submissionTime": "2013-07-15T13:51Z",
+    "versionId": 1
+  },
+  {
+    "activityID": "2012-01-03T11:24:00-CME-001",
+    "catalog": "M2M_CATALOG",
+    "startTime": "2012-01-03T11:24Z",
+    "instruments": [
+      {
+        "displayName": "SOHO: LASCO/C2"
+      },
+      {
+        "displayName": "SOHO: LASCO/C3"
+      },
+      {
+        "displayName": "STEREO A: SECCHI/COR2"
+      },
+      {
+        "displayName": "STEREO B: SECCHI/COR2"
+      }
+    ],
+    "sourceLocation": "",
+    "activeRegionNum": null,
+    "note": "",
+    "cmeAnalyses": [
+      {
+        "isMostAccurate": true,
+        "levelOfData": 0,
+        "time21_5": "2012-01-04T00:47Z",
+        "latitude": 18.0,
+        "longitude": -61.0,
+        "halfAngle": 34.0,
+        "speed": 318.0,
+        "type": "S",
+        "featureCode": "null",
+        "imageType": "null",
+        "measurementTechnique": "null",
+        "note": "",
+        "minorHalfWidth": null,
+        "speedMeasuredAtHeight": null,
+        "tilt": null,
+        "submissionTime": "2013-08-07T15:03Z",
+        "link": "https://ccmc.gsfc.nasa.gov/DONKI/view/CMEAnalysis/2219/-1",
+        "enlilList": [
+          {
+            "modelCompletionTime": "2012-01-03T23:24Z",
+            "au": 2.0,
+            "estimatedShockArrivalTime": null,
+            "isEarthGB": false,
+            "isEarthMinorImpact": false,
+            "rmin_re": null,
+            "kp_18": null,
+            "kp_90": null,
+            "kp_135": null,
+            "kp_180": null,
+            "estimatedDuration": null,
+            "link": "https://ccmc.gsfc.nasa.gov/DONKI/view/WSA-ENLIL/2217/-1",
+            "impactList": [],
+            "cmeIDs": [
+              "2012-01-03T11:24:00-CME-001"
+            ]
+          }
+        ]
+      }
+    ],
+    "linkedEvents": null,
+    "sentNotifications": null,
+    "link": "https://ccmc.gsfc.nasa.gov/DONKI/view/CME/2218/-1",
+    "submissionTime": "2013-08-07T15:03Z",
+    "versionId": 1
+  },
+  {
+    "activityID": "2012-01-04T02:24:00-CME-001",
+    "catalog": "M2M_CATALOG",
+    "startTime": "2012-01-04T02:24Z",
+    "instruments": [
+      {
+        "displayName": "SOHO: LASCO/C2"
+      },
+      {
+        "displayName": "SOHO: LASCO/C3"
+      },
+      {
+        "displayName": "STEREO A: SECCHI/COR2"
+      },
+      {
+        "displayName": "STEREO B: SECCHI/COR2"
+      }
+    ],
+    "sourceLocation": "",
+    "activeRegionNum": null,
+    "note": "",
+    "cmeAnalyses": [
+      {
+        "isMostAccurate": true,
+        "levelOfData": 0,
+        "time21_5": "2012-01-04T15:49Z",
+        "latitude": 33.0,
+        "longitude": 174.0,
+        "halfAngle": 43.0,
+        "speed": 320.0,
+        "type": "S",
+        "featureCode": "null",
+        "imageType": "null",
+        "measurementTechnique": "null",
+        "note": "",
+        "minorHalfWidth": null,
+        "speedMeasuredAtHeight": null,
+        "tilt": null,
+        "submissionTime": "2013-08-07T15:01Z",
+        "link": "https://ccmc.gsfc.nasa.gov/DONKI/view/CMEAnalysis/2216/-1",
+        "enlilList": [
+          {
+            "modelCompletionTime": "2012-01-04T17:23Z",
+            "au": 2.0,
+            "estimatedShockArrivalTime": null,
+            "isEarthGB": false,
+            "isEarthMinorImpact": false,
+            "rmin_re": null,
+            "kp_18": null,
+            "kp_90": null,
+            "kp_135": null,
+            "kp_180": null,
+            "estimatedDuration": null,
+            "link": "https://ccmc.gsfc.nasa.gov/DONKI/view/WSA-ENLIL/2214/-1",
+            "impactList": [],
+            "cmeIDs": [
+              "2012-01-04T02:24:00-CME-001"
+            ]
+          }
+        ]
+      }
+    ],
+    "linkedEvents": null,
+    "sentNotifications": null,
+    "link": "https://ccmc.gsfc.nasa.gov/DONKI/view/CME/2215/-1",
+    "submissionTime": "2013-08-07T15:01Z",
+    "versionId": 1
+  },
+  {
+    "activityID": "2012-01-05T08:39:00-CME-001",
+    "catalog": "M2M_CATALOG",
+    "startTime": "2012-01-05T08:39Z",
+    "instruments": [
+      {
+        "displayName": "STEREO B: SECCHI/COR2"
+      },
+      {
+        "displayName": "STEREO A: SECCHI/COR2"
+      }
+    ],
+    "sourceLocation": "",
+    "activeRegionNum": null,
+    "note": "",
+    "cmeAnalyses": [
+      {
+        "isMostAccurate": true,
+        "levelOfData": 0,
+        "time21_5": "2012-01-05T16:58Z",
+        "latitude": 27.0,
+        "longitude": 16.0,
+        "halfAngle": 56.0,
+        "speed": 957.0,
+        "type": "C",
+        "featureCode": "null",
+        "imageType": "null",
+        "measurementTechnique": "null",
+        "note": "",
+        "minorHalfWidth": null,
+        "speedMeasuredAtHeight": null,
+        "tilt": null,
+        "submissionTime": "2013-08-08T17:50Z",
+        "link": "https://ccmc.gsfc.nasa.gov/DONKI/view/CMEAnalysis/2834/-1",
+        "enlilList": [
+          {
+            "modelCompletionTime": "2012-01-05T21:52Z",
+            "au": 2.0,
+            "estimatedShockArrivalTime": "2012-01-07T13:18Z",
+            "isEarthGB": false,
+            "isEarthMinorImpact": false,
+            "rmin_re": 5.1,
+            "kp_18": 1,
+            "kp_90": null,
+            "kp_135": null,
+            "kp_180": 9,
+            "estimatedDuration": 6.1,
+            "link": "https://ccmc.gsfc.nasa.gov/DONKI/view/WSA-ENLIL/2832/-1",
+            "impactList": [
+              {
+                "location": "Mars",
+                "arrivalTime": "2012-01-09T08:42Z",
+                "isGlancingBlow": false,
+                "isMinorImpact": false
+              }
+            ],
+            "cmeIDs": [
+              "2011-01-05T08:39:00-CME-001",
+              "2012-01-05T08:39:00-CME-001"
+            ]
+          }
+        ]
+      }
+    ],
+    "linkedEvents": null,
+    "sentNotifications": null,
+    "link": "https://ccmc.gsfc.nasa.gov/DONKI/view/CME/2833/-1",
+    "submissionTime": "2014-07-25T00:43Z",
+    "versionId": 2
+  },
+  {
+    "activityID": "2012-01-05T12:39:00-CME-001",
+    "catalog": "M2M_CATALOG",
+    "startTime": "2012-01-05T12:39Z",
+    "instruments": [
+      {
+        "displayName": "STEREO B: SECCHI/COR2"
+      },
+      {
+        "displayName": "SOHO: LASCO/C2"
+      },
+      {
+        "displayName": "SOHO: LASCO/C3"
+      },
+      {
+        "displayName": "STEREO A: SECCHI/COR2"
+      }
+    ],
+    "sourceLocation": "S40W50",
+    "activeRegionNum": null,
+    "note": "",
+    "cmeAnalyses": [
+      {
+        "isMostAccurate": false,
+        "levelOfData": 0,
+        "time21_5": "2012-01-02T15:12Z",
+        "latitude": 50.0,
+        "longitude": -4.0,
+        "halfAngle": 35.0,
+        "speed": 949.0,
+        "type": "C",
+        "featureCode": "null",
+        "imageType": "null",
+        "measurementTechnique": "null",
+        "note": "",
+        "minorHalfWidth": null,
+        "speedMeasuredAtHeight": null,
+        "tilt": null,
+        "submissionTime": "2013-07-15T14:14Z",
+        "link": "https://ccmc.gsfc.nasa.gov/DONKI/view/CMEAnalysis/59/-1",
+        "enlilList": []
+      },
+      {
+        "isMostAccurate": false,
+        "levelOfData": 0,
+        "time21_5": "2012-01-05T16:29Z",
+        "latitude": 50.0,
+        "longitude": 27.0,
+        "halfAngle": 35.0,
+        "speed": 949.0,
+        "type": "C",
+        "featureCode": "null",
+        "imageType": "null",
+        "measurementTechnique": "null",
+        "note": "",
+        "minorHalfWidth": null,
+        "speedMeasuredAtHeight": null,
+        "tilt": null,
+        "submissionTime": "2013-08-07T15:10Z",
+        "link": "https://ccmc.gsfc.nasa.gov/DONKI/view/CMEAnalysis/2233/-1",
+        "enlilList": [
+          {
+            "modelCompletionTime": "2012-01-06T11:17Z",
+            "au": 2.0,
+            "estimatedShockArrivalTime": null,
+            "isEarthGB": false,
+            "isEarthMinorImpact": false,
+            "rmin_re": null,
+            "kp_18": null,
+            "kp_90": null,
+            "kp_135": null,
+            "kp_180": null,
+            "estimatedDuration": null,
+            "link": "https://ccmc.gsfc.nasa.gov/DONKI/view/WSA-ENLIL/2231/-1",
+            "impactList": [],
+            "cmeIDs": [
+              "2012-01-05T12:39:00-CME-001"
+            ]
+          }
+        ]
+      },
+      {
+        "isMostAccurate": true,
+        "levelOfData": 0,
+        "time21_5": "2012-01-05T16:29Z",
+        "latitude": 50.0,
+        "longitude": -4.0,
+        "halfAngle": 35.0,
+        "speed": 949.0,
+        "type": "C",
+        "featureCode": "null",
+        "imageType": "null",
+        "measurementTechnique": "null",
+        "note": "",
+        "minorHalfWidth": null,
+        "speedMeasuredAtHeight": null,
+        "tilt": null,
+        "submissionTime": "2013-08-07T15:12Z",
+        "link": "https://ccmc.gsfc.nasa.gov/DONKI/view/CMEAnalysis/2236/-1",
+        "enlilList": [
+          {
+            "modelCompletionTime": "2012-01-06T12:02Z",
+            "au": 2.0,
+            "estimatedShockArrivalTime": null,
+            "isEarthGB": false,
+            "isEarthMinorImpact": false,
+            "rmin_re": null,
+            "kp_18": null,
+            "kp_90": null,
+            "kp_135": null,
+            "kp_180": null,
+            "estimatedDuration": null,
+            "link": "https://ccmc.gsfc.nasa.gov/DONKI/view/WSA-ENLIL/2234/-1",
+            "impactList": [],
+            "cmeIDs": [
+              "2012-01-05T12:39:00-CME-001"
+            ]
+          }
+        ]
+      }
+    ],
+    "linkedEvents": null,
+    "sentNotifications": [
+      {
+        "messageID": "20110106-AL-001",
+        "messageIssueTime": "2012-01-06T17:35Z",
+        "messageURL": "https://ccmc.gsfc.nasa.gov/DONKI/view/Alert/60/1"
+      }
+    ],
+    "link": "https://ccmc.gsfc.nasa.gov/DONKI/view/CME/53/-1",
+    "submissionTime": "2013-12-09T20:07Z",
+    "versionId": 2
+  },
+  {
+    "activityID": "2012-01-06T21:25:00-CME-001",
+    "catalog": "M2M_CATALOG",
+    "startTime": "2012-01-06T21:25Z",
+    "instruments": [
+      {
+        "displayName": "SOHO: LASCO/C2"
+      },
+      {
+        "displayName": "SOHO: LASCO/C3"
+      },
+      {
+        "displayName": "STEREO A: SECCHI/COR2"
+      },
+      {
+        "displayName": "STEREO B: SECCHI/COR2"
+      }
+    ],
+    "sourceLocation": "",
+    "activeRegionNum": null,
+    "note": "",
+    "cmeAnalyses": [
+      {
+        "isMostAccurate": true,
+        "levelOfData": 0,
+        "time21_5": "2012-01-07T05:34Z",
+        "latitude": 42.0,
+        "longitude": -130.0,
+        "halfAngle": 44.0,
+        "speed": 463.0,
+        "type": "S",
+        "featureCode": "null",
+        "imageType": "null",
+        "measurementTechnique": "null",
+        "note": "",
+        "minorHalfWidth": null,
+        "speedMeasuredAtHeight": null,
+        "tilt": null,
+        "submissionTime": "2013-08-07T16:25Z",
+        "link": "https://ccmc.gsfc.nasa.gov/DONKI/view/CMEAnalysis/2266/-1",
+        "enlilList": [
+          {
+            "modelCompletionTime": "2012-01-06T23:11Z",
+            "au": 2.0,
+            "estimatedShockArrivalTime": null,
+            "isEarthGB": false,
+            "isEarthMinorImpact": false,
+            "rmin_re": null,
+            "kp_18": null,
+            "kp_90": null,
+            "kp_135": null,
+            "kp_180": null,
+            "estimatedDuration": null,
+            "link": "https://ccmc.gsfc.nasa.gov/DONKI/view/WSA-ENLIL/2264/-1",
+            "impactList": [
+              {
+                "location": "STEREO B",
+                "arrivalTime": "2012-01-10T10:38Z",
+                "isGlancingBlow": false,
+                "isMinorImpact": false
+              }
+            ],
+            "cmeIDs": [
+              "2012-01-06T21:25:00-CME-001"
+            ]
+          }
+        ]
+      }
+    ],
+    "linkedEvents": [
+      {
+        "activityID": "2012-01-10T13:30:00-IPS-001"
+      }
+    ],
+    "sentNotifications": null,
+    "link": "https://ccmc.gsfc.nasa.gov/DONKI/view/CME/2265/-1",
+    "submissionTime": "2013-08-07T16:25Z",
+    "versionId": 1
+  },
+  {
+    "activityID": "2012-01-08T02:12:00-CME-001",
+    "catalog": "M2M_CATALOG",
+    "startTime": "2012-01-08T02:12Z",
+    "instruments": [
+      {
+        "displayName": "STEREO A: SECCHI/COR2"
+      },
+      {
+        "displayName": "SOHO: LASCO/C2"
+      },
+      {
+        "displayName": "SOHO: LASCO/C3"
+      },
+      {
+        "displayName": "STEREO B: SECCHI/COR2"
+      }
+    ],
+    "sourceLocation": "",
+    "activeRegionNum": null,
+    "note": "",
+    "cmeAnalyses": [
+      {
+        "isMostAccurate": true,
+        "levelOfData": 0,
+        "time21_5": "2012-01-08T08:48Z",
+        "latitude": -38.0,
+        "longitude": -135.0,
+        "halfAngle": 36.0,
+        "speed": 554.0,
+        "type": "C",
+        "featureCode": "null",
+        "imageType": "null",
+        "measurementTechnique": "null",
+        "note": "",
+        "minorHalfWidth": null,
+        "speedMeasuredAtHeight": null,
+        "tilt": null,
+        "submissionTime": "2013-08-07T16:27Z",
+        "link": "https://ccmc.gsfc.nasa.gov/DONKI/view/CMEAnalysis/2272/-1",
+        "enlilList": [
+          {
+            "modelCompletionTime": "2012-01-08T11:35Z",
+            "au": 2.0,
+            "estimatedShockArrivalTime": null,
+            "isEarthGB": false,
+            "isEarthMinorImpact": false,
+            "rmin_re": null,
+            "kp_18": null,
+            "kp_90": null,
+            "kp_135": null,
+            "kp_180": null,
+            "estimatedDuration": null,
+            "link": "https://ccmc.gsfc.nasa.gov/DONKI/view/WSA-ENLIL/2270/-1",
+            "impactList": [
+              {
+                "location": "STEREO B",
+                "arrivalTime": "2012-01-11T12:00Z",
+                "isGlancingBlow": true,
+                "isMinorImpact": false
+              }
+            ],
+            "cmeIDs": [
+              "2012-01-08T02:12:00-CME-001"
+            ]
+          }
+        ]
+      }
+    ],
+    "linkedEvents": [
+      {
+        "activityID": "2012-01-11T04:30:00-IPS-001"
+      }
+    ],
+    "sentNotifications": null,
+    "link": "https://ccmc.gsfc.nasa.gov/DONKI/view/CME/2271/-1",
+    "submissionTime": "2013-08-07T16:27Z",
+    "versionId": 1
+  },
+  {
+    "activityID": "2012-01-12T04:00:00-CME-001",
+    "catalog": "M2M_CATALOG",
+    "startTime": "2012-01-12T04:00Z",
+    "instruments": [
+      {
+        "displayName": "SOHO: LASCO/C2"
+      },
+      {
+        "displayName": "SOHO: LASCO/C3"
+      }
+    ],
+    "sourceLocation": "",
+    "activeRegionNum": null,
+    "note": "",
+    "cmeAnalyses": [
+      {
+        "isMostAccurate": true,
+        "levelOfData": 0,
+        "time21_5": "2012-01-12T17:40Z",
+        "latitude": 5.0,
+        "longitude": -130.0,
+        "halfAngle": 15.0,
+        "speed": 315.0,
+        "type": "S",
+        "featureCode": "null",
+        "imageType": "null",
+        "measurementTechnique": "null",
+        "note": "",
+        "minorHalfWidth": null,
+        "speedMeasuredAtHeight": null,
+        "tilt": null,
+        "submissionTime": "2013-08-07T16:29Z",
+        "link": "https://ccmc.gsfc.nasa.gov/DONKI/view/CMEAnalysis/2283/-1",
+        "enlilList": [
+          {
+            "modelCompletionTime": "2012-01-12T11:06Z",
+            "au": 2.0,
+            "estimatedShockArrivalTime": null,
+            "isEarthGB": false,
+            "isEarthMinorImpact": false,
+            "rmin_re": null,
+            "kp_18": null,
+            "kp_90": null,
+            "kp_135": null,
+            "kp_180": null,
+            "estimatedDuration": null,
+            "link": "https://ccmc.gsfc.nasa.gov/DONKI/view/WSA-ENLIL/2281/-1",
+            "impactList": [],
+            "cmeIDs": [
+              "2011-01-12T04:00:00-CME-001",
+              "2012-01-12T04:00:00-CME-001"
+            ]
+          }
+        ]
+      }
+    ],
+    "linkedEvents": null,
+    "sentNotifications": null,
+    "link": "https://ccmc.gsfc.nasa.gov/DONKI/view/CME/2282/-1",
+    "submissionTime": "2014-07-25T00:43Z",
+    "versionId": 2
+  },
+  {
+    "activityID": "2012-01-12T08:24:00-CME-001",
+    "catalog": "M2M_CATALOG",
+    "startTime": "2012-01-12T08:24Z",
+    "instruments": [
+      {
+        "displayName": "STEREO A: SECCHI/COR2"
+      },
+      {
+        "displayName": "STEREO B: SECCHI/COR2"
+      }
+    ],
+    "sourceLocation": "",
+    "activeRegionNum": null,
+    "note": "",
+    "cmeAnalyses": [
+      {
+        "isMostAccurate": true,
+        "levelOfData": 0,
+        "time21_5": "2012-01-12T13:05Z",
+        "latitude": 31.0,
+        "longitude": -102.0,
+        "halfAngle": 45.0,
+        "speed": 710.0,
+        "type": "C",
+        "featureCode": "null",
+        "imageType": "null",
+        "measurementTechnique": "null",
+        "note": "",
+        "minorHalfWidth": null,
+        "speedMeasuredAtHeight": null,
+        "tilt": null,
+        "submissionTime": "2013-08-07T16:30Z",
+        "link": "https://ccmc.gsfc.nasa.gov/DONKI/view/CMEAnalysis/2292/-1",
+        "enlilList": [
+          {
+            "modelCompletionTime": "2012-01-12T22:23Z",
+            "au": 2.0,
+            "estimatedShockArrivalTime": null,
+            "isEarthGB": false,
+            "isEarthMinorImpact": false,
+            "rmin_re": null,
+            "kp_18": null,
+            "kp_90": null,
+            "kp_135": null,
+            "kp_180": null,
+            "estimatedDuration": null,
+            "link": "https://ccmc.gsfc.nasa.gov/DONKI/view/WSA-ENLIL/2290/-1",
+            "impactList": [
+              {
+                "location": "Spitzer",
+                "arrivalTime": "2012-01-15T14:41Z",
+                "isGlancingBlow": false,
+                "isMinorImpact": false
+              },
+              {
+                "location": "STEREO B",
+                "arrivalTime": "2012-01-15T00:05Z",
+                "isGlancingBlow": false,
+                "isMinorImpact": false
+              }
+            ],
+            "cmeIDs": [
+              "2012-01-12T08:24:00-CME-001"
+            ]
+          }
+        ]
+      }
+    ],
+    "linkedEvents": [
+      {
+        "activityID": "2012-01-16T10:00:00-IPS-001"
+      }
+    ],
+    "sentNotifications": null,
+    "link": "https://ccmc.gsfc.nasa.gov/DONKI/view/CME/2291/-1",
+    "submissionTime": "2013-08-07T16:30Z",
+    "versionId": 1
+  },
+  {
+    "activityID": "2012-01-14T05:25:00-CME-001",
+    "catalog": "M2M_CATALOG",
+    "startTime": "2012-01-14T05:25Z",
+    "instruments": [
+      {
+        "displayName": "STEREO B: SECCHI/COR2"
+      },
+      {
+        "displayName": "SOHO: LASCO/C2"
+      },
+      {
+        "displayName": "SOHO: LASCO/C3"
+      }
+    ],
+    "sourceLocation": "",
+    "activeRegionNum": null,
+    "note": "",
+    "cmeAnalyses": [
+      {
+        "isMostAccurate": true,
+        "levelOfData": 0,
+        "time21_5": "2012-01-14T14:20Z",
+        "latitude": 16.0,
+        "longitude": -40.0,
+        "halfAngle": 20.0,
+        "speed": 255.0,
+        "type": "S",
+        "featureCode": "null",
+        "imageType": "null",
+        "measurementTechnique": "null",
+        "note": "",
+        "minorHalfWidth": null,
+        "speedMeasuredAtHeight": null,
+        "tilt": null,
+        "submissionTime": "2013-08-07T16:33Z",
+        "link": "https://ccmc.gsfc.nasa.gov/DONKI/view/CMEAnalysis/2302/-1",
+        "enlilList": [
+          {
+            "modelCompletionTime": "2012-01-14T08:48Z",
+            "au": 2.0,
+            "estimatedShockArrivalTime": null,
+            "isEarthGB": false,
+            "isEarthMinorImpact": false,
+            "rmin_re": null,
+            "kp_18": null,
+            "kp_90": null,
+            "kp_135": null,
+            "kp_180": null,
+            "estimatedDuration": null,
+            "link": "https://ccmc.gsfc.nasa.gov/DONKI/view/WSA-ENLIL/2300/-1",
+            "impactList": [],
+            "cmeIDs": [
+              "2012-01-14T05:25:00-CME-001"
+            ]
+          }
+        ]
+      }
+    ],
+    "linkedEvents": null,
+    "sentNotifications": null,
+    "link": "https://ccmc.gsfc.nasa.gov/DONKI/view/CME/2301/-1",
+    "submissionTime": "2013-08-07T16:33Z",
+    "versionId": 1
+  },
+  {
+    "activityID": "2012-01-14T23:25:00-CME-001",
+    "catalog": "M2M_CATALOG",
+    "startTime": "2012-01-14T23:25Z",
+    "instruments": [
+      {
+        "displayName": "STEREO B: SECCHI/COR2"
+      },
+      {
+        "displayName": "SOHO: LASCO/C2"
+      },
+      {
+        "displayName": "SOHO: LASCO/C3"
+      }
+    ],
+    "sourceLocation": "",
+    "activeRegionNum": null,
+    "note": "",
+    "cmeAnalyses": [
+      {
+        "isMostAccurate": true,
+        "levelOfData": 0,
+        "time21_5": "2012-01-15T05:15Z",
+        "latitude": -15.0,
+        "longitude": -58.0,
+        "halfAngle": 20.0,
+        "speed": 290.0,
+        "type": "S",
+        "featureCode": "null",
+        "imageType": "null",
+        "measurementTechnique": "null",
+        "note": "",
+        "minorHalfWidth": null,
+        "speedMeasuredAtHeight": null,
+        "tilt": null,
+        "submissionTime": "2013-08-07T16:35Z",
+        "link": "https://ccmc.gsfc.nasa.gov/DONKI/view/CMEAnalysis/2310/-1",
+        "enlilList": [
+          {
+            "modelCompletionTime": "2012-01-15T00:17Z",
+            "au": 2.0,
+            "estimatedShockArrivalTime": null,
+            "isEarthGB": false,
+            "isEarthMinorImpact": false,
+            "rmin_re": null,
+            "kp_18": null,
+            "kp_90": null,
+            "kp_135": null,
+            "kp_180": null,
+            "estimatedDuration": null,
+            "link": "https://ccmc.gsfc.nasa.gov/DONKI/view/WSA-ENLIL/2308/-1",
+            "impactList": [],
+            "cmeIDs": [
+              "2012-01-14T23:25:00-CME-001"
+            ]
+          }
+        ]
+      }
+    ],
+    "linkedEvents": null,
+    "sentNotifications": null,
+    "link": "https://ccmc.gsfc.nasa.gov/DONKI/view/CME/2309/-1",
+    "submissionTime": "2013-08-07T16:35Z",
+    "versionId": 1
+  },
+  {
+    "activityID": "2012-01-16T01:30:00-CME-001",
+    "catalog": "M2M_CATALOG",
+    "startTime": "2012-01-16T01:30Z",
+    "instruments": [
+      {
+        "displayName": "SOHO: LASCO/C3"
+      },
+      {
+        "displayName": "SOHO: LASCO/C2"
+      },
+      {
+        "displayName": "STEREO B: SECCHI/COR2"
+      }
+    ],
+    "sourceLocation": "",
+    "activeRegionNum": null,
+    "note": "",
+    "cmeAnalyses": [
+      {
+        "isMostAccurate": true,
+        "levelOfData": 0,
+        "time21_5": "2012-01-16T07:38Z",
+        "latitude": -17.0,
+        "longitude": -92.0,
+        "halfAngle": 18.0,
+        "speed": 412.0,
+        "type": "S",
+        "featureCode": "null",
+        "imageType": "null",
+        "measurementTechnique": "null",
+        "note": "",
+        "minorHalfWidth": null,
+        "speedMeasuredAtHeight": null,
+        "tilt": null,
+        "submissionTime": "2013-08-08T17:54Z",
+        "link": "https://ccmc.gsfc.nasa.gov/DONKI/view/CMEAnalysis/2840/-1",
+        "enlilList": [
+          {
+            "modelCompletionTime": "2012-01-16T09:10Z",
+            "au": 2.0,
+            "estimatedShockArrivalTime": "2012-01-19T16:00Z",
+            "isEarthGB": true,
+            "isEarthMinorImpact": false,
+            "rmin_re": null,
+            "kp_18": null,
+            "kp_90": null,
+            "kp_135": null,
+            "kp_180": null,
+            "estimatedDuration": null,
+            "link": "https://ccmc.gsfc.nasa.gov/DONKI/view/WSA-ENLIL/2838/-1",
+            "impactList": [
+              {
+                "location": "Spitzer",
+                "arrivalTime": "2012-01-18T18:57Z",
+                "isGlancingBlow": false,
+                "isMinorImpact": false
+              }
+            ],
+            "cmeIDs": [
+              "2012-01-16T03:42:00-CME-001",
+              "2012-01-16T01:30:00-CME-001"
+            ]
+          }
+        ]
+      }
+    ],
+    "linkedEvents": null,
+    "sentNotifications": null,
+    "link": "https://ccmc.gsfc.nasa.gov/DONKI/view/CME/2839/-1",
+    "submissionTime": "2013-08-08T17:54Z",
+    "versionId": 1
+  },
+  {
+    "activityID": "2012-01-16T03:42:00-CME-001",
+    "catalog": "M2M_CATALOG",
+    "startTime": "2012-01-16T03:42Z",
+    "instruments": [
+      {
+        "displayName": "SOHO: LASCO/C3"
+      },
+      {
+        "displayName": "STEREO A: SECCHI/COR2"
+      },
+      {
+        "displayName": "STEREO B: SECCHI/COR2"
+      }
+    ],
+    "sourceLocation": "S57W28",
+    "activeRegionNum": null,
+    "note": "",
+    "cmeAnalyses": [
+      {
+        "isMostAccurate": true,
+        "levelOfData": 0,
+        "time21_5": "2012-01-16T06:56Z",
+        "latitude": 28.0,
+        "longitude": -57.0,
+        "halfAngle": 47.0,
+        "speed": 990.0,
+        "type": "C",
+        "featureCode": "null",
+        "imageType": "null",
+        "measurementTechnique": "null",
+        "note": "",
+        "minorHalfWidth": null,
+        "speedMeasuredAtHeight": null,
+        "tilt": null,
+        "submissionTime": "2013-07-15T14:25Z",
+        "link": "https://ccmc.gsfc.nasa.gov/DONKI/view/CMEAnalysis/67/-1",
+        "enlilList": [
+          {
+            "modelCompletionTime": "2012-01-16T09:10Z",
+            "au": 2.0,
+            "estimatedShockArrivalTime": "2012-01-19T16:00Z",
+            "isEarthGB": true,
+            "isEarthMinorImpact": false,
+            "rmin_re": null,
+            "kp_18": null,
+            "kp_90": null,
+            "kp_135": null,
+            "kp_180": null,
+            "estimatedDuration": null,
+            "link": "https://ccmc.gsfc.nasa.gov/DONKI/view/WSA-ENLIL/2838/-1",
+            "impactList": [
+              {
+                "location": "Spitzer",
+                "arrivalTime": "2012-01-18T18:57Z",
+                "isGlancingBlow": false,
+                "isMinorImpact": false
+              }
+            ],
+            "cmeIDs": [
+              "2012-01-16T03:42:00-CME-001",
+              "2012-01-16T01:30:00-CME-001"
+            ]
+          }
+        ]
+      }
+    ],
+    "linkedEvents": [
+      {
+        "activityID": "2012-01-21T04:00:00-IPS-001"
+      }
+    ],
+    "sentNotifications": [
+      {
+        "messageID": "20120106-AL-001",
+        "messageIssueTime": "2012-01-16T15:00Z",
+        "messageURL": "https://ccmc.gsfc.nasa.gov/DONKI/view/Alert/68/1"
+      }
+    ],
+    "link": "https://ccmc.gsfc.nasa.gov/DONKI/view/CME/64/-1",
+    "submissionTime": "2013-07-15T14:18Z",
+    "versionId": 1
+  },
+  {
+    "activityID": "2012-01-18T13:25:00-CME-001",
+    "catalog": "M2M_CATALOG",
+    "startTime": "2012-01-18T13:25Z",
+    "instruments": [
+      {
+        "displayName": "STEREO A: SECCHI/COR2"
+      },
+      {
+        "displayName": "SOHO: LASCO/C2"
+      },
+      {
+        "displayName": "SOHO: LASCO/C3"
+      },
+      {
+        "displayName": "STEREO B: SECCHI/COR2"
+      }
+    ],
+    "sourceLocation": "",
+    "activeRegionNum": null,
+    "note": "",
+    "cmeAnalyses": [
+      {
+        "isMostAccurate": true,
+        "levelOfData": 0,
+        "time21_5": "2012-01-18T19:36Z",
+        "latitude": -23.0,
+        "longitude": 22.0,
+        "halfAngle": 30.0,
+        "speed": 520.0,
+        "type": "C",
+        "featureCode": "null",
+        "imageType": "null",
+        "measurementTechnique": "null",
+        "note": "",
+        "minorHalfWidth": null,
+        "speedMeasuredAtHeight": null,
+        "tilt": null,
+        "submissionTime": "2013-08-07T16:39Z",
+        "link": "https://ccmc.gsfc.nasa.gov/DONKI/view/CMEAnalysis/2319/-1",
+        "enlilList": [
+          {
+            "modelCompletionTime": "2012-01-18T12:02Z",
+            "au": 2.0,
+            "estimatedShockArrivalTime": null,
+            "isEarthGB": false,
+            "isEarthMinorImpact": false,
+            "rmin_re": null,
+            "kp_18": null,
+            "kp_90": null,
+            "kp_135": null,
+            "kp_180": null,
+            "estimatedDuration": null,
+            "link": "https://ccmc.gsfc.nasa.gov/DONKI/view/WSA-ENLIL/2317/-1",
+            "impactList": [],
+            "cmeIDs": [
+              "2012-01-18T13:25:00-CME-001"
+            ]
+          }
+        ]
+      },
+      {
+        "isMostAccurate": false,
+        "levelOfData": 0,
+        "time21_5": "2012-01-18T20:20Z",
+        "latitude": -24.0,
+        "longitude": 3.0,
+        "halfAngle": 32.0,
+        "speed": 520.0,
+        "type": "C",
+        "featureCode": "null",
+        "imageType": "null",
+        "measurementTechnique": "null",
+        "note": "",
+        "minorHalfWidth": null,
+        "speedMeasuredAtHeight": null,
+        "tilt": null,
+        "submissionTime": "2013-08-07T16:44Z",
+        "link": "https://ccmc.gsfc.nasa.gov/DONKI/view/CMEAnalysis/2330/-1",
+        "enlilList": [
+          {
+            "modelCompletionTime": "2012-01-19T19:20Z",
+            "au": 2.0,
+            "estimatedShockArrivalTime": "2012-01-22T02:19Z",
+            "isEarthGB": false,
+            "isEarthMinorImpact": false,
+            "rmin_re": 6.5,
+            "kp_18": 1,
+            "kp_90": null,
+            "kp_135": null,
+            "kp_180": 4,
+            "estimatedDuration": 16.0,
+            "link": "https://ccmc.gsfc.nasa.gov/DONKI/view/WSA-ENLIL/2328/-1",
+            "impactList": [],
+            "cmeIDs": [
+              "2012-01-18T13:25:00-CME-001"
+            ]
+          },
+          {
+            "modelCompletionTime": "2012-01-19T20:01Z",
+            "au": 2.0,
+            "estimatedShockArrivalTime": "2012-01-22T00:52Z",
+            "isEarthGB": false,
+            "isEarthMinorImpact": false,
+            "rmin_re": 5.0,
+            "kp_18": 1,
+            "kp_90": null,
+            "kp_135": null,
+            "kp_180": 9,
+            "estimatedDuration": 9.0,
+            "link": "https://ccmc.gsfc.nasa.gov/DONKI/view/WSA-ENLIL/2340/-1",
+            "impactList": [
+              {
+                "location": "Mars",
+                "arrivalTime": "2012-01-24T06:04Z",
+                "isGlancingBlow": false,
+                "isMinorImpact": false
+              },
+              {
+                "location": "Spitzer",
+                "arrivalTime": "2012-01-22T01:42Z",
+                "isGlancingBlow": false,
+                "isMinorImpact": false
+              }
+            ],
+            "cmeIDs": [
+              "2012-01-19T18:34:00-CME-001",
+              "2012-01-19T15:10:00-CME-001",
+              "2012-01-18T13:25:00-CME-001",
+              "2012-01-19T13:25:00-CME-001"
+            ]
+          }
+        ]
+      }
+    ],
+    "linkedEvents": [
+      {
+        "activityID": "2012-01-22T05:15:00-IPS-001"
+      }
+    ],
+    "sentNotifications": null,
+    "link": "https://ccmc.gsfc.nasa.gov/DONKI/view/CME/2318/-1",
+    "submissionTime": "2013-12-04T13:19Z",
+    "versionId": 2
+  },
+  {
+    "activityID": "2012-01-19T13:25:00-CME-001",
+    "catalog": "M2M_CATALOG",
+    "startTime": "2012-01-19T13:25Z",
+    "instruments": [
+      {
+        "displayName": "SOHO: LASCO/C2"
+      },
+      {
+        "displayName": "STEREO A: SECCHI/COR2"
+      },
+      {
+        "displayName": "STEREO B: SECCHI/COR2"
+      }
+    ],
+    "sourceLocation": "",
+    "activeRegionNum": null,
+    "note": "",
+    "cmeAnalyses": [
+      {
+        "isMostAccurate": true,
+        "levelOfData": 0,
+        "time21_5": "2012-01-19T20:51Z",
+        "latitude": 48.0,
+        "longitude": 23.0,
+        "halfAngle": 27.0,
+        "speed": 372.0,
+        "type": "S",
+        "featureCode": "null",
+        "imageType": "null",
+        "measurementTechnique": "null",
+        "note": "",
+        "minorHalfWidth": null,
+        "speedMeasuredAtHeight": null,
+        "tilt": null,
+        "submissionTime": "2013-08-07T16:41Z",
+        "link": "https://ccmc.gsfc.nasa.gov/DONKI/view/CMEAnalysis/2323/-1",
+        "enlilList": [
+          {
+            "modelCompletionTime": "2012-01-19T12:46Z",
+            "au": 2.0,
+            "estimatedShockArrivalTime": "2012-01-21T22:29Z",
+            "isEarthGB": false,
+            "isEarthMinorImpact": false,
+            "rmin_re": 5.3,
+            "kp_18": 1,
+            "kp_90": null,
+            "kp_135": null,
+            "kp_180": 9,
+            "estimatedDuration": 11.8,
+            "link": "https://ccmc.gsfc.nasa.gov/DONKI/view/WSA-ENLIL/2321/-1",
+            "impactList": [
+              {
+                "location": "Mars",
+                "arrivalTime": "2012-01-24T06:56Z",
+                "isGlancingBlow": false,
+                "isMinorImpact": false
+              },
+              {
+                "location": "Spitzer",
+                "arrivalTime": "2012-01-21T23:31Z",
+                "isGlancingBlow": false,
+                "isMinorImpact": false
+              }
+            ],
+            "cmeIDs": [
+              "2012-01-19T18:34:00-CME-001",
+              "2012-01-19T15:10:00-CME-001",
+              "2012-01-19T13:25:00-CME-001"
+            ]
+          },
+          {
+            "modelCompletionTime": "2012-01-19T20:01Z",
+            "au": 2.0,
+            "estimatedShockArrivalTime": "2012-01-22T00:52Z",
+            "isEarthGB": false,
+            "isEarthMinorImpact": false,
+            "rmin_re": 5.0,
+            "kp_18": 1,
+            "kp_90": null,
+            "kp_135": null,
+            "kp_180": 9,
+            "estimatedDuration": 9.0,
+            "link": "https://ccmc.gsfc.nasa.gov/DONKI/view/WSA-ENLIL/2340/-1",
+            "impactList": [
+              {
+                "location": "Mars",
+                "arrivalTime": "2012-01-24T06:04Z",
+                "isGlancingBlow": false,
+                "isMinorImpact": false
+              },
+              {
+                "location": "Spitzer",
+                "arrivalTime": "2012-01-22T01:42Z",
+                "isGlancingBlow": false,
+                "isMinorImpact": false
+              }
+            ],
+            "cmeIDs": [
+              "2012-01-19T18:34:00-CME-001",
+              "2012-01-19T15:10:00-CME-001",
+              "2012-01-18T13:25:00-CME-001",
+              "2012-01-19T13:25:00-CME-001"
+            ]
+          }
+        ]
+      }
+    ],
+    "linkedEvents": null,
+    "sentNotifications": null,
+    "link": "https://ccmc.gsfc.nasa.gov/DONKI/view/CME/2322/-1",
+    "submissionTime": "2013-08-07T16:41Z",
+    "versionId": 1
+  },
+  {
+    "activityID": "2012-01-19T15:10:00-CME-001",
+    "catalog": "M2M_CATALOG",
+    "startTime": "2012-01-19T15:10Z",
+    "instruments": [
+      {
+        "displayName": "SOHO: LASCO/C3"
+      },
+      {
+        "displayName": "STEREO A: SECCHI/COR2"
+      },
+      {
+        "displayName": "STEREO B: SECCHI/COR2"
+      }
+    ],
+    "sourceLocation": "S21W46",
+    "activeRegionNum": null,
+    "note": "",
+    "cmeAnalyses": [
+      {
+        "isMostAccurate": true,
+        "levelOfData": 0,
+        "time21_5": "2012-01-19T18:34Z",
+        "latitude": 46.0,
+        "longitude": -21.0,
+        "halfAngle": 69.0,
+        "speed": 1020.0,
+        "type": "O",
+        "featureCode": "null",
+        "imageType": "null",
+        "measurementTechnique": "null",
+        "note": "",
+        "minorHalfWidth": null,
+        "speedMeasuredAtHeight": null,
+        "tilt": null,
+        "submissionTime": "2013-07-15T14:33Z",
+        "link": "https://ccmc.gsfc.nasa.gov/DONKI/view/CMEAnalysis/78/-1",
+        "enlilList": [
+          {
+            "modelCompletionTime": "2012-01-19T12:46Z",
+            "au": 2.0,
+            "estimatedShockArrivalTime": "2012-01-21T22:29Z",
+            "isEarthGB": false,
+            "isEarthMinorImpact": false,
+            "rmin_re": 5.3,
+            "kp_18": 1,
+            "kp_90": null,
+            "kp_135": null,
+            "kp_180": 9,
+            "estimatedDuration": 11.8,
+            "link": "https://ccmc.gsfc.nasa.gov/DONKI/view/WSA-ENLIL/2321/-1",
+            "impactList": [
+              {
+                "location": "Mars",
+                "arrivalTime": "2012-01-24T06:56Z",
+                "isGlancingBlow": false,
+                "isMinorImpact": false
+              },
+              {
+                "location": "Spitzer",
+                "arrivalTime": "2012-01-21T23:31Z",
+                "isGlancingBlow": false,
+                "isMinorImpact": false
+              }
+            ],
+            "cmeIDs": [
+              "2012-01-19T18:34:00-CME-001",
+              "2012-01-19T15:10:00-CME-001",
+              "2012-01-19T13:25:00-CME-001"
+            ]
+          },
+          {
+            "modelCompletionTime": "2012-01-19T20:01Z",
+            "au": 2.0,
+            "estimatedShockArrivalTime": "2012-01-22T00:52Z",
+            "isEarthGB": false,
+            "isEarthMinorImpact": false,
+            "rmin_re": 5.0,
+            "kp_18": 1,
+            "kp_90": null,
+            "kp_135": null,
+            "kp_180": 9,
+            "estimatedDuration": 9.0,
+            "link": "https://ccmc.gsfc.nasa.gov/DONKI/view/WSA-ENLIL/2340/-1",
+            "impactList": [
+              {
+                "location": "Mars",
+                "arrivalTime": "2012-01-24T06:04Z",
+                "isGlancingBlow": false,
+                "isMinorImpact": false
+              },
+              {
+                "location": "Spitzer",
+                "arrivalTime": "2012-01-22T01:42Z",
+                "isGlancingBlow": false,
+                "isMinorImpact": false
+              }
+            ],
+            "cmeIDs": [
+              "2012-01-19T18:34:00-CME-001",
+              "2012-01-19T15:10:00-CME-001",
+              "2012-01-18T13:25:00-CME-001",
+              "2012-01-19T13:25:00-CME-001"
+            ]
+          }
+        ]
+      }
+    ],
+    "linkedEvents": [
+      {
+        "activityID": "2012-01-22T05:50:00-MPC-001"
+      }
+    ],
+    "sentNotifications": [
+      {
+        "messageID": "20120119-AL-001",
+        "messageIssueTime": "2012-01-19T17:35Z",
+        "messageURL": "https://ccmc.gsfc.nasa.gov/DONKI/view/Alert/80/1"
+      }
+    ],
+    "link": "https://ccmc.gsfc.nasa.gov/DONKI/view/CME/77/-1",
+    "submissionTime": "2013-12-03T20:41Z",
+    "versionId": 2
+  },
+  {
+    "activityID": "2012-01-21T17:54:00-CME-001",
+    "catalog": "M2M_CATALOG",
+    "startTime": "2012-01-21T17:54Z",
+    "instruments": [
+      {
+        "displayName": "STEREO A: SECCHI/COR2"
+      },
+      {
+        "displayName": "SOHO: LASCO/C3"
+      },
+      {
+        "displayName": "STEREO B: SECCHI/COR2"
+      }
+    ],
+    "sourceLocation": "",
+    "activeRegionNum": null,
+    "note": "",
+    "cmeAnalyses": [
+      {
+        "isMostAccurate": true,
+        "levelOfData": 0,
+        "time21_5": "2012-01-21T17:25Z",
+        "latitude": 21.0,
+        "longitude": 50.0,
+        "halfAngle": 25.0,
+        "speed": 450.0,
+        "type": "S",
+        "featureCode": "null",
+        "imageType": "null",
+        "measurementTechnique": "null",
+        "note": "",
+        "minorHalfWidth": null,
+        "speedMeasuredAtHeight": null,
+        "tilt": null,
+        "submissionTime": "2013-12-19T21:41Z",
+        "link": "https://ccmc.gsfc.nasa.gov/DONKI/view/CMEAnalysis/3986/-1",
+        "enlilList": [
+          {
+            "modelCompletionTime": "2012-01-21T16:27Z",
+            "au": 2.0,
+            "estimatedShockArrivalTime": null,
+            "isEarthGB": false,
+            "isEarthMinorImpact": false,
+            "rmin_re": null,
+            "kp_18": null,
+            "kp_90": null,
+            "kp_135": null,
+            "kp_180": null,
+            "estimatedDuration": null,
+            "link": "https://ccmc.gsfc.nasa.gov/DONKI/view/WSA-ENLIL/3984/-1",
+            "impactList": [],
+            "cmeIDs": [
+              "2012-01-21T17:54:00-CME-001"
+            ]
+          }
+        ]
+      }
+    ],
+    "linkedEvents": null,
+    "sentNotifications": null,
+    "link": "https://ccmc.gsfc.nasa.gov/DONKI/view/CME/3985/-1",
+    "submissionTime": "2013-12-19T21:41Z",
+    "versionId": 1
+  },
+  {
+    "activityID": "2012-01-22T08:54:00-CME-001",
+    "catalog": "M2M_CATALOG",
+    "startTime": "2012-01-22T08:54Z",
+    "instruments": [
+      {
+        "displayName": "STEREO B: SECCHI/COR2"
+      },
+      {
+        "displayName": "SOHO: LASCO/C3"
+      },
+      {
+        "displayName": "STEREO A: SECCHI/COR2"
+      }
+    ],
+    "sourceLocation": "",
+    "activeRegionNum": null,
+    "note": "",
+    "cmeAnalyses": [
+      {
+        "isMostAccurate": true,
+        "levelOfData": 0,
+        "time21_5": "2012-01-22T16:43Z",
+        "latitude": -20.0,
+        "longitude": 65.0,
+        "halfAngle": 28.0,
+        "speed": 438.0,
+        "type": "S",
+        "featureCode": "null",
+        "imageType": "null",
+        "measurementTechnique": "null",
+        "note": "",
+        "minorHalfWidth": null,
+        "speedMeasuredAtHeight": null,
+        "tilt": null,
+        "submissionTime": "2013-12-19T21:44Z",
+        "link": "https://ccmc.gsfc.nasa.gov/DONKI/view/CMEAnalysis/3989/-1",
+        "enlilList": [
+          {
+            "modelCompletionTime": "2012-01-21T16:27Z",
+            "au": 2.0,
+            "estimatedShockArrivalTime": null,
+            "isEarthGB": false,
+            "isEarthMinorImpact": false,
+            "rmin_re": null,
+            "kp_18": null,
+            "kp_90": null,
+            "kp_135": null,
+            "kp_180": null,
+            "estimatedDuration": null,
+            "link": "https://ccmc.gsfc.nasa.gov/DONKI/view/WSA-ENLIL/3987/-1",
+            "impactList": [],
+            "cmeIDs": [
+              "2012-01-22T08:54:00-CME-001"
+            ]
+          },
+          {
+            "modelCompletionTime": "2012-01-22T13:29Z",
+            "au": 2.0,
+            "estimatedShockArrivalTime": null,
+            "isEarthGB": false,
+            "isEarthMinorImpact": false,
+            "rmin_re": null,
+            "kp_18": null,
+            "kp_90": null,
+            "kp_135": null,
+            "kp_180": null,
+            "estimatedDuration": null,
+            "link": "https://ccmc.gsfc.nasa.gov/DONKI/view/WSA-ENLIL/3990/-1",
+            "impactList": [
+              {
+                "location": "STEREO A",
+                "arrivalTime": "2012-01-25T18:00Z",
+                "isGlancingBlow": true,
+                "isMinorImpact": false
+              }
+            ],
+            "cmeIDs": [
+              "2012-01-22T08:54:00-CME-001",
+              "2012-01-22T10:48:00-CME-001"
+            ]
+          }
+        ]
+      }
+    ],
+    "linkedEvents": [
+      {
+        "activityID": "2012-01-25T22:10:00-IPS-001"
+      }
+    ],
+    "sentNotifications": null,
+    "link": "https://ccmc.gsfc.nasa.gov/DONKI/view/CME/3988/-1",
+    "submissionTime": "2013-12-19T21:44Z",
+    "versionId": 1
+  },
+  {
+    "activityID": "2012-01-22T10:48:00-CME-001",
+    "catalog": "M2M_CATALOG",
+    "startTime": "2012-01-22T10:48Z",
+    "instruments": [
+      {
+        "displayName": "SOHO: LASCO/C2"
+      },
+      {
+        "displayName": "SOHO: LASCO/C3"
+      },
+      {
+        "displayName": "STEREO A: SECCHI/COR2"
+      },
+      {
+        "displayName": "STEREO B: SECCHI/COR2"
+      }
+    ],
+    "sourceLocation": "",
+    "activeRegionNum": null,
+    "note": "",
+    "cmeAnalyses": [
+      {
+        "isMostAccurate": true,
+        "levelOfData": 0,
+        "time21_5": "2012-01-22T18:15Z",
+        "latitude": 38.0,
+        "longitude": 139.0,
+        "halfAngle": 29.0,
+        "speed": 694.0,
+        "type": "C",
+        "featureCode": "null",
+        "imageType": "null",
+        "measurementTechnique": "null",
+        "note": "",
+        "minorHalfWidth": null,
+        "speedMeasuredAtHeight": null,
+        "tilt": null,
+        "submissionTime": "2013-12-19T21:45Z",
+        "link": "https://ccmc.gsfc.nasa.gov/DONKI/view/CMEAnalysis/3992/-1",
+        "enlilList": [
+          {
+            "modelCompletionTime": "2012-01-22T13:29Z",
+            "au": 2.0,
+            "estimatedShockArrivalTime": null,
+            "isEarthGB": false,
+            "isEarthMinorImpact": false,
+            "rmin_re": null,
+            "kp_18": null,
+            "kp_90": null,
+            "kp_135": null,
+            "kp_180": null,
+            "estimatedDuration": null,
+            "link": "https://ccmc.gsfc.nasa.gov/DONKI/view/WSA-ENLIL/3990/-1",
+            "impactList": [
+              {
+                "location": "STEREO A",
+                "arrivalTime": "2012-01-25T18:00Z",
+                "isGlancingBlow": true,
+                "isMinorImpact": false
+              }
+            ],
+            "cmeIDs": [
+              "2012-01-22T08:54:00-CME-001",
+              "2012-01-22T10:48:00-CME-001"
+            ]
+          }
+        ]
+      }
+    ],
+    "linkedEvents": [
+      {
+        "activityID": "2012-01-25T22:10:00-IPS-001"
+      }
+    ],
+    "sentNotifications": null,
+    "link": "https://ccmc.gsfc.nasa.gov/DONKI/view/CME/3991/-1",
+    "submissionTime": "2013-12-19T21:45Z",
+    "versionId": 1
+  },
+  {
+    "activityID": "2012-01-23T04:00:00-CME-001",
+    "catalog": "M2M_CATALOG",
+    "startTime": "2012-01-23T04:00Z",
+    "instruments": [
+      {
+        "displayName": "SOHO: LASCO/C3"
+      },
+      {
+        "displayName": "STEREO B: SECCHI/COR2"
+      }
+    ],
+    "sourceLocation": "N26W41",
+    "activeRegionNum": 11401,
+    "note": "",
+    "cmeAnalyses": [
+      {
+        "isMostAccurate": true,
+        "levelOfData": 0,
+        "time21_5": "2012-01-23T05:20Z",
+        "latitude": 41.0,
+        "longitude": 26.0,
+        "halfAngle": 62.0,
+        "speed": 2211.0,
+        "type": "R",
+        "featureCode": "null",
+        "imageType": "direct",
+        "measurementTechnique": "null",
+        "note": "",
+        "minorHalfWidth": null,
+        "speedMeasuredAtHeight": null,
+        "tilt": null,
+        "submissionTime": "2017-11-14T20:36Z",
+        "link": "https://ccmc.gsfc.nasa.gov/DONKI/view/CMEAnalysis/120/-1",
+        "enlilList": [
+          {
+            "modelCompletionTime": "2012-01-23T01:26Z",
+            "au": 2.0,
+            "estimatedShockArrivalTime": "2012-01-24T14:18Z",
+            "isEarthGB": false,
+            "isEarthMinorImpact": false,
+            "rmin_re": 4.6,
+            "kp_18": 1,
+            "kp_90": null,
+            "kp_135": null,
+            "kp_180": 9,
+            "estimatedDuration": 7.7,
+            "link": "https://ccmc.gsfc.nasa.gov/DONKI/view/WSA-ENLIL/3983/-1",
+            "impactList": [
+              {
+                "location": "Mars",
+                "arrivalTime": "2012-01-25T22:46Z",
+                "isGlancingBlow": false,
+                "isMinorImpact": false
+              }
+            ],
+            "cmeIDs": [
+              "2012-01-23T04:00:00-CME-001"
+            ]
+          }
+        ]
+      },
+      {
+        "isMostAccurate": false,
+        "levelOfData": 0,
+        "time21_5": "2012-01-23T05:50Z",
+        "latitude": 29.0,
+        "longitude": 17.0,
+        "halfAngle": 52.0,
+        "speed": 1796.0,
+        "type": "O",
+        "featureCode": "null",
+        "imageType": "null",
+        "measurementTechnique": "SWPC_CAT",
+        "note": "SWPC info:\nCME Start = 2012-01-23T04:00Z\nShock at ACE = 2012-01-24T14:31Z\nWSA/ENLIL prediction = 2012-01-24T14:00Z\nCME ID = 28\nReference Time = 2012-01-23T06:00Z",
+        "minorHalfWidth": null,
+        "speedMeasuredAtHeight": null,
+        "tilt": null,
+        "submissionTime": "2017-11-14T20:34Z",
+        "link": "https://ccmc.gsfc.nasa.gov/DONKI/view/CMEAnalysis/13428/-1",
+        "enlilList": []
+      }
+    ],
+    "linkedEvents": [
+      {
+        "activityID": "2012-01-23T03:38:00-FLR-001"
+      },
+      {
+        "activityID": "2012-01-23T04:49:00-SEP-001"
+      },
+      {
+        "activityID": "2012-01-23T05:00:00-SEP-001"
+      },
+      {
+        "activityID": "2012-01-23T05:30:00-SEP-001"
+      },
+      {
+        "activityID": "2012-01-23T08:15:00-SEP-001"
+      },
+      {
+        "activityID": "2012-01-24T06:30:00-SEP-001"
+      },
+      {
+        "activityID": "2012-01-24T14:30:00-IPS-001"
+      },
+      {
+        "activityID": "2012-01-24T18:00:00-GST-001"
+      }
+    ],
+    "sentNotifications": [
+      {
+        "messageID": "20120123-AL-003",
+        "messageIssueTime": "2012-01-23T05:50Z",
+        "messageURL": "https://ccmc.gsfc.nasa.gov/DONKI/view/Alert/122/1"
+      },
+      {
+        "messageID": "20120123-AL-006",
+        "messageIssueTime": "2012-01-23T11:15Z",
+        "messageURL": "https://ccmc.gsfc.nasa.gov/DONKI/view/Alert/6248/1"
+      }
+    ],
+    "link": "https://ccmc.gsfc.nasa.gov/DONKI/view/CME/119/-1",
+    "submissionTime": "2013-07-15T15:16Z",
+    "versionId": 1
+  },
+  {
+    "activityID": "2012-01-25T02:30:00-CME-001",
+    "catalog": "M2M_CATALOG",
+    "startTime": "2012-01-25T02:30Z",
+    "instruments": [
+      {
+        "displayName": "SOHO: LASCO/C2"
+      },
+      {
+        "displayName": "SOHO: LASCO/C3"
+      },
+      {
+        "displayName": "STEREO A: SECCHI/COR2"
+      },
+      {
+        "displayName": "STEREO B: SECCHI/COR2"
+      }
+    ],
+    "sourceLocation": "",
+    "activeRegionNum": null,
+    "note": "",
+    "cmeAnalyses": [
+      {
+        "isMostAccurate": true,
+        "levelOfData": 0,
+        "time21_5": "2012-01-25T10:34Z",
+        "latitude": 14.0,
+        "longitude": 98.0,
+        "halfAngle": 28.0,
+        "speed": 433.0,
+        "type": "S",
+        "featureCode": "null",
+        "imageType": "null",
+        "measurementTechnique": "null",
+        "note": "",
+        "minorHalfWidth": null,
+        "speedMeasuredAtHeight": null,
+        "tilt": null,
+        "submissionTime": "2013-12-19T22:14Z",
+        "link": "https://ccmc.gsfc.nasa.gov/DONKI/view/CMEAnalysis/3997/-1",
+        "enlilList": [
+          {
+            "modelCompletionTime": "2012-01-25T07:51Z",
+            "au": 2.0,
+            "estimatedShockArrivalTime": null,
+            "isEarthGB": false,
+            "isEarthMinorImpact": false,
+            "rmin_re": null,
+            "kp_18": null,
+            "kp_90": null,
+            "kp_135": null,
+            "kp_180": null,
+            "estimatedDuration": null,
+            "link": "https://ccmc.gsfc.nasa.gov/DONKI/view/WSA-ENLIL/3995/-1",
+            "impactList": [
+              {
+                "location": "STEREO A",
+                "arrivalTime": "2012-01-28T17:02Z",
+                "isGlancingBlow": false,
+                "isMinorImpact": false
+              }
+            ],
+            "cmeIDs": [
+              "2012-01-25T02:30:00-CME-001"
+            ]
+          }
+        ]
+      }
+    ],
+    "linkedEvents": null,
+    "sentNotifications": null,
+    "link": "https://ccmc.gsfc.nasa.gov/DONKI/view/CME/3996/-1",
+    "submissionTime": "2013-12-19T22:14Z",
+    "versionId": 1
+  },
+  {
+    "activityID": "2012-01-26T05:30:00-CME-001",
+    "catalog": "M2M_CATALOG",
+    "startTime": "2012-01-26T05:30Z",
+    "instruments": [
+      {
+        "displayName": "SOHO: LASCO/C2"
+      },
+      {
+        "displayName": "SOHO: LASCO/C3"
+      },
+      {
+        "displayName": "STEREO A: SECCHI/COR2"
+      }
+    ],
+    "sourceLocation": "",
+    "activeRegionNum": null,
+    "note": "",
+    "cmeAnalyses": [
+      {
+        "isMostAccurate": true,
+        "levelOfData": 0,
+        "time21_5": "2012-01-26T08:11Z",
+        "latitude": 60.0,
+        "longitude": 72.0,
+        "halfAngle": 30.0,
+        "speed": 1082.0,
+        "type": "O",
+        "featureCode": "null",
+        "imageType": "null",
+        "measurementTechnique": "null",
+        "note": "",
+        "minorHalfWidth": null,
+        "speedMeasuredAtHeight": null,
+        "tilt": null,
+        "submissionTime": "2013-12-19T22:15Z",
+        "link": "https://ccmc.gsfc.nasa.gov/DONKI/view/CMEAnalysis/4000/-1",
+        "enlilList": [
+          {
+            "modelCompletionTime": "2012-01-26T08:04Z",
+            "au": 2.0,
+            "estimatedShockArrivalTime": null,
+            "isEarthGB": false,
+            "isEarthMinorImpact": false,
+            "rmin_re": null,
+            "kp_18": null,
+            "kp_90": null,
+            "kp_135": null,
+            "kp_180": null,
+            "estimatedDuration": null,
+            "link": "https://ccmc.gsfc.nasa.gov/DONKI/view/WSA-ENLIL/3998/-1",
+            "impactList": [],
+            "cmeIDs": [
+              "2012-01-26T05:30:00-CME-001"
+            ]
+          }
+        ]
+      }
+    ],
+    "linkedEvents": null,
+    "sentNotifications": null,
+    "link": "https://ccmc.gsfc.nasa.gov/DONKI/view/CME/3999/-1",
+    "submissionTime": "2013-12-19T22:15Z",
+    "versionId": 1
+  },
+  {
+    "activityID": "2012-01-26T15:54:00-CME-001",
+    "catalog": "M2M_CATALOG",
+    "startTime": "2012-01-26T15:54Z",
+    "instruments": [
+      {
+        "displayName": "SOHO: LASCO/C2"
+      },
+      {
+        "displayName": "SOHO: LASCO/C3"
+      },
+      {
+        "displayName": "STEREO B: SECCHI/COR2"
+      }
+    ],
+    "sourceLocation": "",
+    "activeRegionNum": null,
+    "note": "",
+    "cmeAnalyses": [
+      {
+        "isMostAccurate": true,
+        "levelOfData": 0,
+        "time21_5": "2012-01-27T00:59Z",
+        "latitude": 51.0,
+        "longitude": -35.0,
+        "halfAngle": 40.0,
+        "speed": 522.0,
+        "type": "C",
+        "featureCode": "null",
+        "imageType": "null",
+        "measurementTechnique": "null",
+        "note": "",
+        "minorHalfWidth": null,
+        "speedMeasuredAtHeight": null,
+        "tilt": null,
+        "submissionTime": "2013-12-19T22:17Z",
+        "link": "https://ccmc.gsfc.nasa.gov/DONKI/view/CMEAnalysis/4003/-1",
+        "enlilList": [
+          {
+            "modelCompletionTime": "2012-01-26T20:56Z",
+            "au": 2.0,
+            "estimatedShockArrivalTime": null,
+            "isEarthGB": false,
+            "isEarthMinorImpact": false,
+            "rmin_re": null,
+            "kp_18": null,
+            "kp_90": null,
+            "kp_135": null,
+            "kp_180": null,
+            "estimatedDuration": null,
+            "link": "https://ccmc.gsfc.nasa.gov/DONKI/view/WSA-ENLIL/4001/-1",
+            "impactList": [
+              {
+                "location": "STEREO B",
+                "arrivalTime": "2012-01-29T20:38Z",
+                "isGlancingBlow": false,
+                "isMinorImpact": false
+              }
+            ],
+            "cmeIDs": [
+              "2012-01-26T15:54:00-CME-001",
+              "2012-01-26T19:09:00-CME-001"
+            ]
+          }
+        ]
+      }
+    ],
+    "linkedEvents": null,
+    "sentNotifications": null,
+    "link": "https://ccmc.gsfc.nasa.gov/DONKI/view/CME/4002/-1",
+    "submissionTime": "2013-12-19T22:17Z",
+    "versionId": 1
+  },
+  {
+    "activityID": "2012-01-26T19:09:00-CME-001",
+    "catalog": "M2M_CATALOG",
+    "startTime": "2012-01-26T19:09Z",
+    "instruments": [
+      {
+        "displayName": "STEREO A: SECCHI/COR2"
+      },
+      {
+        "displayName": "STEREO B: SECCHI/COR2"
+      }
+    ],
+    "sourceLocation": "",
+    "activeRegionNum": null,
+    "note": "",
+    "cmeAnalyses": [
+      {
+        "isMostAccurate": true,
+        "levelOfData": 0,
+        "time21_5": "2012-01-27T02:00Z",
+        "latitude": 20.0,
+        "longitude": -133.0,
+        "halfAngle": 30.0,
+        "speed": 572.0,
+        "type": "C",
+        "featureCode": "null",
+        "imageType": "null",
+        "measurementTechnique": "null",
+        "note": "",
+        "minorHalfWidth": null,
+        "speedMeasuredAtHeight": null,
+        "tilt": null,
+        "submissionTime": "2013-12-19T22:17Z",
+        "link": "https://ccmc.gsfc.nasa.gov/DONKI/view/CMEAnalysis/4005/-1",
+        "enlilList": [
+          {
+            "modelCompletionTime": "2012-01-26T20:56Z",
+            "au": 2.0,
+            "estimatedShockArrivalTime": null,
+            "isEarthGB": false,
+            "isEarthMinorImpact": false,
+            "rmin_re": null,
+            "kp_18": null,
+            "kp_90": null,
+            "kp_135": null,
+            "kp_180": null,
+            "estimatedDuration": null,
+            "link": "https://ccmc.gsfc.nasa.gov/DONKI/view/WSA-ENLIL/4001/-1",
+            "impactList": [
+              {
+                "location": "STEREO B",
+                "arrivalTime": "2012-01-29T20:38Z",
+                "isGlancingBlow": false,
+                "isMinorImpact": false
+              }
+            ],
+            "cmeIDs": [
+              "2012-01-26T15:54:00-CME-001",
+              "2012-01-26T19:09:00-CME-001"
+            ]
+          }
+        ]
+      }
+    ],
+    "linkedEvents": null,
+    "sentNotifications": null,
+    "link": "https://ccmc.gsfc.nasa.gov/DONKI/view/CME/4004/-1",
+    "submissionTime": "2013-12-19T22:17Z",
+    "versionId": 1
+  },
+  {
+    "activityID": "2012-01-27T06:09:00-CME-001",
+    "catalog": "M2M_CATALOG",
+    "startTime": "2012-01-27T06:09Z",
+    "instruments": [
+      {
+        "displayName": "SOHO: LASCO/C2"
+      },
+      {
+        "displayName": "SOHO: LASCO/C3"
+      },
+      {
+        "displayName": "STEREO A: SECCHI/COR2"
+      }
+    ],
+    "sourceLocation": "",
+    "activeRegionNum": null,
+    "note": "",
+    "cmeAnalyses": [
+      {
+        "isMostAccurate": true,
+        "levelOfData": 0,
+        "time21_5": "2012-01-27T14:00Z",
+        "latitude": -35.0,
+        "longitude": 110.0,
+        "halfAngle": 40.0,
+        "speed": 400.0,
+        "type": "S",
+        "featureCode": "null",
+        "imageType": "null",
+        "measurementTechnique": "null",
+        "note": "",
+        "minorHalfWidth": null,
+        "speedMeasuredAtHeight": null,
+        "tilt": null,
+        "submissionTime": "2013-12-19T22:18Z",
+        "link": "https://ccmc.gsfc.nasa.gov/DONKI/view/CMEAnalysis/4008/-1",
+        "enlilList": [
+          {
+            "modelCompletionTime": "2012-01-27T09:44Z",
+            "au": 2.0,
+            "estimatedShockArrivalTime": null,
+            "isEarthGB": false,
+            "isEarthMinorImpact": false,
+            "rmin_re": null,
+            "kp_18": null,
+            "kp_90": null,
+            "kp_135": null,
+            "kp_180": null,
+            "estimatedDuration": null,
+            "link": "https://ccmc.gsfc.nasa.gov/DONKI/view/WSA-ENLIL/4006/-1",
+            "impactList": [
+              {
+                "location": "STEREO A",
+                "arrivalTime": "2012-01-30T23:13Z",
+                "isGlancingBlow": false,
+                "isMinorImpact": false
+              }
+            ],
+            "cmeIDs": [
+              "2012-01-27T06:09:00-CME-001"
+            ]
+          }
+        ]
+      }
+    ],
+    "linkedEvents": [
+      {
+        "activityID": "2012-01-28T19:40:00-IPS-001"
+      }
+    ],
+    "sentNotifications": null,
+    "link": "https://ccmc.gsfc.nasa.gov/DONKI/view/CME/4007/-1",
+    "submissionTime": "2013-12-19T22:18Z",
+    "versionId": 1
+  },
+  {
+    "activityID": "2012-01-27T16:39:00-CME-001",
+    "catalog": "M2M_CATALOG",
+    "startTime": "2012-01-27T16:39Z",
+    "instruments": [
+      {
+        "displayName": "SOHO: LASCO/C2"
+      },
+      {
+        "displayName": "SOHO: LASCO/C3"
+      },
+      {
+        "displayName": "STEREO A: SECCHI/COR2"
+      },
+      {
+        "displayName": "STEREO B: SECCHI/COR2"
+      }
+    ],
+    "sourceLocation": "",
+    "activeRegionNum": null,
+    "note": "",
+    "cmeAnalyses": [
+      {
+        "isMostAccurate": false,
+        "levelOfData": 0,
+        "time21_5": "2012-01-29T21:00Z",
+        "latitude": 35.0,
+        "longitude": 75.0,
+        "halfAngle": 50.0,
+        "speed": 2500.0,
+        "type": "R",
+        "featureCode": "null",
+        "imageType": "null",
+        "measurementTechnique": "null",
+        "note": "",
+        "minorHalfWidth": null,
+        "speedMeasuredAtHeight": null,
+        "tilt": null,
+        "submissionTime": "2013-07-15T15:09Z",
+        "link": "https://ccmc.gsfc.nasa.gov/DONKI/view/CMEAnalysis/115/-1",
+        "enlilList": []
+      },
+      {
+        "isMostAccurate": true,
+        "levelOfData": 0,
+        "time21_5": "2012-01-27T20:00Z",
+        "latitude": 40.0,
+        "longitude": 75.0,
+        "halfAngle": 55.0,
+        "speed": 2200.0,
+        "type": "R",
+        "featureCode": "null",
+        "imageType": "null",
+        "measurementTechnique": "null",
+        "note": "",
+        "minorHalfWidth": null,
+        "speedMeasuredAtHeight": null,
+        "tilt": null,
+        "submissionTime": "2013-12-19T22:18Z",
+        "link": "https://ccmc.gsfc.nasa.gov/DONKI/view/CMEAnalysis/4011/-1",
+        "enlilList": [
+          {
+            "modelCompletionTime": "2012-01-27T16:38Z",
+            "au": 2.0,
+            "estimatedShockArrivalTime": null,
+            "isEarthGB": false,
+            "isEarthMinorImpact": false,
+            "rmin_re": null,
+            "kp_18": null,
+            "kp_90": null,
+            "kp_135": null,
+            "kp_180": null,
+            "estimatedDuration": null,
+            "link": "https://ccmc.gsfc.nasa.gov/DONKI/view/WSA-ENLIL/4009/-1",
+            "impactList": [
+              {
+                "location": "STEREO A",
+                "arrivalTime": "2012-01-29T08:41Z",
+                "isGlancingBlow": false,
+                "isMinorImpact": false
+              }
+            ],
+            "cmeIDs": [
+              "2012-01-27T16:39:00-CME-001"
+            ]
+          }
+        ]
+      }
+    ],
+    "linkedEvents": [
+      {
+        "activityID": "2012-01-27T17:37:00-FLR-001"
+      },
+      {
+        "activityID": "2012-01-27T19:00:00-SEP-001"
+      },
+      {
+        "activityID": "2012-01-29T05:40:00-IPS-001"
+      },
+      {
+        "activityID": "2012-01-30T15:37:00-IPS-001"
+      }
+    ],
+    "sentNotifications": [
+      {
+        "messageID": "20120127-AL-004",
+        "messageIssueTime": "2012-01-27T20:00Z",
+        "messageURL": "https://ccmc.gsfc.nasa.gov/DONKI/view/Alert/116/1"
+      },
+      {
+        "messageID": "20120127-AL-005",
+        "messageIssueTime": "2012-01-27T20:00Z",
+        "messageURL": "https://ccmc.gsfc.nasa.gov/DONKI/view/Alert/13200/1"
+      },
+      {
+        "messageID": "20120127-AL-006",
+        "messageIssueTime": "2012-01-27T23:45Z",
+        "messageURL": "https://ccmc.gsfc.nasa.gov/DONKI/view/Alert/13201/1"
+      }
+    ],
+    "link": "https://ccmc.gsfc.nasa.gov/DONKI/view/CME/4010/-1",
+    "submissionTime": "2013-12-19T22:18Z",
+    "versionId": 1
+  },
+  {
+    "activityID": "2012-01-31T17:36:00-CME-001",
+    "catalog": "M2M_CATALOG",
+    "startTime": "2012-01-31T17:36Z",
+    "instruments": [
+      {
+        "displayName": "SOHO: LASCO/C2"
+      },
+      {
+        "displayName": "SOHO: LASCO/C3"
+      },
+      {
+        "displayName": "STEREO A: SECCHI/COR2"
+      }
+    ],
+    "sourceLocation": "",
+    "activeRegionNum": null,
+    "note": "",
+    "cmeAnalyses": [
+      {
+        "isMostAccurate": true,
+        "levelOfData": 0,
+        "time21_5": "2012-02-01T03:54Z",
+        "latitude": -10.0,
+        "longitude": 51.0,
+        "halfAngle": 34.0,
+        "speed": 390.0,
+        "type": "S",
+        "featureCode": "null",
+        "imageType": "null",
+        "measurementTechnique": "null",
+        "note": "",
+        "minorHalfWidth": null,
+        "speedMeasuredAtHeight": null,
+        "tilt": null,
+        "submissionTime": "2013-12-19T22:19Z",
+        "link": "https://ccmc.gsfc.nasa.gov/DONKI/view/CMEAnalysis/4014/-1",
+        "enlilList": [
+          {
+            "modelCompletionTime": "2012-01-31T18:59Z",
+            "au": 2.0,
+            "estimatedShockArrivalTime": null,
+            "isEarthGB": false,
+            "isEarthMinorImpact": false,
+            "rmin_re": null,
+            "kp_18": null,
+            "kp_90": null,
+            "kp_135": null,
+            "kp_180": null,
+            "estimatedDuration": null,
+            "link": "https://ccmc.gsfc.nasa.gov/DONKI/view/WSA-ENLIL/4012/-1",
+            "impactList": [],
+            "cmeIDs": [
+              "2012-01-31T17:36:00-CME-001"
+            ]
+          }
+        ]
+      }
+    ],
+    "linkedEvents": null,
+    "sentNotifications": null,
+    "link": "https://ccmc.gsfc.nasa.gov/DONKI/view/CME/4013/-1",
+    "submissionTime": "2013-12-19T22:19Z",
+    "versionId": 1
+  }
+]

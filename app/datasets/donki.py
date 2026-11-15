@@ -8,9 +8,10 @@ not fetched; SEP and CME are enough to replay historical radiation storms.
 
 from __future__ import annotations
 
+import calendar
 import json
 from dataclasses import dataclass
-from datetime import UTC, date, datetime
+from datetime import UTC, date, datetime, timedelta
 from pathlib import Path
 from typing import Any
 from urllib.parse import urlencode
@@ -25,12 +26,28 @@ ENDPOINTS: dict[str, SpaceWeatherKind] = {
     "CME": SpaceWeatherKind.CME,
 }
 
-# Reference windows replayed by the demo: the September 2017 storm (scenario S3,
-# X9.3 flare and ground-level enhancement) and the May 2024 "Gannon" storm.
+# Reference windows:
+# - the Curiosity RAD cruise to Mars (Dec 2011 - Jul 2012), to match dose peaks with
+#   catalogued solar particle events (notebooks/analyse_radiations_nasa.ipynb);
+# - the September 2017 storm replayed by scenario S3;
+# - the May 2024 "Gannon" storm.
 DEFAULT_WINDOWS: list[tuple[date, date]] = [
+    (date(2011, 12, 1), date(2012, 7, 31)),
     (date(2017, 9, 1), date(2017, 9, 30)),
     (date(2024, 5, 1), date(2024, 5, 31)),
 ]
+
+
+def monthly(start: date, end: date) -> list[tuple[date, date]]:
+    """Split a range into calendar months: DONKI rejects long ranges (HTTP 400)."""
+    chunks = []
+    current = start
+    while current <= end:
+        last_day = calendar.monthrange(current.year, current.month)[1]
+        chunk_end = min(date(current.year, current.month, last_day), end)
+        chunks.append((current, chunk_end))
+        current = chunk_end + timedelta(days=1)
+    return chunks
 
 
 @dataclass(frozen=True)
@@ -56,7 +73,8 @@ def fetch(api_key: str, windows: list[tuple[date, date]] | None = None) -> list[
     """Download raw DONKI JSON for each endpoint and window; returns written files."""
     ensure_dir(DONKI_DIR)
     written = []
-    for start, end in windows or DEFAULT_WINDOWS:
+    chunks = [c for start, end in windows or DEFAULT_WINDOWS for c in monthly(start, end)]
+    for start, end in chunks:
         for endpoint in ENDPOINTS:
             payload = get_json(endpoint_url(endpoint, start, end, api_key))
             path = raw_path(endpoint, start, end)

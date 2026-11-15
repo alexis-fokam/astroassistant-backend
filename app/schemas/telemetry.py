@@ -6,7 +6,7 @@ from datetime import datetime
 
 from pydantic import BaseModel, Field
 
-from app.models.enums import ExerciseIntensity, ExerciseKind, Metric, SessionStatus, HealthLevel
+from app.models.enums import ExerciseIntensity, ExerciseKind, HealthLevel, Metric, SessionStatus
 from app.schemas.common import OrmModel
 
 
@@ -44,6 +44,7 @@ class VitalSeries(BaseModel):
     baseline_std: float | None
     points: list[VitalPoint]
 
+
 class NormalBand(BaseModel):
     low: float
     high: float
@@ -62,6 +63,7 @@ class VitalLatestItem(BaseModel):
 class CrewVitalsLatest(BaseModel):
     crew_id: str
     vitals: dict[Metric, VitalLatestItem]
+
 
 class RadiationPoint(BaseModel):
     t: datetime

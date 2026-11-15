@@ -1,0 +1,88 @@
+# Astro Assistant risk engine configuration (spec §6).
+# Thresholds come from the exploratory analyses (notebooks/) and the clinical literature;
+# weights are adjusted during calibration.
+
+model_version: "risk-engine 1.1.0"
+
+# Physiologically plausible ranges: readings outside are flagged as artefacts (§6.1).
+plausible:
+  heart_rate: [25, 230]
+  hrv_rmssd: [3, 250]
+  spo2: [60, 100]
+  respiratory_rate: [4, 60]
+  skin_temperature: [25, 42]
+  core_temperature: [33, 42]
+  systolic_bp: [60, 250]
+  diastolic_bp: [30, 150]
+  activity_level: [0.8, 20]
+  cabin_co2: [0, 5]
+min_quality: 0.5
+
+windows:
+  now_minutes: 5           # "current" value: mean of the last 5 min
+  confirm_minutes: 5       # previous measurement, for WARNING confirmation (§6.3)
+  baseline_days: 14        # individual baseline window (F2.1)
+  baseline_gap_days: 3     # most recent days excluded from the baseline
+  checkin_hours: 36        # a check-in older than this is ignored
+
+radiation:
+  # Notebook analyse_radiations_nasa: background ≈ 1.67 mSv/day; storm above ≈ 2.5 mSv/day.
+  storm_rate_msv_h: 0.104
+
+anomaly:
+  # Isolation Forest per crew member on hourly vectors of these metrics.
+  metrics: [heart_rate, hrv_rmssd, spo2, respiratory_rate, core_temperature]
+  min_training_hours: 72
+  contamination: 0.02
+  random_state: 42
+
+# Global score = blend of the worst domain and the weighted mean (max-severity rule).
+global:
+  weights:
+    cardio: 0.30
+    radiation: 0.20
+    musculoskeletal: 0.15
+    behavioral: 0.25
+    immune: 0.10
+  worst_domain_share: 0.5
+  # The global score never shows a lower band than the status it carries.
+  status_floor:
+    warning: 40
+    critical: 70
+
+# A confirmed rule lifts its domain score to at least this floor.
+rule_floor:
+  warning: 45
+  critical: 75
+
+# Indicators of each domain: severity = clip((value - low) / (high - low), 0, 1), with
+# low/high swapped for "lower is worse" indicators. Domain score = 100 * min(1, Σ w·s).
+domains:
+  cardio:
+    - {feature: hr_z, low: 1.0, high: 4.0, weight: 0.35, label: "FC au repos (z-score)"}
+    - {feature: spo2_now, low: 96, high: 88, weight: 0.35, label: "SpO₂"}
+    - {feature: anomaly_score, low: 0.55, high: 0.9, weight: 0.25, label: "Anomalie multivariée"}
+    - {feature: systolic_bp_z, low: 1.0, high: 4.0, weight: 0.10, label: "Pression systolique (z-score)"}
+    - {feature: vision_days, low: 0, high: 2, weight: 0.20, label: "Jours avec vision modifiée"}
+    - {feature: headache_days, low: 0, high: 2, weight: 0.15, label: "Jours avec céphalées"}
+  radiation:
+    - {feature: dose_rate_ratio, low: 0.8, high: 2.0, weight: 0.7, label: "Débit de dose / seuil de tempête"}
+    - {feature: career_pct, low: 40, high: 90, weight: 0.4, label: "Dose de carrière (% de la limite)"}
+    - {feature: proton_flux_10mev, low: 1, high: 100, weight: 0.3, label: "Flux de protons GOES ≥ 10 MeV (pfu)"}
+  musculoskeletal:
+    - {feature: missed_resistance_streak, low: 0, high: 3, weight: 0.4, label: "Séances de résistance manquées"}
+    - {feature: back_pain, low: 0, high: 3, weight: 0.15, label: "Douleurs dorsales"}
+    - {feature: activity_24h, low: 2.0, high: 1.2, weight: 0.15, label: "Activité moyenne (MET)"}
+    - {feature: bone_loss_projection_pct, low: 2.0, high: 6.0, weight: 0.2, label: "Perte osseuse projetée en fin de mission (%)"}
+  behavioral:
+    - {feature: hrv_ratio, low: 0.95, high: 0.6, weight: 0.3, label: "VFC / baseline"}
+    - {feature: short_nights_3n, low: 0, high: 3, weight: 0.2, label: "Nuits de moins de 6 h"}
+    - {feature: stress, low: 3, high: 9, weight: 0.15, label: "Stress déclaré"}
+    - {feature: pvt_rt_ratio, low: 1.0, high: 1.3, weight: 0.1, label: "Temps de réaction PVT / habituel"}
+    - {feature: mood, low: 7, high: 2, weight: 0.1, label: "Humeur"}
+    - {feature: isolation, low: 4, high: 9, weight: 0.05, label: "Isolement"}
+  immune:
+    - {feature: core_temperature_now, low: 37.3, high: 38.5, weight: 0.5, label: "Température"}
+    - {feature: congestion, low: 1, high: 3, weight: 0.2, label: "Congestion"}
+    - {feature: skin_issue, low: 0, high: 3, weight: 0.2, label: "Problème cutané"}
+    - {feature: nausea, low: 0, high: 3, weight: 0.2, label: "Nausées"}

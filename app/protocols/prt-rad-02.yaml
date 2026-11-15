@@ -8,7 +8,7 @@ description: >
 domain: radiation
 severity: critical
 trigger:
-  rules: [RAD-SPE-01]
+  rules: [RAD-SPE-01, GOES-S1-01]
   summary: Débit de dose anormal ou alerte SPE de la météo spatiale
 expected_duration_min: 120
 steps:

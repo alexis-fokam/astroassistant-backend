@@ -24,6 +24,12 @@ dev = [
     "httpx2",
     "ruff>=0.8",
 ]
+# Exploratory analysis (notebooks/): pip install -e ".[notebooks]"
+notebooks = [
+    "jupyter>=1.1",
+    "matplotlib>=3.9",
+    "seaborn>=0.13",
+]
 
 [build-system]
 requires = ["setuptools>=75"]
@@ -48,3 +54,7 @@ select = ["E", "F", "I", "UP", "B"]
 [tool.ruff.lint.flake8-bugbear]
 # FastAPI declares parameters through default values.
 extend-immutable-calls = ["fastapi.Query", "fastapi.Depends", "fastapi.Body"]
+
+[tool.ruff.lint.per-file-ignores]
+# Exploratory notebooks: long f-strings in printed reports are fine.
+"notebooks/*" = ["E501", "B905"]

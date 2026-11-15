@@ -48,7 +48,6 @@ class MissionOut(OrmModel):
     next_contact_time: str | None
 
 
-
 class Factor(BaseModel):
     feature: str
     value: Any
@@ -79,8 +78,8 @@ class CrewStatus(BaseModel):
     recommended_protocol: str | None
     active_alerts: list[AlertOut]
 
-class CrewProfile(BaseModel):
 
+class CrewProfile(BaseModel):
     code: str
     first_name: str
     last_name: str

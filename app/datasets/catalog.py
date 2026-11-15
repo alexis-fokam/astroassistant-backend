@@ -95,6 +95,16 @@ CATALOG: list[DatasetInfo] = [
         bundled=False,
     ),
     DatasetInfo(
+        code="physionet-bidmc",
+        name="BIDMC PPG and Respiration Dataset (numerics, 1 Hz)",
+        agency="PhysioNet",
+        url="https://physionet.org/content/bidmc/1.0.0/",
+        licence="Open Data Commons Attribution v1.0",
+        usage="SpO2, heart and respiratory rate distributions to calibrate thresholds (F1, §6).",
+        size="~1 MB (numerics only)",
+        bundled=False,
+    ),
+    DatasetInfo(
         code="monash-pvt",
         name="PVT under 40 h sleep deprivation (Monash University)",
         agency="Monash University",

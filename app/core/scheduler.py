@@ -3,8 +3,10 @@ from apscheduler.triggers.cron import CronTrigger
 
 scheduler = AsyncIOScheduler()
 
+
 async def sample_periodic_task():
     print("hello")
+
 
 def init_scheduler():
     scheduler.add_job(

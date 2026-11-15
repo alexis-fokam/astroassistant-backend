@@ -3,6 +3,8 @@
 import csv
 from datetime import date
 
+import pytest
+
 from app.datasets import msl_rad
 from app.datasets.msl_rad import CSV_HEADER, file_date, finalize, parse_lines
 
@@ -83,3 +85,53 @@ def test_donki_events_are_imported_with_provenance(db) -> None:
         assert source.record_count == len(cached)
         from_donki = [e for e in events if e.source_id == source.id]
         assert len({e.donki_id for e in from_donki}) == len(cached)
+
+
+def test_donki_windows_are_split_by_month() -> None:
+    from app.datasets.donki import monthly
+
+    chunks = monthly(date(2011, 12, 15), date(2012, 2, 10))
+    assert chunks == [
+        (date(2011, 12, 15), date(2011, 12, 31)),
+        (date(2012, 1, 1), date(2012, 1, 31)),
+        (date(2012, 2, 1), date(2012, 2, 10)),
+    ]
+
+
+def test_edf_plus_hypnogram_annotations_are_parsed(tmp_path) -> None:
+    from app.datasets.physionet import summarize_night
+
+    # Minimal EDF+ annotation file: 256-byte header, then TALs (onset, duration, text).
+    tals = (
+        "+0\x14\x14\x00"
+        "+0\x151800\x14Sleep stage W\x14\x00"
+        "+1800\x1514400\x14Sleep stage 2\x14\x00"
+        "+16200\x15600\x14Sleep stage W\x14\x00"
+        "+16800\x157200\x14Sleep stage R\x14\x00"
+        "+24000\x153600\x14Sleep stage W\x14\x00"
+    )
+    header = b"0".ljust(184) + b"256".ljust(8) + b" " * 64
+    path = tmp_path / "SC4001EC-Hypnogram.edf"
+    path.write_bytes(header + tals.encode("latin-1"))
+
+    night = summarize_night(path)
+    assert night.total_sleep_h == 6.0  # 4 h N2 + 2 h REM
+    assert night.sleep_period_h == pytest.approx(6 + 10 / 60)
+    assert night.awakenings == 1 and night.waso_min == 10
+
+
+def test_rmssd_from_a_synthetic_ecg() -> None:
+    import numpy as np
+
+    from app.engine.calibration import ECG_HZ, rmssd, rr_intervals
+
+    # 60 s of spikes alternating 800 ms / 850 ms R-R intervals → RMSSD = 50 ms.
+    ecg = np.zeros(ECG_HZ * 60)
+    t, toggle = 0.5, False
+    while t < 59.5:
+        ecg[int(t * ECG_HZ)] = 1.0
+        t += 0.85 if toggle else 0.80
+        toggle = not toggle
+    rr = rr_intervals(ecg)
+    assert len(rr) > 60
+    assert rmssd(rr) == pytest.approx(50, abs=3)
