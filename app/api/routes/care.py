@@ -34,7 +34,14 @@ from app.models import (
 )
 from app.models.enums import AlertStatus, EmergencyStatus, Metric, ProtocolRunStatus, SessionStatus
 from app.models.sync import PRIORITY_CRITICAL
-from app.schemas.alerts import AlertOut, AlertPatch, EmergencyClose, EmergencyIn, EmergencyOut
+from app.schemas.alerts import (
+    AlertOut,
+    AlertPatch,
+    EmergencyClose,
+    EmergencyIn,
+    EmergencyOut,
+    AlertExplanationOut,
+)
 from app.schemas.care import (
     InventoryItemOut,
     ProtocolOut,
@@ -48,6 +55,7 @@ from app.schemas.care import (
 )
 from app.services import audit
 from app.services import protocols as library
+from app.services.alert import get_alert_explanation
 from app.services.sync import queue_packet
 from app.services.views import (
     active_alerts,
@@ -122,6 +130,29 @@ async def update_alert(alert_id: int, body: AlertPatch, db: DbSession, cmo: Curr
     out = alert_out(alert)
     await manager.broadcast({"type": "alert", "alert": out.model_dump(mode="json")})
     return out
+
+@router.get("/alerts/{id}/explanation", response_model=AlertExplanationOut)
+def alert_explanation(
+    id: int,
+    db: DbSession,
+    current: CurrentMember,
+) -> AlertExplanationOut:
+    result = get_alert_explanation(db, id)
+    if result is None:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"Alerte #{id} introuvable",
+        )
+
+    alert, explanation = result
+
+    if alert.crew_member_id != current.id and not is_cmo:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Accès refusé aux détails de cette alerte",
+        )
+
+    return explanation
 
 
 # --------------------------------------------------------------------- protocols

@@ -47,6 +47,20 @@ class AlertPatch(BaseModel):
     status: Literal["acknowledged", "resolved"]
     comment: str | None = Field(default=None, max_length=2000)
 
+class AlertFactor(BaseModel):
+    label: str
+    value: float | str | None = None
+    contribution: float | None = None
+
+
+class AlertExplanationOut(BaseModel):
+    alert_id: int
+    crew_code: str
+    method: DetectionMethod
+    rule_code: str | None = None
+    anomaly_score: float | None = None
+    confirmations_count: int = Field(ge=1)
+    factors: list[AlertFactor] = []
 
 class EmergencyIn(BaseModel):
     patient_code: str | None = Field(default=None, description="Défaut : soi-même")

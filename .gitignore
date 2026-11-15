@@ -6,7 +6,7 @@ __pycache__/
 .ruff_cache/
 .coverage
 htmlcov/
-
+.idea/
 .env
 data/*.db*
 # Large third-party datasets (see app/datasets/catalog.py)
