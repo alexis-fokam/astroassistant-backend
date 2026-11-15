@@ -135,3 +135,59 @@ def test_rmssd_from_a_synthetic_ecg() -> None:
     rr = rr_intervals(ecg)
     assert len(rr) > 60
     assert rmssd(rr) == pytest.approx(50, abs=3)
+
+
+def test_reference_datasets_are_imported(db) -> None:
+    from sqlalchemy import func, select
+
+    from app.datasets.importer import import_all
+    from app.models import DatasetSource, ReferenceSleepNight, ReferenceVitalSample
+    from app.models.enums import Metric
+
+    counts = import_all(db)
+    if counts["physionet-bidmc"]:
+        spo2 = db.scalar(
+            select(func.avg(ReferenceVitalSample.value)).where(
+                ReferenceVitalSample.metric == Metric.SPO2
+            )
+        )
+        assert 90 < spo2 < 100
+        subjects = db.scalar(select(func.count(func.distinct(ReferenceVitalSample.subject))))
+        assert subjects >= 53
+    if counts["sleep-edfx"]:
+        nights = db.scalars(select(ReferenceSleepNight)).all()
+        assert len(nights) == counts["sleep-edfx"]
+        assert all(0 < n.efficiency <= 1 and n.total_sleep_h <= n.sleep_period_h for n in nights)
+    bidmc = db.scalars(select(DatasetSource).where(DatasetSource.code == "physionet-bidmc")).one()
+    assert bidmc.bundled and bidmc.record_count == counts["physionet-bidmc"]
+
+
+def test_wesad_windows_csv_is_imported_and_evaluated(db, tmp_path, monkeypatch) -> None:
+    from sqlalchemy import select
+
+    from app.datasets import physionet
+    from app.datasets.importer import import_wesad_windows, seed_sources
+    from app.engine import calibration
+    from app.models import ReferenceVitalSample
+
+    path = tmp_path / "wesad_hrv_windows.csv"
+    rows = ["subject,condition,t_offset_s,rmssd_ms"]
+    for subject in ("S2", "S3"):
+        rows += [f"{subject},baseline,{i * 60},{50 + i % 3}" for i in range(10)]
+        rows += [f"{subject},stress,{600 + i * 60},{30 + i % 2}" for i in range(6)]
+        rows += [f"{subject},amusement,{1000 + i * 60},48" for i in range(4)]
+    path.write_text("\n".join(rows) + "\n", encoding="utf-8")
+    monkeypatch.setattr(physionet, "WESAD_WINDOWS_CSV", path)
+
+    source = seed_sources(db)["wesad"]
+    assert import_wesad_windows(db, source) == 40
+    assert {r.condition for r in db.scalars(select(ReferenceVitalSample))} == {
+        "baseline",
+        "stress",
+        "amusement",
+    }
+
+    report = calibration.evaluate_wesad(windows_csv=path)
+    rule_80 = next(r for r in report["hrv_rule"] if r["ratio"] == 0.8)
+    assert report["subjects"] == 2
+    assert rule_80["sensitivity"] == 1.0 and rule_80["false_alarm_rate"] == 0.0

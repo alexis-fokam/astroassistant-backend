@@ -352,9 +352,9 @@ def test_engine_routes(client: TestClient, astronaut, cmo) -> None:
 def test_profiles_are_public_and_carry_no_health_data(client: TestClient) -> None:
     profiles = client.get("/api/v1/profiles").json()
     assert [p["code"] for p in profiles] == ["AV-01", "AV-02", "AV-03", "AV-04"]
-    assert [p["code"] for p in profiles if p["isCmo"]] == ["AV-04"]
+    assert [p["code"] for p in profiles if p["is_cmo"]] == ["AV-04"]
     assert all(
-        set(p) == {"code", "first_name", "last_name", "crew_role", "isCmo"} for p in profiles
+        set(p) == {"code", "first_name", "last_name", "crew_role", "is_cmo"} for p in profiles
     )
 
 
@@ -374,3 +374,5 @@ def test_latest_vitals_respect_rbac(client: TestClient, astronaut, cmo) -> None:
 def test_mission_exposes_next_contact_time(client: TestClient, astronaut) -> None:
     mission = client.get("/api/v1/mission", headers=astronaut).json()
     assert mission["next_contact_time"] and len(mission["next_contact_time"]) == 8
+    assert mission["clock"] == "J+142 · 14:05"
+    assert 0 <= mission["next_contact_in_s"] <= 12 * 3600

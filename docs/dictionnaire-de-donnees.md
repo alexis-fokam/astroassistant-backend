@@ -2,19 +2,19 @@
 
 > Document généré par `python -m app.docs` à partir des modèles SQLAlchemy (`backend/app/models`). Ne pas modifier à la main.
 
-Généré le 15/11/2026 à 11:14.
+Généré le 15/11/2026 à 13:06.
 
 ## Synthèse
 
 | Élément | Nombre |
 |---|---:|
-| Tables | 31 |
-| Colonnes | 327 |
-| Clés étrangères | 60 |
-| Contraintes CHECK métier | 57 |
-| Index secondaires | 54 |
+| Tables | 33 |
+| Colonnes | 346 |
+| Clés étrangères | 62 |
+| Contraintes CHECK métier | 59 |
+| Index secondaires | 55 |
 | Énumérations | 22 |
-| Lignes après `python -m app.seed` | 22 752 |
+| Lignes après `python -m app.seed` | 99 048 |
 
 ### Conventions
 
@@ -45,6 +45,8 @@ Généré le 15/11/2026 à 11:14.
 | Données ouvertes | [`cruise_dose_samples`](#cruise_dose_samples) | 5117 | Débit de dose réel mesuré par Curiosity RAD pendant le transit vers Mars (référence F5). |
 | Données ouvertes | [`dataset_sources`](#dataset_sources) | 9 | Jeu de données ouvert utilisé par le projet : origine, licence, date de récupération. |
 | Données ouvertes | [`proton_flux_readings`](#proton_flux_readings) | 4026 | Flux de protons intégral mesuré par les satellites GOES de la NOAA (alerte précoce F5.4). |
+| Données ouvertes | [`reference_sleep_nights`](#reference_sleep_nights) | 102 | Nuit de sommeil réelle annotée par des experts (Sleep-EDF), épisode principal (F7). |
+| Données ouvertes | [`reference_vital_samples`](#reference_vital_samples) | 76194 | Mesure physiologique réelle d'un jeu de référence terrestre, pour calibrer le moteur (§6). |
 | Moteur IA | [`feature_snapshots`](#feature_snapshots) | 240 | Indicateurs agrégés sur une fenêtre (moyennes, pentes, z-scores) à un passage du pipeline. |
 | Moteur IA | [`risk_scores`](#risk_scores) | 1440 | Score de risque 0-100 d'un domaine à un instant (F2.5, F2.6, §9 risk_score). |
 | Alertes et urgences | [`alerts`](#alerts) | 10 | Alerte issue d'une règle clinique ou d'un modèle (§9 alert). |
@@ -71,6 +73,8 @@ erDiagram
     inventory_items ||--o{ protocol_requirements : "item_id"
     protocols ||--o{ protocol_requirements : "protocol_id"
     dataset_sources ||--o{ proton_flux_readings : "source_id"
+    dataset_sources ||--o{ reference_sleep_nights : "source_id"
+    dataset_sources ||--o{ reference_vital_samples : "source_id"
     crew_members |o--o{ audit_logs : "actor_id"
     crew_members ||--o{ baselines : "crew_member_id"
     crew_members |o--o{ devices : "crew_member_id"
@@ -640,6 +644,67 @@ Modèle `ProtonFluxReading` · 7 colonnes · 4026 lignes dans la base de démons
 **Index composites**
 
 - `ix_proton_flux_readings_energy_time` (`energy_band`, `measured_at`)
+
+<a id="reference_sleep_nights"></a>
+
+### `reference_sleep_nights`
+
+Nuit de sommeil réelle annotée par des experts (Sleep-EDF), épisode principal (F7).
+
+Modèle `ReferenceSleepNight` · 12 colonnes · 102 lignes dans la base de démonstration.
+
+| Colonne | Type | Null | Défaut | Clés | Description |
+|---|---|:---:|---|---|---|
+| `id` | INTEGER | non |  | PK | Identifiant technique |
+| `source_id` | INTEGER | non |  | FK → `dataset_sources.id` | Jeu de données d'origine |
+| `record` | VARCHAR(16) | non |  | UNIQUE | Nuit enregistrée (sujet et nuit, ex. SC4001E) |
+| `sleep_period_h` | DOUBLE | non |  |  | Durée de l'épisode, de l'endormissement au réveil final (h) |
+| `total_sleep_h` | DOUBLE | non |  |  | Temps de sommeil effectif (h) |
+| `efficiency` | DOUBLE | non |  |  | Efficacité : sommeil / épisode, de 0 à 1 |
+| `waso_min` | DOUBLE | non |  |  | Éveil après endormissement (min) |
+| `awakenings` | INTEGER | non |  |  | Nombre de réveils pendant l'épisode |
+| `n1_h` | DOUBLE | non |  |  | Sommeil léger N1 (h) |
+| `n2_h` | DOUBLE | non |  |  | Sommeil léger N2 (h) |
+| `n3_h` | DOUBLE | non |  |  | Sommeil profond N3 (h) |
+| `rem_h` | DOUBLE | non |  |  | Sommeil paradoxal (h) |
+
+**Clés étrangères**
+
+- `source_id` → `dataset_sources.id` (suppression en cascade)
+
+**Contraintes**
+
+- CHECK `ck_reference_sleep_nights_durations` : `total_sleep_h >= 0 AND sleep_period_h >= total_sleep_h`
+- CHECK `ck_reference_sleep_nights_efficiency_range` : `efficiency BETWEEN 0 AND 1`
+
+<a id="reference_vital_samples"></a>
+
+### `reference_vital_samples`
+
+Mesure physiologique réelle d'un jeu de référence terrestre, pour calibrer le moteur (§6).
+
+BIDMC : FC, FR et SpO₂ à la seconde de patients de soins intensifs ; WESAD : VFC par
+fenêtre de 60 s selon l'état (repos, stress, amusement).
+
+Modèle `ReferenceVitalSample` · 7 colonnes · 76194 lignes dans la base de démonstration.
+
+| Colonne | Type | Null | Défaut | Clés | Description |
+|---|---|:---:|---|---|---|
+| `id` | INTEGER | non |  | PK | Identifiant technique |
+| `source_id` | INTEGER | non |  | FK → `dataset_sources.id` | Jeu de données d'origine |
+| `subject` | VARCHAR(32) | non |  |  | Sujet ou enregistrement anonymisé (ex. bidmc_01, S2) |
+| `condition` | VARCHAR(32) | non |  |  | Contexte de la mesure : icu, baseline, stress, amusement |
+| `metric` | VARCHAR(32) · `Metric` | non |  |  | Constante mesurée |
+| `t_offset_s` | DOUBLE | non |  |  | Instant de la mesure en secondes depuis le début de l'enregistrement |
+| `value` | DOUBLE | non |  |  | Valeur (unité fixée par la métrique) |
+
+**Clés étrangères**
+
+- `source_id` → `dataset_sources.id` (suppression en cascade)
+
+**Index composites**
+
+- `ix_reference_vital_samples_lookup` (`source_id`, `metric`, `condition`)
 
 ## Moteur IA
 
@@ -1269,7 +1334,7 @@ Physiological time series. The unit is fixed by the metric (see METRIC_UNITS).
 
 Valeurs : `heart_rate`, `hrv_rmssd`, `spo2`, `respiratory_rate`, `skin_temperature`, `core_temperature`, `systolic_bp`, `diastolic_bp`, `activity_level`, `cabin_co2`
 
-Utilisée par : `baselines.metric`, `vital_readings.metric`, `alerts.metric`
+Utilisée par : `reference_vital_samples.metric`, `baselines.metric`, `vital_readings.metric`, `alerts.metric`
 
 ### `MissionDestination`
 

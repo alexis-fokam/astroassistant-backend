@@ -20,7 +20,7 @@ from app.schemas.crew import (
 )
 from app.schemas.telemetry import CrewVitalsLatest
 from app.services import audit
-from app.services.views import crew_profiles, crew_status, crew_summary, mission_now
+from app.services.views import as_utc, crew_profiles, crew_status, crew_summary, mission_now
 from app.services.vitals import crew_vitals_latest
 
 router = APIRouter()
@@ -61,15 +61,19 @@ def mission(db: DbSession, _: CurrentMember) -> MissionOut:
         .where(ContactWindow.mission_id == current.id, ContactWindow.ends_at >= now)
         .order_by(ContactWindow.starts_at)
     ).first()
-    next_start = next_window.starts_at if next_window else None
-    next_time = next_start.strftime("%H:%M:%S") if next_start else None
-
+    next_start = as_utc(next_window.starts_at) if next_window else None
+    day = (now.date() - current.start_date).days
     return MissionOut.model_validate(
         {
             **{k: getattr(current, k) for k in MissionOut.model_fields if hasattr(current, k)},
-            "mission_day": (now.date() - current.start_date).days,
+            "mission_day": day,
+            "mission_time": now,
+            "clock": f"J+{day} · {now:%H:%M}",
             "next_contact_at": next_start,
-            "next_contact_time": next_time,
+            "next_contact_time": next_start.strftime("%H:%M:%S") if next_start else None,
+            "next_contact_in_s": max(int((next_start - now).total_seconds()), 0)
+            if next_start
+            else None,
         }
     )
 

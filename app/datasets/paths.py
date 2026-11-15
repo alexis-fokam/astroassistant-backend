@@ -10,6 +10,8 @@ NASA_DIR = DATA_DIR / "nasa"
 DONKI_DIR = NASA_DIR / "donki"
 GOES_DIR = NASA_DIR / "goes"
 MSL_RAD_CSV = NASA_DIR / "msl_rad_cruise_dose.csv"
+# PhysioNet extracts (ODC-By, redistributable with attribution): calibration references.
+PHYSIONET_DIR = DATA_DIR / "physionet"
 # Large third-party datasets, downloaded on demand and never committed.
 EXTERNAL_DIR = DATA_DIR / "external"
 

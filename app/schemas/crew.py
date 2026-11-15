@@ -44,8 +44,11 @@ class MissionOut(OrmModel):
     one_way_latency_s: int
     day_length_min: int
     mission_day: int
+    mission_time: datetime
+    clock: str = Field(description="Horloge de mission, ex. « J+142 · 14:05 »")
     next_contact_at: datetime | None
     next_contact_time: str | None
+    next_contact_in_s: int | None
 
 
 class Factor(BaseModel):
@@ -84,4 +87,4 @@ class CrewProfile(BaseModel):
     first_name: str
     last_name: str
     crew_role: CrewRole
-    is_cmo: bool = Field(serialization_alias="isCmo")
+    is_cmo: bool
