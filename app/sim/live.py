@@ -253,13 +253,28 @@ def _one_shot_events(db: Session, state: SimState, effect: Effect, member: CrewM
                 )
             )
     elif effect.kind.code == "deconditioning":
-        for days in (3, 2, 1):
+        # The astronaut skips the three most recent resistance (ARED) sessions.
+        recent = db.scalars(
+            select(ExerciseSession)
+            .where(
+                ExerciseSession.crew_member_id == member.id,
+                ExerciseSession.kind == ExerciseKind.RESISTANCE,
+                ExerciseSession.scheduled_at <= at,
+            )
+            .order_by(ExerciseSession.scheduled_at.desc())
+            .limit(3)
+        ).all()
+        for session in recent:
+            session.status, session.started_at = SessionStatus.MISSED, None
+            session.duration_min = session.intensity = session.avg_heart_rate = None
+            session.notes = "Séance manquée (simulation)"
+        for days in range(len(recent), 3):
             db.add(
                 ExerciseSession(
                     crew_member_id=member.id,
                     kind=ExerciseKind.RESISTANCE,
                     status=SessionStatus.MISSED,
-                    scheduled_at=at - timedelta(days=days),
+                    scheduled_at=at - timedelta(days=days, minutes=5),
                     notes="Séance manquée (simulation)",
                 )
             )
