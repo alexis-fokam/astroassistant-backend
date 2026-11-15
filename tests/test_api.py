@@ -214,6 +214,26 @@ def test_protocol_run_follows_steps_in_order(client: TestClient, astronaut) -> N
     assert done["status"] == "completed"
 
 
+def test_protocol_runs_list_respects_rbac(client: TestClient, astronaut, cmo) -> None:
+    mine = client.get("/api/v1/protocols/runs", headers=astronaut).json()
+    assert mine and {r["crew_code"] for r in mine} == {"AV-02"}
+    stress = next(r for r in mine if r["protocol_code"] == "PRT-STRESS-01")
+    assert stress["trigger"].startswith("HRV-01") and stress["total_steps"] == 4
+    assert stress["status"] == "in_progress" and stress["next_step"] == "hrv_check"
+    everyone = client.get("/api/v1/protocols/runs", headers=cmo).json()
+    assert {r["crew_code"] for r in everyone} == {"AV-01", "AV-02", "AV-03", "AV-04"}
+    done = client.get("/api/v1/protocols/runs", headers=cmo, params={"status": "completed"}).json()
+    assert done and all(r["status"] == "completed" for r in done)
+    assert (
+        client.get(
+            "/api/v1/protocols/runs", headers=astronaut, params={"crew": "AV-03"}
+        ).status_code
+        == 403
+    )
+    # "runs" must not be mistaken for a protocol code.
+    assert client.get("/api/v1/protocols/PRT-STRESS-01", headers=astronaut).status_code == 200
+
+
 def test_protocol_materials_reflect_stock(client: TestClient, astronaut) -> None:
     emergency = client.get("/api/v1/protocols/EMRG-01", headers=astronaut).json()
     required = {m["item_code"] for m in emergency["materials"] if not m["optional"]}
