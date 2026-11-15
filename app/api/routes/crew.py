@@ -15,10 +15,12 @@ from app.schemas.crew import (
     LoginRequest,
     MemberOut,
     MissionOut,
-    TokenResponse,
+    TokenResponse, CrewProfile,
 )
+from app.schemas.telemetry import CrewVitalsLatest
 from app.services import audit
-from app.services.views import crew_status, crew_summary, mission_now
+from app.services.views import crew_status, crew_summary, mission_now, crew_profiles
+from app.services.vitals import crew_vitals_latest
 
 router = APIRouter()
 
@@ -58,11 +60,15 @@ def mission(db: DbSession, _: CurrentMember) -> MissionOut:
         .where(ContactWindow.mission_id == current.id, ContactWindow.ends_at >= now)
         .order_by(ContactWindow.starts_at)
     ).first()
+    next_start = next_window.starts_at if next_window else None
+    next_time = next_start.strftime("%H:%M:%S") if next_start else None
+
     return MissionOut.model_validate(
         {
             **{k: getattr(current, k) for k in MissionOut.model_fields if hasattr(current, k)},
             "mission_day": (now.date() - current.start_date).days,
-            "next_contact_at": next_window.starts_at if next_window else None,
+            "next_contact_at": next_start,
+            "next_contact_time": next_time,
         }
     )
 
@@ -80,3 +86,31 @@ def crew(db: DbSession, viewer: CurrentMember) -> list[CrewSummary]:
 def status_of(code: str, db: DbSession, viewer: CurrentMember) -> CrewStatus:
     """Current status, domain scores, explanation factors and active alerts (§10.1)."""
     return crew_status(db, visible_member(db, viewer, code))
+
+@router.get("/profiles", response_model=list[CrewProfile], response_model_by_alias=True)
+def list_profiles(db: DbSession ) -> list[CrewProfile]:
+    return crew_profiles(db)
+
+@router.get("/crew/{code}/vitals/latest", response_model=CrewVitalsLatest)
+def get_crew_vitals_latest(
+    code: str,
+    db: DbSession,
+    current: CurrentMember,
+) -> CrewVitalsLatest:
+
+    if current.code != code and not is_cmo:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Accès limité à vos propres données vitales",
+        )
+
+    member = db.scalars(
+        select(CrewMember).where(CrewMember.code == code, CrewMember.is_active.is_(True))
+    ).first()
+    if member is None:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Membre d'équipage introuvable",
+        )
+
+    return crew_vitals_latest(db, member)
