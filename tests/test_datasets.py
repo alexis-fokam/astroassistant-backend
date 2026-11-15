@@ -83,3 +83,14 @@ def test_donki_events_are_imported_with_provenance(db) -> None:
         assert source.record_count == len(cached)
         from_donki = [e for e in events if e.source_id == source.id]
         assert len({e.donki_id for e in from_donki}) == len(cached)
+
+
+def test_donki_windows_are_split_by_month() -> None:
+    from app.datasets.donki import monthly
+
+    chunks = monthly(date(2011, 12, 15), date(2012, 2, 10))
+    assert chunks == [
+        (date(2011, 12, 15), date(2011, 12, 31)),
+        (date(2012, 1, 1), date(2012, 1, 31)),
+        (date(2012, 2, 1), date(2012, 2, 10)),
+    ]
