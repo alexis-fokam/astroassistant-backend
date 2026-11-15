@@ -103,6 +103,20 @@ class UsageOut(OrmModel):
     remaining: float
     used_at: datetime
 
+# --- Nouveau schéma pour GET /inventory/usages ---
+class UsageLogOut(OrmModel):
+    id: int
+    item_code: str
+    item_name: str
+    unit: str
+    quantity: float
+    patient_code: str | None
+    recorded_by_code: str
+    protocol_run_id: int | None
+    emergency_id: int | None
+    used_at: datetime
+    note: str | None
+
 
 class ReportOut(BaseModel):
     """Weekly synthesis of one member (spec §10 GET /reports)."""
@@ -121,3 +135,21 @@ class ReportOut(BaseModel):
     checkins: int
     dose_received_msv: float
     alerts: dict[str, int]
+
+class ConsultationIn(BaseModel):
+    alert_id: int | None = Field(
+        default=None, description="ID de l'alerte à l'origine de la consultation"
+    )
+    title: str = Field(..., min_length=1, max_length=160, description="Motif de consultation")
+    body: str = Field(..., min_length=1, description="Observations et conduite à tenir")
+
+
+class ConsultationOut(OrmModel):
+    id: int
+    patient_code: str
+    author_code: str | None
+    author_name: str | None
+    alert_id: int | None
+    written_at: datetime
+    title: str
+    body: str

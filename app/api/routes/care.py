@@ -52,10 +52,15 @@ from app.schemas.care import (
     RunPatch,
     UsageIn,
     UsageOut,
+    ConsultationOut,
+    ConsultationIn,
+    UsageLogOut,
 )
 from app.services import audit
 from app.services import protocols as library
 from app.services.alert import get_alert_explanation
+from app.services.medical import list_consultations, create_consultation, list_inventory_usages
+from app.services.protocols import list_protocol_runs
 from app.services.sync import queue_packet
 from app.services.views import (
     active_alerts,
@@ -467,3 +472,54 @@ def report(
             for level in ("info", "warning", "critical")
         },
     )
+
+@router.get("/protocols/runs", response_model=list[RunOut])
+def get_protocol_runs(
+    db: DbSession,
+    current: CurrentMember,
+    crew: str | None = Query(default=None, description="Code du membre d'équipage (ex. AV-02)"),
+    status: ProtocolRunStatus | None = Query(
+        default=None,
+        description="Statut de l'exécution (in_progress, completed, aborted)",
+    ),
+) -> list[RunOut]:
+    return list_protocol_runs(db, current, crew_code=crew, run_status=status)
+
+@router.get("/consultations/{code}", response_model=list[ConsultationOut])
+def get_patient_consultations(
+    code: str,
+    db: DbSession,
+    current: CurrentMember,
+) -> list[ConsultationOut]:
+    return list_consultations(db, current, patient_code=code)
+
+
+@router.post(
+    "/consultations/{code}",
+    response_model=ConsultationOut,
+    status_code=status.HTTP_201_CREATED,
+)
+def post_patient_consultation(
+    code: str,
+    payload: ConsultationIn,
+    db: DbSession,
+    current: CurrentMember,
+) -> ConsultationOut:
+    return create_consultation(db, current, patient_code=code, payload=payload)
+
+@router.get("/inventory/usages", response_model=list[UsageLogOut])
+def get_inventory_usages(
+    db: DbSession,
+    current: CurrentMember,
+    item_code: str | None = Query(default=None, description="Filtrer par code article (ex. MED-PARA-500)"),
+    patient_code: str | None = Query(default=None, description="Filtrer par code patient (ex. AV-02)"),
+    limit: int = Query(default=100, ge=1, le=500),
+) -> list[UsageLogOut]:
+    return list_inventory_usages(
+        db,
+        current,
+        item_code=item_code,
+        patient_code=patient_code,
+        limit=limit,
+    )
+
