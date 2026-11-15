@@ -61,7 +61,7 @@ uvicorn app.main:app --reload
 | Tableau de bord astronaute | ~~`GET /crew/{code}/vitals/latest`~~ ✅ fait (PR #6) | pour chaque constante : dernière valeur, unité, niveau, tendance en %, bande normale (baseline ± 2σ), 36 derniers points |
 | Détail d'une alerte | ~~`GET /alerts/{id}/explanation`~~ ✅ fait | facteurs (libellé, valeur, contribution), règle déclenchée, score d'anomalie, nombre de confirmations |
 | Systèmes | ~~`GET /crew/{code}/domains/{domain}`~~ ✅ fait | historique du score du domaine et facteurs |
-| Historiques | `GET /checkins/{code}`, `GET /sleep/{code}`, `GET /exercises/{code}`, `GET /pvt/{code}` | listes paginées, les plus récentes d'abord |
+| Historiques | ~~`GET /checkins/{code}`, `GET /sleep/{code}`, `GET /exercises/{code}`, `GET /pvt/{code}`~~ ✅ fait (PR #8, corrigé) | listes paginées, les plus récentes d'abord |
 | Protocoles | ~~`GET /protocols/runs?crew=&status=`~~ ✅ fait | exécutions en cours et terminées |
 | Médecin de bord | `GET /consultations/{code}`, `POST /consultations/{code}` | journal médical (F9.3) |
 | Pharmacie | `GET /inventory/usages` | registre des usages |

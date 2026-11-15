@@ -411,3 +411,21 @@ def test_vital_card_levels_follow_engine_thresholds() -> None:
     assert level_for(Metric.SPO2, 92, None) is HealthLevel.WARNING
     assert level_for(Metric.SPO2, 90, None) is HealthLevel.CRITICAL
     assert level_for(Metric.CORE_TEMPERATURE, 38.2, None) is HealthLevel.WARNING
+
+
+def test_history_lists_respect_rbac_and_pagination(client: TestClient, astronaut, cmo) -> None:
+    for kind in ("checkins", "sleep", "exercises", "pvt"):
+        own = client.get(f"/api/v1/{kind}/AV-02", headers=astronaut, params={"limit": 3}).json()
+        assert own["total"] > 0 and len(own["items"]) == min(3, own["total"]), kind
+        assert client.get(f"/api/v1/{kind}/AV-03", headers=astronaut).status_code == 403
+        assert (
+            client.get(f"/api/v1/{kind}/AV-03", headers=cmo).status_code == 200
+        )  # CMO: whole crew
+    checkins = client.get("/api/v1/checkins/AV-02", headers=astronaut).json()["items"]
+    stamps = [c["submitted_at"] for c in checkins]
+    assert stamps == sorted(stamps, reverse=True)
+    assert checkins[0]["stress"] == 7  # S2 story: stress declared at 7/10
+    page2 = client.get(
+        "/api/v1/sleep/AV-02", headers=astronaut, params={"limit": 2, "offset": 2}
+    ).json()
+    assert page2["offset"] == 2 and len(page2["items"]) == 2
