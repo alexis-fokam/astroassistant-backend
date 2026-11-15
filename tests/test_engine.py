@@ -309,3 +309,29 @@ def test_bone_loss_projection_reflects_adherence(demo: Session) -> None:
             code = demo.get(CrewMember, snapshot.crew_member_id).code
             projections[code] = snapshot.features["bone_loss_projection_pct"]
     assert projections["AV-01"] > projections["AV-02"]  # three missed ARED sessions
+
+
+def test_new_baselines_are_not_duplicated_across_runs(demo: Session) -> None:
+    """A baseline created by the engine (e.g. activity level) must be updated, not re-inserted."""
+    from app.models import Baseline
+
+    member = _member(demo, "AV-01")
+    run_once(demo, force=True)
+    later = DEMO_NOW + timedelta(days=2)
+    demo.add(
+        VitalReading(
+            crew_member_id=member.id,
+            metric=Metric.HEART_RATE,
+            value=65,
+            recorded_at=later,
+            received_at=later,
+        )
+    )
+    demo.commit()
+    run_once(demo, at=later, force=True)
+    activity = demo.scalars(
+        select(Baseline).where(
+            Baseline.crew_member_id == member.id, Baseline.metric == Metric.ACTIVITY_LEVEL
+        )
+    ).all()
+    assert len(activity) == 1

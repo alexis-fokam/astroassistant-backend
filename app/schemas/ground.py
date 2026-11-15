@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 from datetime import datetime
-from typing import Any
+from typing import Any, Literal
 
 from pydantic import BaseModel, Field
 
@@ -81,6 +81,15 @@ class ScenarioStart(BaseModel):
     crew_code: str | None = None
     speed_factor: float = Field(default=60, ge=1, le=1000)
     seed: int = 42
+
+
+class InjectIn(BaseModel):
+    """Inject an anomaly live (jury demo): the AI must detect it within seconds."""
+
+    anomaly: Literal[
+        "tachycardia", "desaturation", "fever", "hrv_drop", "radiation", "sans", "deconditioning"
+    ]
+    crew_code: str = Field(default="AV-03", description="Code d'un membre, ou « all »")
 
 
 class SpeedIn(BaseModel):

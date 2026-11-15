@@ -36,8 +36,9 @@ def refresh(db: Session, data: MemberData, at: datetime, cfg: EngineConfig) -> l
             continue
         median, mad = stats.median_mad(values)
         if baseline is None:
-            baseline = Baseline(crew_member_id=data.member.id, metric=metric)
-            db.add(baseline)
+            baseline = Baseline(metric=metric)
+            # Through the relationship, so the next run sees it (no duplicate insert).
+            data.member.baselines.append(baseline)
             data.baselines[metric] = baseline
         baseline.mean = round(float(np.mean(values)), 3)
         baseline.std = round(float(np.std(values, ddof=1)), 3)

@@ -30,6 +30,7 @@ from app.schemas.ground import (
     ExportRequest,
     GroundMessageOut,
     ImportRequest,
+    InjectIn,
     PacketOut,
     ScenarioOut,
     ScenarioStart,
@@ -39,6 +40,8 @@ from app.schemas.ground import (
 from app.services import audit
 from app.services.sync import export_queue, queue_packet
 from app.services.views import crew_summary, message_out, mission_now, packet_out, sim_run_out
+from app.sim import live
+from app.sim.controller import controller
 
 router = APIRouter()
 
@@ -171,8 +174,8 @@ def scenarios(db: DbSession, _: CurrentMember) -> list[SimScenario]:
     status_code=status.HTTP_201_CREATED,
     tags=["simulation"],
 )
-def start_scenario(body: ScenarioStart, db: DbSession, viewer: CurrentMember) -> SimRunOut:
-    """Register a demo run of S1-S6 (F15). Telemetry injection is done by the simulator."""
+async def start_scenario(body: ScenarioStart, db: DbSession, viewer: CurrentMember) -> SimRunOut:
+    """Start a live demo run of S1-S6 (F15): telemetry every 2 s, analysed by the engine."""
     scenario = db.scalars(select(SimScenario).where(SimScenario.code == body.code)).first()
     if scenario is None:
         raise HTTPException(status.HTTP_404_NOT_FOUND, f"Scénario {body.code} inconnu")
@@ -192,6 +195,18 @@ def start_scenario(body: ScenarioStart, db: DbSession, viewer: CurrentMember) ->
         db, "sim.start", actor=viewer, entity=run, scenario=scenario.code, speed=body.speed_factor
     )
     db.commit()
+    await controller.stop()
+    controller.reset()
+    live.start(
+        db,
+        controller.state,
+        run.id,
+        scenario.code,
+        body.speed_factor,
+        body.seed,
+        member.code if member else None,
+    )
+    controller.launch()
     return sim_run_out(run)
 
 
@@ -203,21 +218,71 @@ def set_speed(body: SpeedIn, db: DbSession, viewer: CurrentMember) -> SimRunOut:
     if run.status is not SimRunStatus.RUNNING:
         raise HTTPException(status.HTTP_409_CONFLICT, "Simulation terminée")
     run.speed_factor = body.speed_factor
+    if controller.state.run_id == run.id:
+        controller.state.speed = body.speed_factor
     audit.record(db, "sim.speed", actor=viewer, entity=run, speed=body.speed_factor)
     db.commit()
     return sim_run_out(run)
 
 
 @router.post("/sim/runs/{run_id}/stop", response_model=SimRunOut, tags=["simulation"])
-def stop_run(run_id: int, db: DbSession, viewer: CurrentMember) -> SimRunOut:
+async def stop_run(run_id: int, db: DbSession, viewer: CurrentMember) -> SimRunOut:
     run = db.get(SimRun, run_id)
     if run is None:
         raise HTTPException(status.HTTP_404_NOT_FOUND, "Exécution introuvable")
+    if controller.state.run_id == run.id:
+        await controller.stop()
     if run.status is SimRunStatus.RUNNING:
         run.status, run.ended_at = SimRunStatus.COMPLETED, datetime.now(UTC)
         audit.record(db, "sim.stop", actor=viewer, entity=run)
         db.commit()
     return sim_run_out(run)
+
+
+@router.get("/sim/anomalies", tags=["simulation"])
+def anomalies(_: CurrentMember) -> list[dict]:
+    """Anomalies the jury can inject, with the rules the engine is expected to raise."""
+    return [
+        {
+            "code": a.code,
+            "label": a.label,
+            "description": a.description,
+            "expected_rules": list(a.expected_rules),
+        }
+        for a in live.ANOMALIES.values()
+    ]
+
+
+@router.get("/sim/state", tags=["simulation"])
+def sim_state(_: CurrentMember) -> dict:
+    """Current run: simulated clock, speed, active anomalies and event log."""
+    return live.snapshot(controller.state, controller.running)
+
+
+@router.post("/sim/inject", tags=["simulation"])
+def inject(body: InjectIn, db: DbSession, _: CurrentMember) -> dict:
+    """Inject an anomaly into the running simulation (start a scenario first)."""
+    if controller.state.run_id is None:
+        raise HTTPException(
+            status.HTTP_409_CONFLICT, "Lancez d'abord un scénario (POST /sim/scenario)"
+        )
+    try:
+        live.inject(db, controller.state, body.anomaly, body.crew_code)
+    except ValueError as error:
+        raise HTTPException(status.HTTP_404_NOT_FOUND, str(error)) from error
+    return live.snapshot(controller.state, controller.running)
+
+
+@router.post("/sim/tick", tags=["simulation"])
+def sim_tick(db: DbSession, _: CurrentMember, count: int = Query(default=1, ge=1, le=60)) -> dict:
+    """Advance the simulation by ``count`` ticks now (demo step, tests)."""
+    if controller.state.run_id is None:
+        raise HTTPException(
+            status.HTTP_409_CONFLICT, "Lancez d'abord un scénario (POST /sim/scenario)"
+        )
+    for _ in range(count):
+        live.tick(db, controller.state)
+    return live.snapshot(controller.state, controller.running)
 
 
 @router.get("/sim/runs", response_model=list[SimRunOut], tags=["simulation"])
