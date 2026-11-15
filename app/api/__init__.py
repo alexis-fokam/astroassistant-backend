@@ -2,10 +2,10 @@
 
 from fastapi import APIRouter
 
-from app.api.routes import care, crew, ground, health, telemetry, ws
+from app.api.routes import care, crew, engine, ground, health, history, telemetry, ws
 
 api_router = APIRouter(prefix="/api/v1")
-for module in (health, crew, telemetry, care, ground):
+for module in (health, crew, telemetry, care, engine, ground, history):
     api_router.include_router(module.router)
 
 # Kept for existing clients: GET /api/health.

@@ -55,14 +55,14 @@ uvicorn app.main:app --reload
 
 | Écran | Endpoint | Contenu attendu |
 |---|---|---|
-| Connexion | `GET /profiles` (**public**) | code, prénom, nom, rôle, `isCmo` |
+| Connexion | ~~`GET /profiles`~~ ✅ fait (PR #6) | code, prénom, nom, rôle, `isCmo` |
 | Connexion | `POST /auth/logout` | invalide la session |
 | En-tête | `GET /mission` (à compléter) | ajouter `missionTime`, `clock` (« J+142 · 14:05 ») et le compte à rebours jusqu'au prochain contact |
-| Tableau de bord astronaute | `GET /crew/{code}/vitals/latest` | pour chaque constante : dernière valeur, unité, niveau, tendance en %, bande normale (baseline ± 2σ), 36 derniers points |
-| Détail d'une alerte | `GET /alerts/{id}/explanation` | facteurs (libellé, valeur, contribution), règle déclenchée, score d'anomalie, nombre de confirmations |
-| Systèmes | `GET /crew/{code}/domains/{domain}` | historique du score du domaine et facteurs |
-| Historiques | `GET /checkins/{code}`, `GET /sleep/{code}`, `GET /exercises/{code}`, `GET /pvt/{code}` | listes paginées, les plus récentes d'abord |
-| Protocoles | `GET /protocols/runs?crew=&status=` | exécutions en cours et terminées |
+| Tableau de bord astronaute | ~~`GET /crew/{code}/vitals/latest`~~ ✅ fait (PR #6) | pour chaque constante : dernière valeur, unité, niveau, tendance en %, bande normale (baseline ± 2σ), 36 derniers points |
+| Détail d'une alerte | ~~`GET /alerts/{id}/explanation`~~ ✅ fait | facteurs (libellé, valeur, contribution), règle déclenchée, score d'anomalie, nombre de confirmations |
+| Systèmes | ~~`GET /crew/{code}/domains/{domain}`~~ ✅ fait | historique du score du domaine et facteurs |
+| Historiques | ~~`GET /checkins/{code}`, `GET /sleep/{code}`, `GET /exercises/{code}`, `GET /pvt/{code}`~~ ✅ fait (PR #8, corrigé) | listes paginées, les plus récentes d'abord |
+| Protocoles | ~~`GET /protocols/runs?crew=&status=`~~ ✅ fait | exécutions en cours et terminées |
 | Médecin de bord | `GET /consultations/{code}`, `POST /consultations/{code}` | journal médical (F9.3) |
 | Pharmacie | `GET /inventory/usages` | registre des usages |
 | Météo spatiale | `GET /space-weather/events` | événements DONKI et simulés |
@@ -70,8 +70,8 @@ uvicorn app.main:app --reload
 
 ## 4. Fonctionnalités à coder
 
-1. **Point d'entrée du moteur IA** : une tâche planifiée toutes les 5 s (`AV_PIPELINE_INTERVAL_SECONDS`). Elle lit `vital_readings` puis écrit `feature_snapshots`, `risk_scores` et `alerts`. L'API lit déjà les derniers scores ; l'IA n'aura qu'à écrire dans ces tables.
-2. **Service `create_alert`** : unique point de création d'une alerte. Il enregistre l'alerte, l'inscrit dans l'audit et la diffuse sur le WebSocket.
+1. ✅ **Moteur IA et pipeline planifié** : fait (`app/engine/`, voir le README). La tâche tourne toutes les 5 s et ne recalcule un membre que si de nouvelles mesures sont arrivées. Routes : `GET /engine/status` et `POST /engine/run`.
+2. ✅ **Service `create_alert`** : fait (`app/services/alerts.py`). Il enregistre l'alerte, l'inscrit dans l'audit et évite les doublons ; le pipeline la diffuse sur le WebSocket.
 3. **Simulateur** (`app/sim/`) : il injecte la télémétrie des scénarios S1 à S6, avec la vitesse choisie et le `sim_run_id`, quand on appelle `/sim/scenario` et `/sim/speed`.
 4. **Validation des mesures** : rejet des valeurs physiologiquement impossibles dans `POST /vitals` et marquage des artefacts.
 5. **Sécurité de la connexion** : blocage d'un profil pendant 5 min après 3 PIN faux, et déconnexion.
@@ -90,7 +90,7 @@ Les tests existants doivent rester verts, et la couverture doit dépasser 70 %.
 
 ## Priorités
 
-1. `GET /profiles` et l'heure de mission dans `GET /mission`.
-2. `GET /crew/{code}/vitals/latest` et `GET /alerts/{id}/explanation`.
-3. Le simulateur et le point d'entrée du moteur IA.
+1. ✅ `GET /profiles` et `GET /crew/{code}/vitals/latest` (PR #6). Reste l'horloge « J+142 · 14:05 » dans `GET /mission`.
+2. Les historiques (`/checkins`, `/sleep`, `/exercises`, `/pvt`) et les consultations.
+3. Le simulateur : le moteur IA est prêt et traite déjà les mesures d'une simulation en cours (`sim_run_id`).
 4. Le reste des endpoints, la sécurité, Docker et Alembic.

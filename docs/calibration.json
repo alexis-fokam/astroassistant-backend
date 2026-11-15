@@ -1,0 +1,81 @@
+{
+  "bidmc": {
+    "dataset": "BIDMC (PhysioNet), 53 patients de soins intensifs, 1 Hz",
+    "records": 53,
+    "seconds": 25365,
+    "heart_rate": {
+      "p1": 60.0,
+      "p5": 67.0,
+      "p25": 81.0,
+      "p50": 89.0,
+      "p75": 95.0,
+      "p95": 115.0,
+      "p99": 126.0
+    },
+    "respiratory_rate": {
+      "p1": 8.0,
+      "p5": 12.0,
+      "p25": 16.0,
+      "p50": 18.0,
+      "p75": 19.0,
+      "p95": 22.0,
+      "p99": 25.0
+    },
+    "spo2": {
+      "p1": 85.0,
+      "p5": 92.0,
+      "p25": 95.0,
+      "p50": 98.0,
+      "p75": 99.0,
+      "p95": 100.0,
+      "p99": 100.0
+    },
+    "spo2_below_94_pct": 17.27,
+    "spo2_below_90_pct": 3.8,
+    "cardio_crit_01_seconds_pct": 0.0,
+    "cardio_crit_01_patients": 0,
+    "spo2_crit_01_seconds_pct": 3.78,
+    "spo2_crit_01_patients": 3
+  },
+  "sleep": {
+    "dataset": "Sleep-EDF Expanded, étude « sleep cassette » (adultes sains de 25 à 101 ans)",
+    "nights": 102,
+    "total_sleep_h": {
+      "p1": 3.51,
+      "p5": 4.5,
+      "p25": 6.24,
+      "p50": 6.84,
+      "p75": 7.47,
+      "p95": 8.53,
+      "p99": 9.27
+    },
+    "efficiency": {
+      "p1": 0.62,
+      "p5": 0.72,
+      "p25": 0.82,
+      "p50": 0.93,
+      "p75": 0.96,
+      "p95": 0.99,
+      "p99": 0.99
+    },
+    "waso_min": {
+      "p1": 2.5,
+      "p5": 3.53,
+      "p25": 15.5,
+      "p50": 34.0,
+      "p75": 85.38,
+      "p95": 147.87,
+      "p99": 165.91
+    },
+    "awakenings": {
+      "p1": 3.0,
+      "p5": 4.0,
+      "p25": 10.0,
+      "p50": 15.0,
+      "p75": 23.0,
+      "p95": 37.0,
+      "p99": 46.99
+    },
+    "nights_below_6h_pct": 22.5
+  }
+}

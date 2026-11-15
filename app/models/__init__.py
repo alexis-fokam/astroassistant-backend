@@ -8,7 +8,13 @@ from app.models.alerts import Alert, EmergencyEvent
 from app.models.audit import AuditLog
 from app.models.base import Base
 from app.models.crew import Baseline, CrewMember, Device
-from app.models.datasets import CruiseDoseSample, DatasetSource, ProtonFluxReading
+from app.models.datasets import (
+    CruiseDoseSample,
+    DatasetSource,
+    ProtonFluxReading,
+    ReferenceSleepNight,
+    ReferenceVitalSample,
+)
 from app.models.medical import ConsultationNote, InventoryItem, InventoryUsage
 from app.models.mission import Mission
 from app.models.protocols import Protocol, ProtocolRequirement, ProtocolRun
@@ -45,6 +51,8 @@ __all__ = [
     "ProtonFluxReading",
     "PvtResult",
     "RadiationDose",
+    "ReferenceSleepNight",
+    "ReferenceVitalSample",
     "RiskScore",
     "SimRun",
     "SimScenario",

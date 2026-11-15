@@ -41,6 +41,7 @@ from app.schemas.care import (
     ProtocolSummary,
     ReportOut,
     RunCreate,
+    RunListItem,
     RunOut,
     RunPatch,
     UsageIn,
@@ -55,6 +56,7 @@ from app.services.views import (
     as_utc,
     crew_status,
     emergency_out,
+    mission_latency,
     mission_now,
     run_out,
 )
@@ -86,7 +88,8 @@ def list_alerts(
         if member is not None:
             query = query.where(Alert.crew_member_id == member.id)
         alerts = list(db.scalars(query))
-    return [alert_out(a) for a in alerts[:limit]]
+    latency = mission_latency(db)
+    return [alert_out(a, latency) for a in alerts[:limit]]
 
 
 @router.get("/alerts/{alert_id}", response_model=AlertOut, tags=["alerts"])
@@ -95,7 +98,7 @@ def get_alert(alert_id: int, db: DbSession, viewer: CurrentMember) -> AlertOut:
     if alert is None:
         raise HTTPException(status.HTTP_404_NOT_FOUND, "Alerte introuvable")
     visible_member(db, viewer, alert.crew_member.code)
-    return alert_out(alert)
+    return alert_out(alert, mission_latency(db))
 
 
 @router.patch("/alerts/{alert_id}", response_model=AlertOut, tags=["alerts"])
@@ -137,6 +140,44 @@ def list_protocols(db: DbSession, _: CurrentMember) -> list[Protocol]:
     return list(
         db.scalars(select(Protocol).where(Protocol.is_active.is_(True)).order_by(Protocol.code))
     )
+
+
+@router.get("/protocols/runs", response_model=list[RunListItem], tags=["protocols"])
+def list_runs(
+    db: DbSession,
+    viewer: CurrentMember,
+    crew: str | None = None,
+    status_filter: Literal["in_progress", "completed", "aborted", "all"] = Query(
+        default="all", alias="status"
+    ),
+    limit: int = Query(default=50, ge=1, le=200),
+) -> list[RunListItem]:
+    """Protocol executions, most recent first. An astronaut only sees their own (spec §7)."""
+    member = visible_member(db, viewer, crew) if crew else (None if is_cmo(viewer) else viewer)
+    query = select(ProtocolRun).order_by(ProtocolRun.started_at.desc()).limit(limit)
+    if member is not None:
+        query = query.where(ProtocolRun.crew_member_id == member.id)
+    if status_filter != "all":
+        query = query.where(ProtocolRun.status == ProtocolRunStatus(status_filter))
+    items = []
+    for run in db.scalars(query):
+        codes = library.step_codes(run.protocol)
+        trigger = (
+            f"{run.alert.rule_code or run.alert.method.value} · {run.alert.title}"
+            if run.alert
+            else None
+        )
+        items.append(
+            RunListItem(
+                **run_out(run, codes).model_dump(),
+                protocol_title=run.protocol.title,
+                severity=run.protocol.severity,
+                expected_duration_min=run.protocol.expected_duration_min,
+                total_steps=len(codes),
+                trigger=trigger,
+            )
+        )
+    return items
 
 
 @router.get("/protocols/{code}", response_model=ProtocolOut, tags=["protocols"])

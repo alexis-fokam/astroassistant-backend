@@ -7,17 +7,25 @@ value shown in the app can be traced back to the agency that published it.
 
 from __future__ import annotations
 
+import csv
 import json
 from datetime import UTC, datetime
 from pathlib import Path
 
 from sqlalchemy.orm import Session
 
-from app.datasets import donki, msl_rad
+from app.datasets import donki, msl_rad, physionet
 from app.datasets.catalog import CATALOG
 from app.datasets.paths import DONKI_DIR, GOES_DIR, MSL_RAD_CSV
-from app.models import CruiseDoseSample, DatasetSource, ProtonFluxReading, SpaceWeatherEvent
-from app.models.enums import SpaceWeatherKind
+from app.models import (
+    CruiseDoseSample,
+    DatasetSource,
+    ProtonFluxReading,
+    ReferenceSleepNight,
+    ReferenceVitalSample,
+    SpaceWeatherEvent,
+)
+from app.models.enums import Metric, SpaceWeatherKind
 
 # GOES bands kept in the database: the S-scale threshold band and the hard-spectrum band.
 GOES_BANDS = (">=10 MeV", ">=100 MeV")
@@ -154,6 +162,90 @@ def import_space_weather(session: Session, source: DatasetSource) -> int:
     return len(events) + len(references)
 
 
+BIDMC_METRICS = {"HR": Metric.HEART_RATE, "RESP": Metric.RESPIRATORY_RATE, "SpO2": Metric.SPO2}
+
+
+def import_bidmc(session: Session, source: DatasetSource) -> int:
+    """Per-second HR, respiratory rate and SpO2 of the 53 BIDMC recordings."""
+    files = sorted(physionet.BIDMC_DIR.glob("bidmc_*_Numerics.csv"))
+    rows = []
+    for path in files:
+        subject = path.name.removesuffix("_Numerics.csv")
+        with path.open(encoding="utf-8") as handle:
+            for raw in csv.DictReader(handle):
+                row = {k.strip(): (v or "").strip() for k, v in raw.items()}
+                t = float(row["Time [s]"])
+                for column, metric in BIDMC_METRICS.items():
+                    value = row.get(column)
+                    if value and value.lower() != "nan":
+                        rows.append(
+                            {
+                                "source_id": source.id,
+                                "subject": subject,
+                                "condition": "icu",
+                                "metric": metric,
+                                "t_offset_s": t,
+                                "value": float(value),
+                            }
+                        )
+    if rows:
+        session.execute(ReferenceVitalSample.__table__.insert(), rows)
+        source.record_count = len(rows)
+        source.retrieved_at = max(_mtime(f) for f in files)
+    return len(rows)
+
+
+def import_sleep_edf(session: Session, source: DatasetSource) -> int:
+    """One row per expert-scored night (main sleep episode)."""
+    files = sorted(physionet.SLEEP_EDF_DIR.glob("SC4*-Hypnogram.edf"))
+    rows = []
+    for path in files:
+        night = physionet.summarize_night(path)
+        if night is None:
+            continue
+        rows.append(
+            {
+                "source_id": source.id,
+                "record": night.record,
+                "sleep_period_h": round(night.sleep_period_h, 3),
+                "total_sleep_h": round(night.total_sleep_h, 3),
+                "efficiency": round(night.efficiency, 4),
+                "waso_min": night.waso_min,
+                "awakenings": night.awakenings,
+                **{f"{k}_h": round(v, 3) for k, v in night.stages_h.items()},
+            }
+        )
+    if rows:
+        session.execute(ReferenceSleepNight.__table__.insert(), rows)
+        source.record_count = len(rows)
+        source.retrieved_at = max(_mtime(f) for f in files)
+    return len(rows)
+
+
+def import_wesad_windows(session: Session, source: DatasetSource) -> int:
+    """HRV (RMSSD) per 60 s window and condition, extracted from WESAD (if available)."""
+    path = physionet.WESAD_WINDOWS_CSV
+    if not path.exists():
+        return 0
+    with path.open(encoding="utf-8") as handle:
+        rows = [
+            {
+                "source_id": source.id,
+                "subject": row["subject"],
+                "condition": row["condition"],
+                "metric": Metric.HRV_RMSSD,
+                "t_offset_s": float(row["t_offset_s"]),
+                "value": float(row["rmssd_ms"]),
+            }
+            for row in csv.DictReader(handle)
+        ]
+    if rows:
+        session.execute(ReferenceVitalSample.__table__.insert(), rows)
+        source.record_count = len(rows)
+        source.retrieved_at = _mtime(path)
+    return len(rows)
+
+
 def import_all(session: Session) -> dict[str, int]:
     """Create the provenance entries and import every bundled dataset available locally."""
     sources = seed_sources(session)
@@ -161,6 +253,9 @@ def import_all(session: Session) -> dict[str, int]:
         "nasa-msl-rad": import_msl_rad(session, sources["nasa-msl-rad"]),
         "noaa-goes-protons": import_goes(session, sources["noaa-goes-protons"]),
         "nasa-donki": import_space_weather(session, sources["nasa-donki"]),
+        "physionet-bidmc": import_bidmc(session, sources["physionet-bidmc"]),
+        "sleep-edfx": import_sleep_edf(session, sources["sleep-edfx"]),
+        "wesad": import_wesad_windows(session, sources["wesad"]),
     }
     session.flush()
     return counts

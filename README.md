@@ -46,6 +46,67 @@ acquitter une alerte, enregistrer un usage de pharmacie, clôturer une urgence o
 L'horloge de mission suit la dernière télémétrie reçue : avec la base de démo, l'API répond
 à J+142 · 14:05, comme le frontend.
 
+## Moteur IA (`app/engine/`, cahier des charges §6)
+
+Toutes les 5 s (`AV_PIPELINE_INTERVAL_SECONDS`), le pipeline reprend chaque membre dont de
+nouvelles mesures sont arrivées :
+
+1. **Nettoyage** : valeurs hors plage physiologique ou de qualité < 0,5 écartées (`config.yaml`).
+2. **Indicateurs** : valeur actuelle (5 min), moyennes 1 h et 24 h, z-scores robustes par
+   rapport à la baseline individuelle, ratio VFC/baseline, dette de sommeil, séances manquées,
+   PVT, check-in, débit et dose de carrière (`features.py`).
+3. **Règles cliniques** en YAML (`rules.yaml`), avec les mêmes codes que les protocoles
+   (`HRV-01`, `SANS-01`, `EX-MISSED-01`, `RAD-SPE-01`…). Une règle WARNING doit tenir sur deux
+   mesures consécutives ; une règle CRITICAL déclenche immédiatement.
+4. **Isolation Forest** par astronaute, entraîné sur sa propre baseline (`anomaly.py`).
+5. **Scores 0-100** par domaine avec les 3 facteurs explicatifs, score global et statut
+   (`scoring.py`) ; alertes créées sans doublon par `app/services/alerts.py`.
+
+Les seuils de radiation viennent du notebook `analyse_radiations_nasa.ipynb`. Sur la base de
+démo, le moteur retrouve seul l'histoire de J+142 : AV-01 en WARNING (séances manquées), AV-02
+en WARNING (VFC basse), AV-03 en CRITICAL (tachycardie et désaturation), AV-04 en WARNING
+(suspicion de SANS). Routes : `GET /api/v1/engine/status`, `POST /api/v1/engine/run` (CMO),
+`GET /api/v1/alerts/{id}/explanation`, `GET /api/v1/crew/{code}/domains/{domain}`.
+Désactiver la tâche de fond : `AV_PIPELINE_ENABLED=false`.
+
+Fiche du moteur pour le jury (données, règles, origine des seuils, performances, limites) :
+[`docs/fiche-moteur-ia.md`](docs/fiche-moteur-ia.md). Calibration sur données réelles :
+
+```bash
+python -m app.datasets fetch bidmc        # PhysioNet BIDMC, ~1 Mo
+python -m app.datasets fetch sleep-edf    # PhysioNet Sleep-EDF (hypnogrammes), ~1 Mo
+python -m app.engine.calibration all      # écrit docs/calibration.json
+```
+
+WESAD (~2,5 Go) se télécharge à la main depuis
+https://www.eti.uni-siegen.de/ubicomp/home/datasets/icmi18/ dans `data/external/wesad/`.
+
+## Simulateur en direct (démo jury)
+
+Le simulateur (`app/sim/live.py`) produit toutes les 2 s une mesure par constante et par
+astronaute, autour de sa baseline, puis fait tourner le moteur IA : les scores et alertes
+apparaissent en direct sur les tableaux de bord (page **Simulation** du frontend).
+
+- `POST /api/v1/sim/scenario` : lance S1 à S6 (vitesse ×1 à ×1000) ;
+- `POST /api/v1/sim/inject` : injecte une anomalie (tachycardie, chute de SpO₂, fièvre,
+  stress/VFC, tempête solaire, SANS, déconditionnement) sur un astronaute ou tout l'équipage ;
+- `GET /api/v1/sim/state` : horloge simulée, anomalies actives, journal du moteur ;
+- `POST /api/v1/sim/tick`, `POST /api/v1/sim/speed`, `POST /api/v1/sim/runs/{id}/stop`.
+
+Évaluation sur anomalies injectées : `python -m app.engine.evaluation` (détection 100 %,
+0 fausse alerte sur 306 h·astronaute, 36 ms par astronaute ; détails dans
+[`docs/fiche-moteur-ia.md`](docs/fiche-moteur-ia.md)). Après une démo, `python -m app.seed --reset`
+remet l'histoire de référence.
+
+## Délai de communication Terre-équipage
+
+- `PATCH /api/v1/mission` (médecin de bord) : ISS, Lune, transit ou surface de Mars ; fixe la
+  latence aller (2 s, 3 s, 12 min, 22 min) ;
+- les paquets exportés et les alertes indiquent l'heure de mesure à bord et l'heure d'arrivée
+  au sol (`received_at_ground`, `ground_received_at`) ;
+- `POST /api/v1/ground/instructions` : une consigne du sol n'apparaît à bord qu'après la latence
+  (`GET /api/v1/ground/instructions` montre celles encore en route).
+
 ## Tests et lint
 
 ```bash

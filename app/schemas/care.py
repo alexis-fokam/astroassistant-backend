@@ -72,6 +72,16 @@ class RunOut(OrmModel):
     efficacy: float | None
 
 
+class RunListItem(RunOut):
+    """A protocol execution with what the "My protocols" screen needs (F4.5)."""
+
+    protocol_title: str
+    severity: AlertLevel
+    expected_duration_min: int | None
+    total_steps: int
+    trigger: str | None = Field(description="Règle et titre de l'alerte déclenchante")
+
+
 class InventoryItemOut(OrmModel):
     code: str
     name: str
