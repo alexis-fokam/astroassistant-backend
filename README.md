@@ -78,8 +78,16 @@ python -m app.datasets fetch sleep-edf    # PhysioNet Sleep-EDF (hypnogrammes), 
 python -m app.engine.calibration all      # écrit docs/calibration.json
 ```
 
-WESAD (~2,5 Go) se télécharge à la main depuis
-https://www.eti.uni-siegen.de/ubicomp/home/datasets/icmi18/ dans `data/external/wesad/`.
+WESAD (~2,5 Go compressé, ~17 Go décompressé) se télécharge à la main depuis
+https://www.eti.uni-siegen.de/ubicomp/home/datasets/icmi18/. Placez les dossiers `S2` à `S17`
+dans `data/external/wesad/` (non versionné), puis :
+
+```bash
+python -m app.engine.calibration wesad-extract   # ECG brut → data/physionet/wesad_hrv_windows.csv (13 Ko, versionné)
+python -m app.engine.calibration wesad           # sensibilité / fausses alertes de HRV-01
+```
+
+Le fichier CSV extrait est versionné : il n'est pas nécessaire de retélécharger WESAD.
 
 ## Simulateur en direct (démo jury)
 
