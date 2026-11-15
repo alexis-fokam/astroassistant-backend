@@ -32,14 +32,24 @@ _HYPNOGRAM_RE = re.compile(r'href="(SC4\d{3}E[0-9A-Z]-Hypnogram\.edf)"')
 SLEEP_STAGES = {"W": "wake", "1": "n1", "2": "n2", "3": "n3", "4": "n3", "R": "rem"}
 
 
-def _download(url: str, path: Path) -> Path:
+def _download(url: str, path: Path, retries: int = 4) -> Path:
+    """Download one small file, retrying slow or dropped connections."""
+    import time
     import urllib.request
 
     from app.datasets.http import USER_AGENT
 
     request = urllib.request.Request(url, headers={"User-Agent": USER_AGENT})
-    with urllib.request.urlopen(request, timeout=60) as response:
-        path.write_bytes(response.read())
+    for attempt in range(retries):
+        try:
+            with urllib.request.urlopen(request, timeout=120) as response:
+                payload = response.read()
+            path.write_bytes(payload)
+            return path
+        except OSError:
+            if attempt == retries - 1:
+                raise
+            time.sleep(5 * 2**attempt)
     return path
 
 
