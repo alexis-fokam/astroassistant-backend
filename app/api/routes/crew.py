@@ -2,24 +2,28 @@
 
 from __future__ import annotations
 
-from fastapi import APIRouter, HTTPException, status
+from fastapi import APIRouter, HTTPException, Query, status
 from sqlalchemy import select
 
 from app.api.deps import CurrentMember, DbSession, is_cmo, visible_member
 from app.core.config import get_settings
 from app.core.security import create_token, verify_pin
 from app.models import ContactWindow, CrewMember, Mission
+from app.models.enums import RiskDomain
 from app.schemas.crew import (
+    CrewProfile,
     CrewStatus,
     CrewSummary,
     LoginRequest,
     MemberOut,
     MissionOut,
-    TokenResponse, CrewProfile,
+    TokenResponse,
 )
+from app.schemas.domains import CrewDomainHistoryOut
 from app.schemas.telemetry import CrewVitalsLatest
 from app.services import audit
-from app.services.views import crew_status, crew_summary, mission_now, crew_profiles
+from app.services.domains import crew_domain_history
+from app.services.views import crew_profiles, crew_status, crew_summary, mission_now
 from app.services.vitals import crew_vitals_latest
 
 router = APIRouter()
@@ -91,7 +95,7 @@ def status_of(code: str, db: DbSession, viewer: CurrentMember) -> CrewStatus:
 def list_profiles(db: DbSession ) -> list[CrewProfile]:
     return crew_profiles(db)
 
-@router.get("/crew/{code}/vitals/latest", response_model=CrewVitalsLatest)
+@router.get("/crew/{code}/vitals/latest", response_model=CrewVitalsLatest, tags=["crew"])
 def get_crew_vitals_latest(
     code: str,
     db: DbSession,
@@ -114,3 +118,29 @@ def get_crew_vitals_latest(
         )
 
     return crew_vitals_latest(db, member)
+
+@router.get("/crew/{code}/domains/{domain}", response_model=CrewDomainHistoryOut)
+def get_crew_domain_history(
+    code: str,
+    domain: RiskDomain,
+    db: DbSession,
+    current: CurrentMember,
+    limit: int = Query(default=50, ge=1, le=500, description="Nombre de points d'historique"),
+) -> CrewDomainHistoryOut:
+
+    if current.code != code and not is_cmo:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Accès limité à vos propres données systèmes",
+        )
+
+    member = db.scalars(
+        select(CrewMember).where(CrewMember.code == code, CrewMember.is_active.is_(True))
+    ).first()
+    if member is None:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Membre d'équipage introuvable",
+        )
+
+    return crew_domain_history(db, member, domain, limit=limit)
