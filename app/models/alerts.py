@@ -1,4 +1,4 @@
-"""Clinical alerts (spec F2, F9.2) and emergency events (F12)."""
+"""Alertes cliniques (F2, F9.2) et événements d'urgence (F12)."""
 
 from __future__ import annotations
 

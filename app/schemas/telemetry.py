@@ -1,4 +1,4 @@
-"""Vitals, radiation, check-in, exercise and PVT payloads."""
+"""Données envoyées : constantes, radiation, check-in, exercice et PVT."""
 
 from __future__ import annotations
 
@@ -18,7 +18,7 @@ class VitalIn(BaseModel):
 
 
 class VitalBatch(BaseModel):
-    """Batch of readings for one member (spec §10 POST /vitals)."""
+    """Lot de mesures pour un membre (§10 POST /vitals)."""
 
     crew_code: str | None = Field(default=None, description="Défaut : soi-même")
     device_serial: str | None = None
@@ -73,7 +73,7 @@ class RadiationPoint(BaseModel):
 
 
 class RadiationOut(BaseModel):
-    """Cumulative dose, current rate and projection (spec F5.1, F5.2)."""
+    """Dose cumulée, débit actuel et projection (F5.1, F5.2)."""
 
     crew_id: str
     recorded_at: datetime | None
@@ -90,7 +90,7 @@ class RadiationOut(BaseModel):
 
 
 class CheckinIn(BaseModel):
-    """Daily check-in (F3): symptoms 0-3, feelings 0-10."""
+    """Check-in quotidien (F3) : symptômes de 0 à 3, ressentis de 0 à 10."""
 
     crew_code: str | None = None
     duration_seconds: int | None = Field(default=None, ge=0)

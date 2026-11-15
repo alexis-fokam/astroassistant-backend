@@ -1,4 +1,4 @@
-"""Small robust statistics used by the engine (spec F2.1, F2.2)."""
+"""Petites statistiques robustes utilisées par le moteur (F2.1, F2.2)."""
 
 from __future__ import annotations
 
@@ -6,7 +6,7 @@ from collections.abc import Sequence
 
 import numpy as np
 
-MAD_TO_SIGMA = 1.4826  # MAD × 1.4826 ≈ standard deviation for normal data
+MAD_TO_SIGMA = 1.4826  # MAD × 1,4826 ≈ écart-type pour des données normales
 
 
 def mean(values: Sequence[float]) -> float | None:
@@ -24,7 +24,7 @@ def median_mad(values: Sequence[float]) -> tuple[float, float] | None:
 def robust_z(
     value: float | None, median: float | None, mad: float | None, floor: float
 ) -> float | None:
-    """(value - median) / (1.4826 · MAD); ``floor`` avoids dividing by a near-zero MAD."""
+    """(valeur - médiane) / (1,4826 · MAD) ; ``floor`` évite de diviser par une MAD quasi nulle."""
     if value is None or median is None:
         return None
     scale = max((mad or 0.0) * MAD_TO_SIGMA, floor)
@@ -32,7 +32,7 @@ def robust_z(
 
 
 def slope_per_hour(hours: Sequence[float], values: Sequence[float]) -> float | None:
-    """Least-squares slope (unit per hour)."""
+    """Pente par moindres carrés (unité par heure)."""
     if len(values) < 3:
         return None
     x, y = np.asarray(hours, dtype=float), np.asarray(values, dtype=float)

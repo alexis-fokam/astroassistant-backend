@@ -1,4 +1,4 @@
-"""Mission configuration (first-launch setup A-03): destination, duration, latency."""
+"""Configuration de la mission (premier lancement A-03) : destination, durée, latence."""
 
 from __future__ import annotations
 

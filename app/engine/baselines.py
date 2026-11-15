@@ -1,8 +1,9 @@
-"""Rolling individual baselines (spec F2.1).
+"""Références individuelles glissantes (F2.1).
 
-Each metric's baseline (mean, std, median, MAD) is recomputed from the member's own clean
-readings over ``baseline_days``, ending ``baseline_gap_days`` before now so that an ongoing
-drift is not absorbed into "normal". A baseline is refreshed at most once a day.
+La référence de chaque mesure (moyenne, écart-type, médiane, MAD) est recalculée sur les
+mesures propres du membre pendant ``baseline_days``, en s'arrêtant ``baseline_gap_days``
+avant maintenant pour qu'une dérive en cours ne soit pas absorbée dans le « normal ».
+Une référence est rafraîchie au plus une fois par jour.
 """
 
 from __future__ import annotations
@@ -17,12 +18,12 @@ from app.engine.config import EngineConfig
 from app.engine.features import MemberData, naive_utc
 from app.models import Baseline
 
-MIN_SAMPLES = 48  # at least two days of hourly readings
+MIN_SAMPLES = 48  # au moins deux jours de mesures horaires
 REFRESH_EVERY = timedelta(hours=24)
 
 
 def refresh(db: Session, data: MemberData, at: datetime, cfg: EngineConfig) -> list[str]:
-    """Update stale baselines in place; returns the refreshed metric names."""
+    """Mettre à jour les références périmées ; renvoie les noms des mesures rafraîchies."""
     at = naive_utc(at)
     end = at - timedelta(days=cfg.windows["baseline_gap_days"])
     start = end - timedelta(days=cfg.windows["baseline_days"])
@@ -37,7 +38,7 @@ def refresh(db: Session, data: MemberData, at: datetime, cfg: EngineConfig) -> l
         median, mad = stats.median_mad(values)
         if baseline is None:
             baseline = Baseline(metric=metric)
-            # Through the relationship, so the next run sees it (no duplicate insert).
+            # Via la relation, pour que l'exécution suivante la voie (pas d'insertion en double).
             data.member.baselines.append(baseline)
             data.baselines[metric] = baseline
         baseline.mean = round(float(np.mean(values)), 3)

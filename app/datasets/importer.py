@@ -1,8 +1,8 @@
-"""Load the bundled open datasets into the database (tables ``dataset_sources``,
+"""Charger les jeux de données ouverts embarqués en base (tables ``dataset_sources``,
 ``cruise_dose_samples``, ``proton_flux_readings``, ``space_weather_events``).
 
-Every imported row points to its ``dataset_sources`` entry, so the provenance of any
-value shown in the app can be traced back to the agency that published it.
+Chaque ligne importée pointe vers son entrée ``dataset_sources`` : l'origine de toute valeur
+affichée dans l'application remonte jusqu'à l'agence qui l'a publiée.
 """
 
 from __future__ import annotations
@@ -27,11 +27,11 @@ from app.models import (
 )
 from app.models.enums import Metric, SpaceWeatherKind
 
-# GOES bands kept in the database: the S-scale threshold band and the hard-spectrum band.
+# Bandes GOES gardées en base : celle du seuil de l'échelle S et celle du spectre dur.
 GOES_BANDS = (">=10 MeV", ">=100 MeV")
 
-# Reference events from NOAA/SWPC event reports, used when no DONKI cache is available
-# (the DEMO_KEY quota is easily exhausted). They drive scenario S3.
+# Événements de référence tirés des rapports NOAA/SWPC, utilisés sans cache DONKI
+# (le quota DEMO_KEY s'épuise vite). Ils pilotent le scénario S3.
 REFERENCE_EVENTS = [
     {
         "kind": SpaceWeatherKind.SOLAR_FLARE,
@@ -132,10 +132,10 @@ def import_goes(session: Session, source: DatasetSource, path: Path | None = Non
 
 
 def import_space_weather(session: Session, source: DatasetSource) -> int:
-    """DONKI events (SEP, CME) when cached, plus the reference flares.
+    """Événements DONKI (SEP, CME) s'ils sont en cache, plus les éruptions de référence.
 
-    The DONKI flare route (FLR) is not served by api.nasa.gov, so flares always come from
-    the NOAA reference list; without a DONKI cache the reference SEP is used as well.
+    La route des éruptions de DONKI (FLR) n'est pas servie par api.nasa.gov : les éruptions
+    viennent toujours de la liste NOAA ; sans cache DONKI, le SEP de référence est aussi utilisé.
     """
     events = donki.load_cached()
     for e in events:
@@ -166,7 +166,7 @@ BIDMC_METRICS = {"HR": Metric.HEART_RATE, "RESP": Metric.RESPIRATORY_RATE, "SpO2
 
 
 def import_bidmc(session: Session, source: DatasetSource) -> int:
-    """Per-second HR, respiratory rate and SpO2 of the 53 BIDMC recordings."""
+    """FC, fréquence respiratoire et SpO2 à la seconde des 53 enregistrements BIDMC."""
     files = sorted(physionet.BIDMC_DIR.glob("bidmc_*_Numerics.csv"))
     rows = []
     for path in files:
@@ -196,7 +196,7 @@ def import_bidmc(session: Session, source: DatasetSource) -> int:
 
 
 def import_sleep_edf(session: Session, source: DatasetSource) -> int:
-    """One row per expert-scored night (main sleep episode)."""
+    """Une ligne par nuit annotée par un expert (épisode de sommeil principal)."""
     files = sorted(physionet.SLEEP_EDF_DIR.glob("SC4*-Hypnogram.edf"))
     rows = []
     for path in files:
@@ -223,7 +223,7 @@ def import_sleep_edf(session: Session, source: DatasetSource) -> int:
 
 
 def import_wesad_windows(session: Session, source: DatasetSource) -> int:
-    """HRV (RMSSD) per 60 s window and condition, extracted from WESAD (if available)."""
+    """VFC (RMSSD) par fenêtre de 60 s et condition, extraite de WESAD (si disponible)."""
     path = physionet.WESAD_WINDOWS_CSV
     if not path.exists():
         return 0
@@ -247,7 +247,7 @@ def import_wesad_windows(session: Session, source: DatasetSource) -> int:
 
 
 def import_all(session: Session) -> dict[str, int]:
-    """Create the provenance entries and import every bundled dataset available locally."""
+    """Créer les entrées d'origine et importer chaque jeu embarqué disponible localement."""
     sources = seed_sources(session)
     counts = {
         "nasa-msl-rad": import_msl_rad(session, sources["nasa-msl-rad"]),

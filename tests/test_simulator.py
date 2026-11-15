@@ -1,4 +1,4 @@
-"""Live simulator: injected anomalies must be detected by the risk engine (jury demo)."""
+"""Simulateur en direct : les anomalies injectées doivent être détectées par le moteur."""
 
 from __future__ import annotations
 
@@ -107,11 +107,11 @@ def test_ground_instruction_arrives_after_the_delay(client: TestClient, cmo) -> 
         "body": "Boire 500 ml de plus aujourd'hui.",
     }
     sent = client.post("/api/v1/ground/instructions", headers=cmo, json=body).json()
-    assert sent["in_transit"] is True  # Mars transit: 12 min one way
+    assert sent["in_transit"] is True  # transit vers Mars : 12 min aller
     onboard = client.get("/api/v1/sync/messages", headers=astronaut).json()
     assert all(m["subject"] != "Hydratation" for m in onboard)
 
-    start(client, cmo, "S1", speed=60)  # 2 simulated minutes per tick
+    start(client, cmo, "S1", speed=60)  # 2 minutes simulées par pas
     client.post("/api/v1/sim/tick", headers=cmo, params={"count": 7})
     onboard = client.get("/api/v1/sync/messages", headers=astronaut).json()
     assert any(m["subject"] == "Hydratation" and not m["in_transit"] for m in onboard)

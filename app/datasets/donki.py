@@ -1,9 +1,9 @@
 """NASA DONKI (Space Weather Database Of Notifications, Knowledge, Information).
 
-Fetches solar particle events (SEP) and coronal mass ejections (CME) through
-api.nasa.gov and maps them to ``SpaceWeatherEvent`` rows (spec F5.3, scenario S3).
-The flare endpoint (FLR) currently answers 404 on api.nasa.gov, so flare classes are
-not fetched; SEP and CME are enough to replay historical radiation storms.
+Récupère les événements à particules solaires (SEP) et les éjections de masse coronale (CME)
+via api.nasa.gov et les convertit en lignes ``SpaceWeatherEvent`` (F5.3, scénario S3).
+La route des éruptions (FLR) répond 404 sur api.nasa.gov : les classes d'éruption ne sont
+pas récupérées ; SEP et CME suffisent pour rejouer les tempêtes radiatives historiques.
 """
 
 from __future__ import annotations
@@ -27,10 +27,10 @@ ENDPOINTS: dict[str, SpaceWeatherKind] = {
 }
 
 # Reference windows:
-# - the Curiosity RAD cruise to Mars (Dec 2011 - Jul 2012), to match dose peaks with
+# - le trajet de Curiosity RAD vers Mars (déc. 2011 - juil. 2012), pour relier les pics de dose
 #   catalogued solar particle events (notebooks/analyse_radiations_nasa.ipynb);
-# - the September 2017 storm replayed by scenario S3;
-# - the May 2024 "Gannon" storm.
+# - la tempête de septembre 2017 rejouée par le scénario S3 ;
+# - la tempête « Gannon » de mai 2024.
 DEFAULT_WINDOWS: list[tuple[date, date]] = [
     (date(2011, 12, 1), date(2012, 7, 31)),
     (date(2017, 9, 1), date(2017, 9, 30)),
@@ -39,7 +39,7 @@ DEFAULT_WINDOWS: list[tuple[date, date]] = [
 
 
 def monthly(start: date, end: date) -> list[tuple[date, date]]:
-    """Split a range into calendar months: DONKI rejects long ranges (HTTP 400)."""
+    """Découper une période en mois civils : DONKI refuse les longues périodes (HTTP 400)."""
     chunks = []
     current = start
     while current <= end:
@@ -70,7 +70,7 @@ def raw_path(endpoint: str, start: date, end: date) -> Path:
 
 
 def fetch(api_key: str, windows: list[tuple[date, date]] | None = None) -> list[Path]:
-    """Download raw DONKI JSON for each endpoint and window; returns written files."""
+    """Télécharger le JSON brut de DONKI par route et par fenêtre ; renvoie les fichiers écrits."""
     ensure_dir(DONKI_DIR)
     written = []
     chunks = [c for start, end in windows or DEFAULT_WINDOWS for c in monthly(start, end)]
@@ -91,7 +91,7 @@ def parse_time(value: str) -> datetime:
 
 
 def parse(endpoint: str, payload: list[dict[str, Any]]) -> list[DonkiEvent]:
-    """Map one raw DONKI payload to events; unknown or incomplete entries are skipped."""
+    """Convertir une réponse DONKI brute en événements ; les entrées incomplètes sont ignorées."""
     kind = ENDPOINTS[endpoint]
     events = []
     for item in payload or []:
@@ -109,7 +109,7 @@ def parse(endpoint: str, payload: list[dict[str, Any]]) -> list[DonkiEvent]:
 
 
 def load_cached() -> list[DonkiEvent]:
-    """Parse every DONKI file already stored under ``data/nasa/donki``."""
+    """Lire chaque fichier DONKI déjà stocké dans ``data/nasa/donki``."""
     events: dict[str, DonkiEvent] = {}
     for path in sorted(DONKI_DIR.glob("*.json")):
         endpoint = path.name.split("_", 1)[0].upper()

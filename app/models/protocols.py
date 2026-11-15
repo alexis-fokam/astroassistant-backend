@@ -1,8 +1,8 @@
-"""Countermeasure protocols (spec F4): version registry, required materials, executions.
+"""Protocoles de contre-mesure (F4) : registre des versions, matériel requis, exécutions.
 
-Protocol content (trigger, steps, exit criterion) lives in the YAML files of
-``app/protocols/``; the ``protocols`` table records the loaded version so every
-execution stays tied to the exact text that was followed.
+Le contenu d'un protocole (déclencheur, étapes, critère de sortie) est dans les YAML de
+``app/protocols/`` ; la table ``protocols`` garde la version chargée, pour que chaque
+exécution reste liée au texte exact qui a été suivi.
 """
 
 from __future__ import annotations

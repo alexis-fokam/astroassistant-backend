@@ -6,6 +6,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from app.api import api_router, legacy_router, ws_router
+from app.core import errors
 from app.core.config import get_settings
 from app.core.database import engine
 from app.core.scheduler import init_scheduler, scheduler
@@ -18,7 +19,7 @@ settings = get_settings()
 @asynccontextmanager
 async def lifespan(_app: FastAPI) -> AsyncIterator[None]:
     Base.metadata.create_all(bind=engine)
-    # Periodic housekeeping jobs (APScheduler) and the risk pipeline every few seconds.
+    # Tâches périodiques (APScheduler) et pipeline de risque toutes les quelques secondes.
     init_scheduler()
     scheduler.start()
     task = asyncio.create_task(run_forever()) if settings.pipeline_enabled else None
@@ -37,6 +38,8 @@ app = FastAPI(
     debug=settings.debug,
     lifespan=lifespan,
 )
+
+errors.install(app)
 
 app.add_middleware(
     CORSMiddleware,

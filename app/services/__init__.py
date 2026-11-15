@@ -1,1 +1,1 @@
-"""Business services shared by the API routes (audit, status, protocols)."""
+"""Services métier partagés par les routes de l'API (audit, statut, protocoles)."""

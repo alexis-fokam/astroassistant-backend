@@ -1,4 +1,4 @@
-"""Protocol, pharmacy and report payloads."""
+"""Données échangées pour les protocoles, la pharmacie et les rapports."""
 
 from __future__ import annotations
 
@@ -52,7 +52,7 @@ class RunCreate(BaseModel):
 
 
 class RunPatch(BaseModel):
-    """Validate the next step, or close the run."""
+    """Valider l'étape suivante, ou clôturer l'exécution."""
 
     step_code: str | None = None
     status: Literal["completed", "aborted"] | None = None
@@ -73,7 +73,7 @@ class RunOut(OrmModel):
 
 
 class RunListItem(RunOut):
-    """A protocol execution with what the "My protocols" screen needs (F4.5)."""
+    """Une exécution de protocole avec ce dont l'écran « Mes protocoles » a besoin (F4.5)."""
 
     protocol_title: str
     severity: AlertLevel
@@ -96,7 +96,7 @@ class InventoryItemOut(OrmModel):
 
 
 class UsageIn(BaseModel):
-    """Record a pharmacy use; CMO only (F11.3). Decrements the stock."""
+    """Enregistrer une utilisation en pharmacie ; CMO uniquement (F11.3). Décrémente le stock."""
 
     item_code: str
     quantity: float = Field(gt=0)
@@ -115,7 +115,7 @@ class UsageOut(OrmModel):
 
 
 class ReportOut(BaseModel):
-    """Weekly synthesis of one member (spec §10 GET /reports)."""
+    """Synthèse hebdomadaire d'un membre (§10 GET /reports)."""
 
     crew_id: str
     period_start: datetime

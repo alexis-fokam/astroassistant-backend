@@ -1,4 +1,4 @@
-"""Authentication, mission and crew status (spec §7, §10, F1)."""
+"""Authentification, mission et statut de l'équipage (§7, §10, F1)."""
 
 from __future__ import annotations
 
@@ -30,7 +30,7 @@ router = APIRouter()
 
 @router.post("/auth/login", response_model=TokenResponse, tags=["auth"])
 def login(body: LoginRequest, db: DbSession) -> TokenResponse:
-    """Unlock a local profile with its PIN and get a session token."""
+    """Déverrouiller un profil local avec son PIN et obtenir un jeton de session."""
     member = db.scalars(select(CrewMember).where(CrewMember.code == body.code)).first()
     if member is None or not member.is_active or not verify_pin(body.pin, member.pin_hash):
         audit.record(db, "auth.failed", actor_label=body.code[:64])
@@ -81,7 +81,7 @@ def mission(db: DbSession, _: CurrentMember) -> MissionOut:
 
 
 LATENCY_BY_DESTINATION = {
-    # One-way light time plus relay overhead, rounded (seconds).
+    # Temps de lumière aller plus relais, arrondi (secondes).
     "low_earth_orbit": 2,
     "moon": 3,
     "mars_transit": 12 * 60,
@@ -91,7 +91,7 @@ LATENCY_BY_DESTINATION = {
 
 @router.patch("/mission", response_model=MissionOut, tags=["mission"])
 def update_mission(body: MissionPatch, db: DbSession, cmo: CurrentCmo) -> MissionOut:
-    """Choose the mission profile (ISS, Moon, Mars); sets the communication delay."""
+    """Choisir le profil de mission (ISS, Lune, Mars) ; fixe le délai de communication."""
     current = db.scalars(select(Mission).where(Mission.is_active.is_(True))).first()
     if current is None:
         raise HTTPException(status.HTTP_404_NOT_FOUND, "Aucune mission configurée")
@@ -105,7 +105,7 @@ def update_mission(body: MissionPatch, db: DbSession, cmo: CurrentCmo) -> Missio
 
 @router.get("/crew", response_model=list[CrewSummary], tags=["crew"])
 def crew(db: DbSession, viewer: CurrentMember) -> list[CrewSummary]:
-    """Crew and global status of each member. An astronaut only gets their own line."""
+    """Équipage et statut global de chaque membre. Un astronaute ne reçoit que sa ligne."""
     members = db.scalars(
         select(CrewMember).where(CrewMember.is_active.is_(True)).order_by(CrewMember.code)
     )
@@ -114,7 +114,7 @@ def crew(db: DbSession, viewer: CurrentMember) -> list[CrewSummary]:
 
 @router.get("/crew/{code}/status", response_model=CrewStatus, tags=["crew"])
 def status_of(code: str, db: DbSession, viewer: CurrentMember) -> CrewStatus:
-    """Current status, domain scores, explanation factors and active alerts (§10.1)."""
+    """Statut actuel, scores par domaine, facteurs explicatifs et alertes actives (§10.1)."""
     return crew_status(db, visible_member(db, viewer, code))
 
 
@@ -122,12 +122,12 @@ def status_of(code: str, db: DbSession, viewer: CurrentMember) -> CrewStatus:
     "/profiles", response_model=list[CrewProfile], response_model_by_alias=True, tags=["auth"]
 )
 def list_profiles(db: DbSession) -> list[CrewProfile]:
-    """Public: profiles shown on the lock screen (no health data)."""
+    """Public : profils affichés sur l'écran de verrouillage (aucune donnée de santé)."""
     return crew_profiles(db)
 
 
 @router.get("/crew/{code}/vitals/latest", response_model=CrewVitalsLatest, tags=["vitals"])
 def get_crew_vitals_latest(code: str, db: DbSession, viewer: CurrentMember) -> CrewVitalsLatest:
-    """Latest value, level, trend, normal band and last 36 points of every vital sign."""
-    # visible_member enforces RBAC: an astronaut only reads their own vitals (spec §7).
+    """Dernière valeur, niveau, tendance, plage normale et 36 derniers points par constante."""
+    # visible_member applique le RBAC : un astronaute ne lit que ses constantes (§7).
     return crew_vitals_latest(db, visible_member(db, viewer, code))

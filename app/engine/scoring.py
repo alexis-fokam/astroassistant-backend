@@ -1,4 +1,4 @@
-"""Rule evaluation, domain scores, global score and explanations (spec F2.4-F2.7, §6.3)."""
+"""Règles, scores par domaine, score global et explications (F2.4-F2.7, §6.3)."""
 
 from __future__ import annotations
 
@@ -32,7 +32,7 @@ def _holds(condition, features: Features) -> bool:
 
 
 def evaluate(rules: tuple[Rule, ...], features: Features) -> list[Rule]:
-    """Rules whose conditions hold, minus those suppressed by a more specific one."""
+    """Règles dont les conditions sont vraies, moins celles masquées par une plus spécifique."""
     fired = [
         r
         for r in rules
@@ -44,7 +44,7 @@ def evaluate(rules: tuple[Rule, ...], features: Features) -> list[Rule]:
 
 
 def confirmed(current: list[Rule], previous: list[Rule]) -> list[Rule]:
-    """CRITICAL rules fire at once; WARNING rules need two consecutive evaluations."""
+    """Les règles CRITICAL se déclenchent tout de suite ; les WARNING demandent deux évaluations."""
     before = {r.code for r in previous}
     return [r for r in current if r.level is AlertLevel.CRITICAL or r.code in before]
 
@@ -99,7 +99,7 @@ def score_domains(features: Features, rules: list[Rule], cfg: EngineConfig) -> l
 
 
 def global_score(domains: list[DomainScore], cfg: EngineConfig) -> tuple[float, HealthLevel]:
-    """score = blend of worst domain and weighted mean; status = max(level(score), worst rule)."""
+    """score = pire domaine mêlé à la moyenne pondérée ; statut = max(niveau, pire règle)."""
     weighted = sum(cfg.global_weights[d.domain.value] * d.score for d in domains)
     worst = max(d.score for d in domains)
     share = cfg.worst_domain_share

@@ -1,4 +1,4 @@
-"""Engine configuration and clinical rules, loaded from the YAML files next to this module."""
+"""Configuration du moteur et règles cliniques, chargées depuis les YAML à côté du module."""
 
 from __future__ import annotations
 
@@ -54,7 +54,7 @@ class Indicator:
     label: str
 
     def severity(self, value: float | None) -> float:
-        """0 (normal) → 1 (severe); works for "higher is worse" and "lower is worse"."""
+        """0 (normal) → 1 (sévère) ; marche pour « plus haut = pire » comme « plus bas = pire »."""
         if value is None:
             return 0.0
         span = self.high - self.low

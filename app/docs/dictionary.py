@@ -1,9 +1,9 @@
-"""Generate the data dictionary (Markdown, in French) from the SQLAlchemy metadata.
+"""Générer le dictionnaire de données (Markdown, en français) depuis les métadonnées SQLAlchemy.
 
-Everything comes from the models themselves: table descriptions from class docstrings,
-column descriptions from ``comment=``, types, keys, constraints and indexes from the
-metadata, and row counts from a fresh in-memory demo database. Run
-``python -m app.docs`` after any model change so the document never drifts.
+Tout vient des modèles eux-mêmes : descriptions des tables depuis les docstrings des classes,
+descriptions des colonnes depuis ``comment=``, types, clés, contraintes et index depuis les
+métadonnées, et nombres de lignes depuis une base de démo neuve en mémoire. Lancer
+``python -m app.docs`` après chaque changement de modèle pour que le document reste à jour.
 """
 
 from __future__ import annotations
@@ -29,7 +29,7 @@ from sqlalchemy.orm import Session
 
 from app.models import Base
 
-# Functional areas, in reading order. Key = models module name.
+# Domaines fonctionnels, dans l'ordre de lecture. Clé = nom du module de modèles.
 DOMAINS: list[tuple[str, str, str]] = [
     ("mission", "Mission", "Paramètres de la mission (A-03)."),
     ("crew", "Équipage et capteurs", "Profils locaux, capteurs appairés et baselines (F1, F7)."),
@@ -113,7 +113,7 @@ def enum_columns(table: Table) -> set[str]:
 
 
 def business_checks(table: Table) -> list[CheckConstraint]:
-    """CHECK constraints written by hand (enum CHECKs are documented with the enums)."""
+    """Contraintes CHECK écrites à la main (les CHECK d'énumérations sont documentés avec elles)."""
     enums = enum_columns(table)
     checks = []
     for c in table.constraints:
@@ -128,7 +128,7 @@ def business_checks(table: Table) -> list[CheckConstraint]:
 
 
 def demo_row_counts() -> dict[str, int]:
-    """Row counts of a freshly seeded in-memory database (deterministic)."""
+    """Nombres de lignes d'une base en mémoire fraîchement remplie (déterministe)."""
     from app.seed import seed
 
     engine = create_engine("sqlite://")
@@ -165,7 +165,7 @@ def mermaid_erd(tables: list[Table]) -> str:
         for fk in sorted(table.foreign_keys, key=lambda f: f.parent.name):
             parent = fk.column.table.name
             if parent == "sim_runs" and table.name != "sim_runs":
-                continue  # sim_run_id is on every telemetry table; drawn once in the text
+                continue  # sim_run_id, sur chaque table : décrit une fois
             optional = "o" if fk.parent.nullable else "|"
             edge = (parent, table.name, fk.parent.name)
             if edge in seen:

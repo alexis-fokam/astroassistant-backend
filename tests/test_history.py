@@ -1,4 +1,4 @@
-"""Fictional demo history: coherence, determinism and integrity."""
+"""Historique de démo fictif : cohérence, déterminisme et intégrité."""
 
 from sqlalchemy import func, select
 from sqlalchemy.orm import Session

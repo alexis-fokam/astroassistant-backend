@@ -1,9 +1,9 @@
 import os
 import tempfile
 
-# The background risk engine is driven explicitly in tests.
+# Le moteur de risque de fond est piloté explicitement dans les tests.
 os.environ.setdefault("AV_PIPELINE_ENABLED", "false")
-# Trained models go to a throwaway folder, never into data/models.
+# Les modèles entraînés vont dans un dossier jetable, jamais dans data/models.
 os.environ.setdefault("AV_MODELS_DIR", tempfile.mkdtemp(prefix="astro-models-"))
 
 import pytest

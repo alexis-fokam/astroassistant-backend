@@ -1,4 +1,4 @@
-"""Dosimetry and space weather (spec F5, §9 radiation_dose)."""
+"""Dosimétrie et météo spatiale (F5, §9 radiation_dose)."""
 
 from __future__ import annotations
 

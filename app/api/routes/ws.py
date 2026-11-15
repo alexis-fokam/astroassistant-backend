@@ -6,7 +6,7 @@ router = APIRouter(tags=["realtime"])
 
 
 class ConnectionManager:
-    """Push new states (vitals, scores, alerts, emergencies) to the dashboards (spec §8.1)."""
+    """Pousser les nouveaux états (constantes, scores, alertes, urgences) aux écrans (§8.1)."""
 
     def __init__(self) -> None:
         self.active: set[WebSocket] = set()

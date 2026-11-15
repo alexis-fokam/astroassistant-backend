@@ -1,4 +1,4 @@
-"""REST API under /api/v1 (spec §10) and the realtime WebSocket."""
+"""API REST sous /api/v1 (cahier des charges §10) et WebSocket temps réel."""
 
 from fastapi import APIRouter
 
@@ -8,7 +8,7 @@ api_router = APIRouter(prefix="/api/v1")
 for module in (health, crew, telemetry, care, engine, ground, history):
     api_router.include_router(module.router)
 
-# Kept for existing clients: GET /api/health.
+# Gardé pour les clients existants : GET /api/health.
 legacy_router = APIRouter(prefix="/api")
 legacy_router.include_router(health.router)
 

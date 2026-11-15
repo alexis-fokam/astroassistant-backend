@@ -1,15 +1,16 @@
-"""Live telemetry simulator for the jury demo (spec F15; new spec: "the AI detects an
-injected anomaly live").
+"""Simulateur de télémétrie en direct pour la démo jury (F15 ; nouveau cahier des charges :
+« l'IA détecte en direct une anomalie injectée »).
 
-Every tick (2 s of real time) the simulated mission clock advances by ``2 s × speed``. For
-each crew member the simulator writes one reading per vital sign around that member's own
-baseline (circadian rhythm + noise), applies the active anomaly *effects*, then runs the
-risk engine: new scores and alerts appear in the API and on the dashboards within seconds.
+À chaque pas (2 s réelles), l'horloge de mission simulée avance de ``2 s × vitesse``. Pour
+chaque membre, le simulateur écrit une mesure par constante autour de sa propre référence
+(rythme circadien + bruit), applique les *effets* des anomalies actives, puis lance le
+moteur de risque : nouveaux scores et alertes apparaissent dans l'API et à l'écran en
+quelques secondes.
 
-Simulated readings are mission telemetry (``source = simulator``, ``sim_run_id`` empty):
-they drive the mission clock and every screen exactly like real sensors would. The
-``sim_runs`` table keeps the trace of each demo run; ``python -m app.seed --reset`` restores
-the reference story.
+Les mesures simulées sont de la télémétrie de mission (``source = simulator``,
+``sim_run_id`` vide) : elles font avancer l'horloge de mission et chaque écran comme de vrais
+capteurs. La table ``sim_runs`` garde la trace de chaque démo ; ``python -m app.seed --reset``
+rétablit l'histoire de référence.
 """
 
 from __future__ import annotations
@@ -129,7 +130,7 @@ ANOMALIES: dict[str, AnomalyKind] = {
     )
 }
 
-# Scenario S1-S6 → anomaly and default target (backend seed, spec §4.1).
+# Scénarios S1-S6 → anomalie et cible par défaut (seed du backend, §4.1).
 SCENARIO_EFFECTS: dict[str, tuple[str | None, str | None]] = {
     "S1": (None, None),
     "S2": ("hrv_drop", "AV-02"),
@@ -215,7 +216,7 @@ def _apply(
 
 
 def _one_shot_events(db: Session, state: SimState, effect: Effect, member: CrewMember) -> None:
-    """Self-reported data that make an anomaly visible (check-ins, sleep, exercise)."""
+    """Données déclarées qui rendent une anomalie visible (check-ins, sommeil, exercice)."""
     at = effect.started_at
     if effect.kind.code == "hrv_drop":
         for night in range(3, 0, -1):
@@ -253,7 +254,7 @@ def _one_shot_events(db: Session, state: SimState, effect: Effect, member: CrewM
                 )
             )
     elif effect.kind.code == "deconditioning":
-        # The astronaut skips the three most recent resistance (ARED) sessions.
+        # L'astronaute saute les trois séances de résistance (ARED) les plus récentes.
         recent = db.scalars(
             select(ExerciseSession)
             .where(
@@ -346,14 +347,14 @@ def start(
 def inject(
     db: Session, state: SimState, anomaly: str, crew: str, actor_label: str = "Jury"
 ) -> Effect:
-    """Start an anomaly now (simulated time) on one member or the whole crew."""
+    """Démarrer une anomalie maintenant (temps simulé) sur un membre ou tout l'équipage."""
     kind = ANOMALIES[anomaly]
     members = list(db.scalars(select(CrewMember).where(CrewMember.is_active.is_(True))))
     targets = [m for m in members if crew == "all" or m.code == crew]
     if not targets:
         raise ValueError(f"Membre {crew} inconnu")
     at = state.sim_time or mission_now(db)
-    # A demo re-run must be able to raise the alert again: close the previous ones.
+    # Une démo rejouée doit pouvoir relever l'alerte : on clôt les précédentes.
     for member in targets:
         for alert in db.scalars(
             select(Alert).where(
@@ -377,7 +378,7 @@ def inject(
 
 
 def contact_window(db: Session, state: SimState) -> None:
-    """Scenario S6: export the crew summary now; the ground reply arrives after the delay."""
+    """Scénario S6 : exporter la synthèse maintenant ; la réponse du sol arrive après le délai."""
     from app.models.sync import PRIORITY_NORMAL
     from app.services.sync import queue_packet
 
@@ -412,7 +413,7 @@ def contact_window(db: Session, state: SimState) -> None:
 
 
 def tick(db: Session, state: SimState) -> PipelineReport:
-    """Advance the simulated clock by one tick, write telemetry and run the risk engine."""
+    """Avancer l'horloge simulée d'un pas, écrire la télémétrie et lancer le moteur de risque."""
     dt = timedelta(seconds=TICK_SECONDS * state.speed)
     state.sim_time = (state.sim_time or mission_now(db)) + dt
     at = state.sim_time

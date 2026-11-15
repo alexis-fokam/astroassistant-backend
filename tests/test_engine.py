@@ -1,4 +1,4 @@
-"""Risk engine (spec §6): unit tests and acceptance tests on the demo story."""
+"""Moteur de risque (§6) : tests unitaires et tests d'acceptation sur l'histoire de démo."""
 
 from __future__ import annotations
 
@@ -67,18 +67,18 @@ def test_rules_suppression_and_confirmation() -> None:
     tachy = {"hr_now": 130, "spo2_now": 91, "hr_z": 5, "anomaly_score": 0.95}
     fired = {r.code for r in evaluate(rules, tachy)}
     assert "CARDIO-CRIT-01" in fired
-    assert not fired & {"HR-02", "ANOMALY-01"}  # suppressed by the specific critical rule
+    assert not fired & {"HR-02", "ANOMALY-01"}  # masquée par la règle critique spécifique
 
     warning_now = evaluate(rules, {"hr_z": 3.0})
     assert [r.code for r in warning_now] == ["HR-02"]
     assert confirmed(warning_now, previous=[]) == []  # WARNING needs two evaluations
     assert confirmed(warning_now, previous=warning_now) == warning_now
     critical = evaluate(rules, {"dose_rate_msv_h": 0.5})
-    assert confirmed(critical, previous=[]) == critical  # CRITICAL fires at once
+    assert confirmed(critical, previous=[]) == critical  # CRITICAL se déclenche tout de suite
 
 
 def test_rules_match_the_protocol_library() -> None:
-    """Every rule that recommends a protocol is listed in that protocol's trigger."""
+    """Chaque règle qui recommande un protocole figure dans le déclencheur de ce protocole."""
     for rule in load_config().rules:
         if not rule.protocol or rule.protocol == "EMRG-01":
             continue
@@ -101,7 +101,7 @@ def test_engine_finds_the_demo_story(demo: Session) -> None:
         "AV-04": "warning",
     }
     assert "EX-MISSED-01" in by_code["AV-01"].rules  # S5 deconditioning
-    assert "HRV-01" in by_code["AV-02"].rules  # S2 stress and sleep debt
+    assert "HRV-01" in by_code["AV-02"].rules  # S2 : stress et dette de sommeil
     assert "CARDIO-CRIT-01" in by_code["AV-03"].rules  # tachycardia + desaturation
     assert "SANS-01" in by_code["AV-04"].rules  # S4 SANS suspicion
     assert by_code["AV-03"].anomaly_score > by_code["AV-01"].anomaly_score
@@ -110,10 +110,10 @@ def test_engine_finds_the_demo_story(demo: Session) -> None:
 def test_open_alerts_are_not_duplicated_and_runs_are_idempotent(demo: Session) -> None:
     before = len(demo.scalars(select(Alert)).all())
     first = run_once(demo)
-    assert first.new_alert_ids == []  # the story's alerts are already open
+    assert first.new_alert_ids == []  # les alertes de l'histoire sont déjà ouvertes
     assert len(demo.scalars(select(Alert)).all()) == before
     second = run_once(demo)
-    assert all(m.skipped for m in second.members)  # no new telemetry → nothing written
+    assert all(m.skipped for m in second.members)  # pas de nouvelle mesure → rien d'écrit
 
 
 def test_scores_are_explained(demo: Session) -> None:
@@ -172,7 +172,7 @@ def test_radiation_storm_raises_a_critical_alert_at_once(demo: Session) -> None:
 
 
 def test_isolated_spike_is_not_confirmed(demo: Session) -> None:
-    """A single abnormal reading must not raise a WARNING (confirmation, §6.3)."""
+    """Une seule mesure anormale ne doit pas lever de WARNING (confirmation, §6.3)."""
     member = _member(demo, "AV-04")
     at = DEMO_NOW + timedelta(minutes=10)
     demo.add(
@@ -240,7 +240,7 @@ def test_baselines_are_refreshed_from_flight_data(demo: Session) -> None:
     ).one()
     assert hrv.computed_at.replace(tzinfo=None) == DEMO_NOW.replace(tzinfo=None)
     assert hrv.sample_count > 48 and hrv.sample_count != 1240
-    # The gap keeps the recent drift out of the baseline: it stays close to the pre-drift value.
+    # L'écart garde la dérive récente hors de la référence : elle reste proche d'avant la dérive.
     assert 44 < hrv.mean < 54
 
 
@@ -261,7 +261,7 @@ def test_goes_storm_raises_the_early_warning(demo: Session) -> None:
         select(DatasetSource).where(DatasetSource.code == "noaa-goes-protons")
     ).one()
     at = DEMO_NOW + timedelta(minutes=10)
-    # GOES publishes every 5 min: two consecutive readings above 10 pfu confirm the storm.
+    # GOES publie toutes les 5 min : deux relevés de suite > 10 pfu confirment la tempête.
     for minutes, flux in ((5, 180.0), (0, 250.0)):
         demo.add(
             ProtonFluxReading(
@@ -293,7 +293,7 @@ def test_hrv_trend_and_bone_projection_features() -> None:
     rules = load_config().rules
     fired = {r.code for r in evaluate(rules, {"hrv_slope_24h": -0.3, "hrv_ratio": 0.85})}
     assert "HRV-TREND-01" in fired
-    # Superseded by the persistent-low-HRV rule when both hold.
+    # Remplacée par la règle de VFC basse persistante quand les deux sont vraies.
     both = {r.code for r in evaluate(rules, {"hrv_slope_24h": -0.3, "hrv_ratio": 0.7, "stress": 8})}
     assert "HRV-01" in both and "HRV-TREND-01" not in both
 
@@ -312,7 +312,7 @@ def test_bone_loss_projection_reflects_adherence(demo: Session) -> None:
 
 
 def test_new_baselines_are_not_duplicated_across_runs(demo: Session) -> None:
-    """A baseline created by the engine (e.g. activity level) must be updated, not re-inserted."""
+    """Une référence créée par le moteur (ex. activité) est mise à jour, pas réinsérée."""
     from app.models import Baseline
 
     member = _member(demo, "AV-01")

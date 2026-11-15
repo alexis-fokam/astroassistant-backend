@@ -1,4 +1,4 @@
-"""CLI: ``python -m app.docs [--output PATH]`` writes the data dictionary."""
+"""CLI : ``python -m app.docs [--output CHEMIN]`` écrit le dictionnaire de données."""
 
 import argparse
 from datetime import datetime

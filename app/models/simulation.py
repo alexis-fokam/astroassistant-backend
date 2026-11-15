@@ -1,7 +1,7 @@
-"""Telemetry simulator and jury demo mode (spec F15).
+"""Simulateur de télémétrie et mode démo jury (F15).
 
-Everything produced during a simulation carries ``sim_run_id``: deleting a SimRun
-cascades to its readings, scores, alerts, packets, etc.
+Tout ce qui est produit pendant une simulation porte ``sim_run_id`` : supprimer un SimRun
+supprime en cascade ses mesures, scores, alertes, paquets, etc.
 """
 
 from __future__ import annotations

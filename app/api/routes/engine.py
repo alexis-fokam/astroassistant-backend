@@ -1,4 +1,4 @@
-"""Risk engine control and explanations (spec F2.7, §6)."""
+"""Pilotage du moteur de risque et explications (F2.7, §6)."""
 
 from __future__ import annotations
 
@@ -51,7 +51,7 @@ def engine_status(db: DbSession, _: CurrentMember) -> EngineStatus:
 
 @router.post("/engine/run", response_model=EngineReport)
 async def engine_run(db: DbSession, cmo: CurrentCmo, force: bool = False) -> EngineReport:
-    """Run the pipeline now (CMO). ``force`` recomputes even without new telemetry."""
+    """Lancer le pipeline maintenant (CMO). ``force`` recalcule même sans nouvelle mesure."""
     report = run_once(db, force=force)
     audit.record(db, "engine.run", actor=cmo, force=force, alerts=report.new_alert_ids)
     db.commit()
@@ -61,7 +61,7 @@ async def engine_run(db: DbSession, cmo: CurrentCmo, force: bool = False) -> Eng
 
 @router.get("/alerts/{alert_id}/explanation", response_model=AlertExplanation)
 def explanation(alert_id: int, db: DbSession, viewer: CurrentMember) -> AlertExplanation:
-    """Why an alert fired (F2.7): factors, rule, anomaly score and confirmations."""
+    """Pourquoi une alerte s'est déclenchée (F2.7) : facteurs, règle, score, confirmations."""
     alert = db.get(Alert, alert_id)
     if alert is None:
         raise HTTPException(status.HTTP_404_NOT_FOUND, "Alerte introuvable")
@@ -91,7 +91,7 @@ def explanation(alert_id: int, db: DbSession, viewer: CurrentMember) -> AlertExp
 def domain_history(
     code: str, domain: RiskDomain, db: DbSession, viewer: CurrentMember, limit: int = 56
 ) -> DomainHistory:
-    """Score history of one domain, with the latest explanation factors."""
+    """Historique des scores d'un domaine, avec les derniers facteurs explicatifs."""
     member = visible_member(db, viewer, code)
     rows = list(
         db.scalars(

@@ -1,8 +1,8 @@
-"""Risk pipeline (spec §6, §8.1): features → rules → anomaly → scores → alerts.
+"""Pipeline de risque (§6, §8.1) : indicateurs → règles → anomalie → scores → alertes.
 
-``run_once`` processes every active crew member at the mission clock. A member is only
-recomputed when new telemetry arrived since the engine's last scores (or with ``force``),
-so the scheduler can call it every few seconds without filling the database.
+``run_once`` traite chaque membre actif à l'horloge de mission. Un membre n'est recalculé
+que si de nouvelles mesures sont arrivées depuis ses derniers scores (ou avec ``force``) :
+l'ordonnanceur peut l'appeler toutes les quelques secondes sans remplir la base.
 """
 
 from __future__ import annotations
@@ -205,8 +205,8 @@ def run_once(db: Session, at: datetime | None = None, *, force: bool = False) ->
         select(CrewMember).where(CrewMember.is_active.is_(True)).order_by(CrewMember.code)
     ).all()
     reports = [
-        # The live simulator writes mission telemetry (app/sim/live.py): outputs are mission
-        # scores and alerts, shown on every screen.
+        # Le simulateur (app/sim/live.py) écrit de la télémétrie de mission : les sorties sont
+        # des scores et alertes de mission, affichés sur tous les écrans.
         process_member(db, m, at, cfg, force=force)
         for m in members
     ]

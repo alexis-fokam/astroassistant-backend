@@ -1,13 +1,13 @@
-"""Demo database: mission, crew, pharmacy, protocols, scenarios, open datasets and
-a fictional 14-day history.
+"""Base de démo : mission, équipage, pharmacie, protocoles, scénarios, jeux ouverts et
+un historique fictif de 14 jours.
 
-Usage:
-    python -m app.seed                # fill an empty database (no-op if the crew exists)
-    python -m app.seed --reset        # drop and recreate every table, then fill
-    python -m app.seed --no-history   # reference data and datasets only
+Utilisation :
+    python -m app.seed                # remplit une base vide (rien si l'équipage existe)
+    python -m app.seed --reset        # supprime et recrée chaque table, puis remplit
+    python -m app.seed --no-history   # données de référence et jeux ouverts seulement
 
-Demo PINs are in ``DEMO_PINS``. Every person and value of the history is fictional;
-only the space-environment tables hold real NASA/NOAA measurements.
+Les PIN de démo sont dans ``DEMO_PINS``. Toutes les personnes et valeurs de l'historique sont
+fictives ; seules les tables d'environnement spatial contiennent de vraies mesures NASA/NOAA.
 """
 
 from __future__ import annotations
@@ -65,7 +65,7 @@ MISSION = {
     "day_length_min": 1440,
 }
 
-# Fictional profiles. Demo PINs only.
+# Profils fictifs. PIN de démo uniquement.
 DEMO_PINS = {"AV-01": "1111", "AV-02": "2222", "AV-03": "3333", "AV-04": "4444"}
 
 CREW = [
@@ -116,7 +116,7 @@ CREW = [
     },
 ]
 
-# Resting baselines (mean, std); slight per-member variation.
+# Références au repos (moyenne, écart-type) ; légère variation par membre.
 BASELINES: dict[Metric, tuple[float, float]] = {
     Metric.HEART_RATE: (64, 6),
     Metric.HRV_RMSSD: (48, 6),
@@ -270,7 +270,7 @@ SCENARIOS = [
 
 
 def load_protocol_files(directory: Path = PROTOCOLS_DIR) -> list[tuple[Path, dict, str]]:
-    """Read every library YAML: (path, content, SHA-256 of the file)."""
+    """Lire chaque YAML de la bibliothèque : (chemin, contenu, SHA-256 du fichier)."""
     files = []
     for path in sorted(directory.glob("*.yaml")):
         raw = path.read_bytes()
@@ -279,7 +279,7 @@ def load_protocol_files(directory: Path = PROTOCOLS_DIR) -> list[tuple[Path, dic
 
 
 def seed(session: Session, now: datetime | None = None, *, history: bool = True) -> bool:
-    """Fill an empty database. Returns False and does nothing if the crew already exists."""
+    """Remplir une base vide. Renvoie False sans rien faire si l'équipage existe déjà."""
     if session.scalar(select(func.count()).select_from(CrewMember)):
         return False
     now = now or DEMO_NOW
@@ -315,7 +315,7 @@ def seed(session: Session, now: datetime | None = None, *, history: bool = True)
         )
         offset = BASELINE_OFFSETS[member.code]
         for metric, (mean, std) in BASELINES.items():
-            # SpO2 and core temperature are tightly regulated: no per-member offset.
+            # SpO2 et température centrale sont très régulées : pas de décalage par membre.
             fixed = metric in (Metric.SPO2, Metric.CORE_TEMPERATURE)
             value = mean if fixed else round(mean * (1 + offset), 2)
             session.add(
@@ -327,7 +327,7 @@ def seed(session: Session, now: datetime | None = None, *, history: bool = True)
                     median=value,
                     mad=round(std * 0.6745, 3),
                     sample_count=1240,
-                    # Pre-flight baseline; the engine refreshes it from in-flight data (F2.1).
+                    # Référence d'avant vol, rafraîchie par le moteur en vol (F2.1).
                     computed_at=datetime.combine(MISSION_START, datetime.min.time(), UTC),
                 )
             )
@@ -374,7 +374,7 @@ def seed(session: Session, now: datetime | None = None, *, history: bool = True)
     for spec in SCENARIOS:
         session.add(SimScenario(**spec))
 
-    # Contact windows every 12 h, from the start of the history to 3 days ahead (F10.3).
+    # Fenêtres de contact toutes les 12 h, du début de l'historique à 3 jours en avant (F10.3).
     first = now.replace(minute=0, second=0, microsecond=0) + timedelta(hours=2)
     for i in range(-2 * HISTORY_DAYS, 6):
         start = first + timedelta(hours=12 * i)

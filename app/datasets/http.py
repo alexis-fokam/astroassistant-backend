@@ -1,4 +1,4 @@
-"""Minimal HTTP helpers on the standard library (no extra runtime dependency)."""
+"""Utilitaires HTTP minimaux sur la bibliothèque standard (aucune dépendance en plus)."""
 
 from __future__ import annotations
 
@@ -18,13 +18,13 @@ def _request(url: str) -> urllib.request.Request:
 
 
 def get_json(url: str, retries: int = 3) -> Any:
-    """GET a JSON document, retrying transient failures with backoff."""
+    """GET d'un document JSON, en réessayant les échecs passagers avec attente croissante."""
     for attempt in range(retries):
         try:
             with urllib.request.urlopen(_request(url), timeout=TIMEOUT_S) as response:
                 return json.load(response)
         except urllib.error.HTTPError as error:
-            # 429 = rate limited (DEMO_KEY allows ~30 requests per hour): wait and retry.
+            # 429 = quota dépassé (DEMO_KEY : ~30 requêtes/heure) : attendre et réessayer.
             if error.code != 429 or attempt == retries - 1:
                 raise
         except urllib.error.URLError:
@@ -35,7 +35,7 @@ def get_json(url: str, retries: int = 3) -> Any:
 
 
 def iter_lines(url: str) -> Iterator[str]:
-    """Stream a large text file line by line without keeping it on disk."""
+    """Lire un gros fichier texte ligne par ligne sans le garder sur le disque."""
     with urllib.request.urlopen(_request(url), timeout=TIMEOUT_S) as response:
         for raw in response:
             yield raw.decode("latin-1").rstrip("\r\n")

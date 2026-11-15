@@ -1,4 +1,4 @@
-"""AI pipeline outputs: computed features and per-domain risk scores."""
+"""Sorties du pipeline IA : indicateurs calculés et scores de risque par domaine."""
 
 from __future__ import annotations
 

@@ -1,4 +1,4 @@
-"""Store-and-forward export queue (spec F10): gzip JSON packets signed with SHA-256."""
+"""File d'export différée (F10) : paquets JSON gzip signés en SHA-256."""
 
 from __future__ import annotations
 
@@ -16,7 +16,7 @@ from app.models.enums import SyncPacketKind, SyncPacketStatus
 
 
 def encode(content: dict[str, Any]) -> bytes:
-    # mtime=0 makes the archive, and therefore its hash, depend on the content only.
+    # mtime=0 rend l'archive, et donc son empreinte, dépendante du seul contenu.
     raw = json.dumps(content, ensure_ascii=False, sort_keys=True, default=str).encode()
     return gzip.compress(raw, mtime=0)
 
@@ -48,7 +48,7 @@ def queue_packet(
 
 
 def export_queue(db: Session) -> list[SyncPacket]:
-    """Packets waiting for the next contact window: priority first, then age (F10.2)."""
+    """Paquets en attente de la prochaine fenêtre de contact : priorité, puis ancienneté (F10.2)."""
     return list(
         db.scalars(
             select(SyncPacket)

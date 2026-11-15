@@ -35,7 +35,7 @@ Toutes les 5 secondes, pour chaque astronaute qui a reçu de nouvelles mesures, 
 | `HR-02` | Cardio | Avertissement | z-score robuste de la FC sur 1 h ≥ 2,5 | — | Statistique : environ 1 % de faux positifs sous une loi normale |
 | `ANOMALY-01` | Cardio | Avertissement | Score Isolation Forest ≥ 0,85 | — | Modèle entraîné sur la référence individuelle (contamination 2 %) |
 | `SANS-01` | Neuro-oculaire | Avertissement | Vision modifiée ≥ 2/3 **et** céphalées ≥ 2/3, 2 jours | PRT-SANS-01 | NASA HRP, risque SANS (syndrome neuro-oculaire du vol spatial) |
-| `HRV-01` | Comportemental | Avertissement | VFC < 80 % de la référence **et** (stress ≥ 7/10 **ou** 3 nuits < 6 h) | PRT-STRESS-01 | Cahier des charges F4.2 ; à confirmer sur WESAD (§4) |
+| `HRV-01` | Comportemental | Avertissement | VFC < 80 % de la référence **et** (stress ≥ 7/10 **ou** 3 nuits < 6 h) | PRT-STRESS-01 | Cahier des charges F4.2 ; **vérifié sur WESAD** : sous stress, la VFC tombe à 63 % de la référence (§4.2) |
 | `HRV-TREND-01` | Comportemental | Avertissement | Pente de la VFC ≤ −0,15 ms/h (−3,6 ms/jour) **et** VFC < 90 % | — | Détection précoce d'une baisse de la VFC |
 | `PVT-01` | Comportemental | Avertissement | ≥ 3 inattentions **et** temps de réaction ≥ 115 % de l'habituel | — | PVT de 3 min, inattention = réponse > 500 ms (Basner et al.) |
 | `EX-MISSED-01` | Musculo-squelettique | Avertissement | ≥ 2 séances de résistance manquées d'affilée | PRT-EX-03 | Cahier des charges F6 |
@@ -96,18 +96,19 @@ Ces essais reposent sur les données du simulateur : le résultat est donc **opt
 | Couverture des tests du moteur | 93 % (cible ≥ 70 %) | `pytest --cov=app.engine` |
 | **BIDMC** (53 patients de soins intensifs, 25 365 s) | `CARDIO-CRIT-01` se déclenche chez **0 patient sur 53**. `SPO2-CRIT-01` se déclenche chez **3 patients sur 53** (3,8 % du temps), tous réellement en hypoxémie. La SpO₂ médiane est de 98 %, et 17 % du temps passe sous 94 % | `python -m app.engine.calibration bidmc` |
 | **Sleep-EDF** (102 nuits d'adultes sains, épisode de sommeil principal) | Sommeil médian **6,8 h**, efficacité médiane **93 %**, 15 réveils médians. **22,5 % des nuits durent moins de 6 h** : une nuit courte isolée est banale, d'où l'exigence de 3 nuits consécutives dans `HRV-01` | `python -m app.engine.calibration sleep` |
-| WESAD : sensibilité et taux de fausses alertes de `HRV-01` | *À exécuter, après téléchargement manuel de WESAD* | `python -m app.engine.calibration wesad` |
+| **WESAD** (15 personnes, 513 fenêtres de 60 s d'ECG) | Sous stress, la VFC (RMSSD) médiane tombe à **63 % de la référence** au repos. Le critère VFC seul, au seuil de **80 %**, repère **62,5 %** des fenêtres de stress pour **14,7 %** de fenêtres faussement signalées. À 60 % : 46,7 % / 5,8 % ; à 90 % : 66,4 % / 28,3 % | `python -m app.engine.calibration wesad` |
 
 Les résultats chiffrés de la calibration sont écrits dans `docs/calibration.json`.
 
 **Ce que la calibration a confirmé.**
+- **Seuil de la VFC à 80 %.** Sur WESAD, c'est le meilleur compromis : en dessous (60-70 %), on rate près de la moitié des épisodes de stress ; au-dessus (90 %), plus d'une fenêtre normale sur quatre serait signalée. Le seuil du moteur reste donc 80 %.
 - **Spécificité des règles critiques.** Combiner tachycardie et désaturation évite les alertes chez des patients pourtant malades. Seules les vraies hypoxémies (≤ 90 %) déclenchent une alerte critique.
 - **Seuil de sommeil.** Avec 22,5 % des nuits courtes chez des adultes sains, une alerte sur une seule nuit en déclencherait environ une fois par semaine et par astronaute. Exiger 3 nuits consécutives ramène ce risque à environ 1 % si les nuits sont indépendantes.
 - **Aucun seuil modifié.** Les seuils du moteur restent ceux de `config.yaml` et `rules.yaml`.
 
 ## 5. Limites connues
 
-- **Seuil de la VFC encore à confirmer.** Tant que l'évaluation sur WESAD n'a pas tourné, le seuil de 80 % de la VFC reste une valeur de la littérature. Les seuils de SpO₂, de fréquence cardiaque et de sommeil, eux, ont été vérifiés sur BIDMC et Sleep-EDF.
+- **La VFC seule ne suffit pas.** Sur WESAD, le critère VFC à 80 % signale aussi 14,7 % des fenêtres de 60 s sans stress. C'est pourquoi `HRV-01` exige en plus un stress déclaré ≥ 7/10 ou 3 nuits courtes, et deux mesures consécutives : la VFC seule ne déclenche jamais d'alerte. Les seuils de SpO₂, de fréquence cardiaque et de sommeil ont été vérifiés sur BIDMC et Sleep-EDF.
 - **Populations différentes.** Les données terrestres (étudiants pour WESAD, patients de soins intensifs pour BIDMC, adultes sains pour Sleep-EDF) ne reproduisent pas la physiologie en microgravité. Elles servent à **calibrer des ordres de grandeur**, pas à valider le moteur pour le vol.
 - **Mesures de radiation partielles.** Curiosity RAD n'a été mesuré qu'un jour sur trois, et le blindage du rover n'est pas celui d'un habitat.
 - **Isolation Forest.** Il faut au moins 72 h de données propres par astronaute avant que le modèle puisse fonctionner.

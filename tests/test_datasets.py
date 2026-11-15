@@ -1,4 +1,4 @@
-"""Open dataset parsers (offline: no network access)."""
+"""Lecteurs des jeux de données ouverts (hors ligne : aucun accès réseau)."""
 
 import csv
 from datetime import date
@@ -8,7 +8,7 @@ import pytest
 from app.datasets import msl_rad
 from app.datasets.msl_rad import CSV_HEADER, file_date, finalize, parse_lines
 
-# Two observations in the RDR layout; the second one is flagged invalid (negative dose).
+# Deux observations au format RDR ; la seconde est invalide (dose négative).
 RDR_SAMPLE = """\
 [OBSERVATION: 01]
 START_OBS_UTC="2012-098 04:12:30"
@@ -125,7 +125,7 @@ def test_rmssd_from_a_synthetic_ecg() -> None:
 
     from app.engine.calibration import ECG_HZ, rmssd, rr_intervals
 
-    # 60 s of spikes alternating 800 ms / 850 ms R-R intervals → RMSSD = 50 ms.
+    # 60 s de pics alternant des intervalles R-R de 800 / 850 ms → RMSSD = 50 ms.
     ecg = np.zeros(ECG_HZ * 60)
     t, toggle = 0.5, False
     while t < 59.5:

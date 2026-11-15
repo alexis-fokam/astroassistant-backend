@@ -1,8 +1,8 @@
-"""NOAA GOES integral proton flux (spec F5.4: early warning of solar radiation storms).
+"""Flux intégral de protons NOAA GOES (F5.4 : alerte précoce de tempête radiative).
 
-NOAA issues a solar radiation storm alert (S1) when the >= 10 MeV flux reaches 10 pfu;
-the engine reuses that threshold. Only the last 7 days are served in real time, so the
-file is a snapshot kept for offline demos.
+La NOAA émet une alerte de tempête radiative (S1) quand le flux >= 10 MeV atteint 10 pfu ;
+le moteur reprend ce seuil. Seuls les 7 derniers jours sont servis en temps réel : le
+fichier est un instantané conservé pour les démos hors ligne.
 """
 
 from __future__ import annotations
@@ -27,7 +27,7 @@ def fetch() -> Path:
 
 
 def peak_10mev(payload: list[dict]) -> float:
-    """Highest >= 10 MeV flux in the snapshot (pfu)."""
+    """Flux >= 10 MeV le plus élevé de l'instantané (pfu)."""
     values = [
         row["flux"]
         for row in payload

@@ -1,7 +1,7 @@
-"""Multivariate anomaly detection with an Isolation Forest per crew member (spec F2.3).
+"""Détection d'anomalies multivariée avec un Isolation Forest par membre (F2.3).
 
-Each model is trained on the member's own hourly vectors from the baseline window
-(the most recent days are excluded, so an ongoing drift does not become "normal").
+Chaque modèle est entraîné sur les vecteurs horaires du membre dans la fenêtre de référence
+(les jours les plus récents sont exclus, pour qu'une dérive en cours ne devienne pas « normale »).
 """
 
 from __future__ import annotations
@@ -25,7 +25,7 @@ _CACHE: dict[tuple[int, str, int], IsolationForest] = {}
 def hourly_matrix(
     data: MemberData, metrics: list[Metric], start: datetime, end: datetime
 ) -> np.ndarray:
-    """One row per hour with a reading of every metric (hour means)."""
+    """Une ligne par heure où chaque mesure a une valeur (moyennes horaires)."""
     buckets: dict[datetime, dict[Metric, list[float]]] = {}
     for metric in metrics:
         series = data.series.get(metric)
@@ -69,14 +69,14 @@ def _model(data: MemberData, at: datetime, cfg: EngineConfig) -> IsolationForest
 
 
 def model_path(code: str, end: datetime) -> Path:
-    """One model per member and training window (spec §8: models persisted with joblib)."""
+    """Un modèle par membre et par fenêtre d'entraînement (§8 : modèles sauvés avec joblib)."""
     return Path(get_settings().models_dir) / f"isolation_forest_{code}_{end:%Y%m%d}.joblib"
 
 
 def score(
     data: MemberData, features: dict[str, float | None], at: datetime, cfg: EngineConfig
 ) -> float | None:
-    """Anomaly score in [0, 1]: ≈ 0.5 at the decision boundary, → 1 for strong anomalies."""
+    """Score d'anomalie dans [0, 1] : ≈ 0,5 à la frontière de décision, → 1 si anomalie forte."""
     at = naive_utc(at)
     vector = [features.get(f"{m}_1h") for m in cfg.anomaly["metrics"]]
     if any(v is None for v in vector):

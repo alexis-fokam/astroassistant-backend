@@ -1,4 +1,4 @@
-"""Alert and emergency payloads."""
+"""Données échangées pour les alertes et les urgences."""
 
 from __future__ import annotations
 
@@ -43,7 +43,7 @@ class AlertOut(OrmModel):
 
 
 class AlertPatch(BaseModel):
-    """Acknowledge (with a comment, F9.2) or resolve an alert."""
+    """Acquitter (avec un commentaire, F9.2) ou résoudre une alerte."""
 
     status: Literal["acknowledged", "resolved"]
     comment: str | None = Field(default=None, max_length=2000)

@@ -1,4 +1,4 @@
-"""Single entry point to raise a clinical alert (spec F2.7, F9.2)."""
+"""Point d'entrée unique pour lever une alerte clinique (F2.7, F9.2)."""
 
 from __future__ import annotations
 
@@ -15,7 +15,7 @@ from app.services import protocols as library
 
 
 def open_alert(db: Session, member: CrewMember, rule_code: str) -> Alert | None:
-    """An unresolved alert of the same rule for the member, if any."""
+    """Une alerte non résolue de la même règle pour ce membre, s'il y en a une."""
     return db.scalars(
         select(Alert).where(
             Alert.crew_member_id == member.id,
@@ -46,7 +46,7 @@ def create_alert(
     sim_run_id: int | None = None,
     actor_label: str = "Moteur IA",
 ) -> Alert | None:
-    """Create, audit and return the alert; None when the same rule is already open."""
+    """Créer, auditer et renvoyer l'alerte ; None si la même règle est déjà ouverte."""
     if rule_code and open_alert(db, member, rule_code):
         return None
     protocol = library.active_protocol(db, protocol_code) if protocol_code else None

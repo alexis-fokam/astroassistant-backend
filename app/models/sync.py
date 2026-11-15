@@ -1,4 +1,4 @@
-"""Delayed synchronisation with Earth, store-and-forward (spec F10, §9 sync_packet)."""
+"""Synchronisation différée avec la Terre, stockage puis envoi (F10, §9 sync_packet)."""
 
 from __future__ import annotations
 
@@ -14,7 +14,7 @@ from app.models.enums import SyncPacketKind, SyncPacketStatus
 if TYPE_CHECKING:
     from app.models.mission import Mission
 
-# Export priorities: CRITICAL alerts go first (spec F10.2).
+# Priorités d'export : les alertes CRITICAL partent en premier (F10.2).
 PRIORITY_CRITICAL = 0
 PRIORITY_HIGH = 1
 PRIORITY_NORMAL = 2

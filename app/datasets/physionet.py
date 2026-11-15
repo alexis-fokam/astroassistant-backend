@@ -1,15 +1,15 @@
-"""Open physiological datasets used to calibrate the risk engine (spec §6, §12).
+"""Jeux physiologiques ouverts servant à calibrer le moteur de risque (§6, §12).
 
-* BIDMC (PhysioNet, ODC-By): 53 recordings of ~8 min with heart rate, respiratory rate and
-  SpO2 at 1 Hz (``*_Numerics.csv``, a few kB each) → plausible ranges, SpO2 thresholds.
-* Sleep-EDF Expanded (PhysioNet, ODC-By), "sleep cassette" study of healthy adults:
-  expert hypnograms only (``*-Hypnogram.edf``, ~5 kB each) → sleep duration, efficiency,
-  latency and awakenings of healthy sleepers.
-* WESAD (Univ. Siegen, non-commercial research): must be downloaded by hand after reading
-  its terms; see ``app/engine/calibration.py`` for the stress evaluation.
+* BIDMC (PhysioNet, ODC-By) : 53 enregistrements d'environ 8 min avec FC, fréquence
+  respiratoire et SpO2 à 1 Hz (``*_Numerics.csv``, quelques Ko) → plages plausibles, seuils SpO2.
+* Sleep-EDF Expanded (PhysioNet, ODC-By), étude « sleep cassette » d'adultes sains :
+  hypnogrammes d'experts uniquement (``*-Hypnogram.edf``, ~5 Ko) → durée, efficacité,
+  latence et réveils de dormeurs sains.
+* WESAD (univ. de Siegen, recherche non commerciale) : à télécharger à la main après lecture
+  de ses conditions ; voir ``app/engine/calibration.py`` pour l'évaluation du stress.
 
-BIDMC and Sleep-EDF extracts (~1.2 MB, ODC-By) are versioned in ``data/physionet/`` and
-imported into the database by the seed; WESAD (~2.5 GB) stays in ``data/external/``.
+Les extraits BIDMC et Sleep-EDF (~1,2 Mo, ODC-By) sont versionnés dans ``data/physionet/`` et
+importés en base par le seed ; WESAD (~2,5 Go) reste dans ``data/external/``.
 """
 
 from __future__ import annotations
@@ -27,16 +27,16 @@ BIDMC_DIR = PHYSIONET_DIR / "bidmc"
 SLEEP_EDF_ROOT = "https://physionet.org/files/sleep-edfx/1.0.0/sleep-cassette/"
 SLEEP_EDF_DIR = PHYSIONET_DIR / "sleep-edfx"
 WESAD_DIR = EXTERNAL_DIR / "wesad"
-# HRV per 60 s window extracted from WESAD: small, versioned and imported by the seed.
+# VFC par fenêtre de 60 s extraite de WESAD : petite, versionnée et importée par le seed.
 WESAD_WINDOWS_CSV = PHYSIONET_DIR / "wesad_hrv_windows.csv"
 
 _HYPNOGRAM_RE = re.compile(r'href="(SC4\d{3}E[0-9A-Z]-Hypnogram\.edf)"')
-# Rechtschaffen & Kales stages as written in the EDF+ annotations.
+# Stades de Rechtschaffen & Kales tels qu'écrits dans les annotations EDF+.
 SLEEP_STAGES = {"W": "wake", "1": "n1", "2": "n2", "3": "n3", "4": "n3", "R": "rem"}
 
 
 def _download(url: str, path: Path, retries: int = 4) -> Path:
-    """Download one small file, retrying slow or dropped connections."""
+    """Télécharger un petit fichier, en réessayant les connexions lentes ou coupées."""
     import time
     import urllib.request
 
@@ -82,7 +82,7 @@ def fetch_sleep_edf_hypnograms(limit: int | None = None) -> list[Path]:
 
 # --------------------------------------------------------------------- readers
 def read_bidmc(path: Path) -> dict[str, list[float]]:
-    """Columns HR, PULSE, RESP, SpO2 of one Numerics file (blank cells skipped)."""
+    """Colonnes HR, PULSE, RESP, SpO2 d'un fichier Numerics (cellules vides ignorées)."""
     columns: dict[str, list[float]] = {}
     with path.open(encoding="utf-8") as handle:
         reader = csv.DictReader(handle)
@@ -98,24 +98,24 @@ def read_bidmc(path: Path) -> dict[str, list[float]]:
 
 @dataclass(frozen=True)
 class SleepNight:
-    """Metrics over the main sleep episode (30 s epochs, daytime naps excluded).
+    """Mesures sur l'épisode de sommeil principal (époques de 30 s, siestes exclues).
 
-    Lights-off times are not in the hypnograms, so sleep latency is not computed.
+    L'heure d'extinction n'est pas dans les hypnogrammes : la latence n'est pas calculée.
     """
 
     record: str
     sleep_period_h: float  # sleep onset → final awakening
     total_sleep_h: float
     efficiency: float  # total sleep / sleep period
-    waso_min: float  # wake after sleep onset
-    awakenings: int  # wake bouts after sleep onset
+    waso_min: float  # éveil après l'endormissement
+    awakenings: int  # réveils après l'endormissement
     stages_h: dict[str, float]
 
 
 def read_hypnogram_annotations(path: Path) -> list[tuple[float, float, str]]:
-    """(onset s, duration s, stage) from an EDF+ annotation file, without extra libraries.
+    """(début s, durée s, stade) d'un fichier d'annotations EDF+, sans bibliothèque en plus.
 
-    EDF+ stores annotations as TALs: ``+onset\\x15duration\\x14text\\x14\\x00``.
+    EDF+ stocke les annotations en TAL : ``+onset\\x15duration\\x14text\\x14\\x00``.
     """
     raw = path.read_bytes()
     header_bytes = int(raw[184:192].decode("ascii").strip())
@@ -129,12 +129,12 @@ def read_hypnogram_annotations(path: Path) -> list[tuple[float, float, str]]:
 
 
 SLEEP = ("n1", "n2", "n3", "rem")
-# Wake longer than this ends a sleep episode (recordings last ~20 h and include naps).
-EPISODE_BREAK_EPOCHS = 120  # 60 min of 30 s epochs
+# Un éveil plus long que ceci termine un épisode (enregistrements de ~20 h, siestes incluses).
+EPISODE_BREAK_EPOCHS = 120  # 60 min en époques de 30 s
 
 
 def main_sleep_episode(epochs: list[str]) -> list[str]:
-    """Longest sleep episode: sleep epochs joined by wake/unscored gaps under 60 min."""
+    """Plus long épisode : époques de sommeil reliées par des éveils de moins de 60 min."""
     episodes: list[tuple[int, int]] = []
     start = last = None
     for i, stage in enumerate(epochs):

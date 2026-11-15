@@ -1,4 +1,4 @@
-"""Authentication, mission, crew and status payloads."""
+"""Données échangées : authentification, mission, équipage et statut."""
 
 from __future__ import annotations
 
@@ -70,7 +70,7 @@ class CrewSummary(BaseModel):
 
 
 class CrewStatus(BaseModel):
-    """Current status of one member (spec §10.1)."""
+    """Statut actuel d'un membre (§10.1)."""
 
     crew_id: str
     timestamp: datetime | None

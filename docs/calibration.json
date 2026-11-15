@@ -77,5 +77,40 @@
       "p99": 46.99
     },
     "nights_below_6h_pct": 22.5
+  },
+  "wesad": {
+    "dataset": "WESAD (Univ. Siegen), ECG thoracique 700 Hz, fenêtres de 60 s",
+    "subjects": 15,
+    "median_rmssd_stress_over_baseline": 0.631,
+    "hrv_rule": [
+      {
+        "ratio": 0.6,
+        "sensitivity": 0.467,
+        "false_alarm_rate": 0.058,
+        "stress_windows": 152,
+        "non_stress_windows": 361
+      },
+      {
+        "ratio": 0.7,
+        "sensitivity": 0.572,
+        "false_alarm_rate": 0.091,
+        "stress_windows": 152,
+        "non_stress_windows": 361
+      },
+      {
+        "ratio": 0.8,
+        "sensitivity": 0.625,
+        "false_alarm_rate": 0.147,
+        "stress_windows": 152,
+        "non_stress_windows": 361
+      },
+      {
+        "ratio": 0.9,
+        "sensitivity": 0.664,
+        "false_alarm_rate": 0.283,
+        "stress_windows": 152,
+        "non_stress_windows": 361
+      }
+    ]
   }
 }

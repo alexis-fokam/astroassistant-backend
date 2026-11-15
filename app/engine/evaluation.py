@@ -1,13 +1,14 @@
-"""Evaluation of the risk engine on injected anomalies (new spec §5, jury indicators).
+"""Évaluation du moteur de risque sur des anomalies injectées (§5, indicateurs du jury).
 
-    python -m app.engine.evaluation          # writes docs/evaluation.json
+    python -m app.engine.evaluation          # écrit docs/evaluation.json
 
-For every anomaly the live simulator can inject (tachycardia, SpO2 drop, fever, HRV
-drop, solar storm, SANS, deconditioning) and every crew member who does not already show
-that condition in the demo history, a fresh copy of the demo database is driven tick by
-tick until the expected rule fires (or the time budget runs out). Nominal runs without
-injection count the false alerts. Reported, as the specification asks: detection rate,
-false-alarm rate, inference time per crew member and model size.
+Pour chaque anomalie que le simulateur peut injecter (tachycardie, chute de SpO2, fièvre,
+baisse de VFC, tempête solaire, SANS, déconditionnement) et chaque membre qui ne présente
+pas déjà ce trouble dans l'historique de démo, une copie neuve de la base de démo avance pas
+à pas jusqu'à ce que la règle attendue se déclenche (ou que le budget de temps s'épuise).
+Des exécutions nominales sans injection comptent les fausses alertes. Comme le demande le
+cahier des charges : taux de détection, taux de fausses alertes, temps d'inférence par
+membre et taille du modèle.
 """
 
 from __future__ import annotations
@@ -30,7 +31,7 @@ from app.sim import live
 
 OUTPUT = BASE_DIR / "docs" / "evaluation.json"
 
-# anomaly → (members without that condition in the demo story, speed, tick budget)
+# anomalie → (membres sans ce trouble dans l'histoire de démo, vitesse, budget de pas)
 PLAN: dict[str, tuple[tuple[str, ...], int, int]] = {
     "tachycardia": (("AV-01", "AV-02", "AV-04"), 60, 30),
     "desaturation": (("AV-01", "AV-02", "AV-04"), 60, 30),
@@ -40,7 +41,7 @@ PLAN: dict[str, tuple[tuple[str, ...], int, int]] = {
     "sans": (("AV-01", "AV-02", "AV-03"), 60, 5),
     "deconditioning": (("AV-02", "AV-03", "AV-04"), 60, 5),
 }
-# (speed, ticks, seed): 1.5 h, 25 h and 50 h of normal physiology for the 4 members.
+# (vitesse, pas, graine) : 1,5 h, 25 h et 50 h de physiologie normale pour les 4 membres.
 NOMINAL_RUNS = ((60, 45, 7), (1000, 45, 11), (1000, 90, 13))
 
 
@@ -118,7 +119,7 @@ def evaluate() -> dict:
         settings.models_dir = str(folder / "models")
         try:
             template = _template(folder)
-            # False alerts are counted on normal physiology only: a database without the
+            # Les fausses alertes ne sont comptées que sur une physiologie normale : une base sans
             # demo story, whose anomalies (e.g. AV-03 tachycardia) would otherwise linger.
             clean = _template(folder, history=False)
             trials, timings = [], []

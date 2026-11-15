@@ -1,4 +1,4 @@
-"""Vitals, radiation and self-reported data (spec F1, F3, F5, F6, F8)."""
+"""Constantes, radiation et données déclarées (F1, F3, F5, F6, F8)."""
 
 from __future__ import annotations
 
@@ -47,7 +47,7 @@ router = APIRouter()
     tags=["vitals"],
 )
 async def ingest_vitals(body: VitalBatch, db: DbSession, viewer: CurrentMember) -> VitalBatchResult:
-    """Ingest a batch of readings for one member (wearable or manual entry)."""
+    """Recevoir un lot de mesures pour un membre (capteur porté ou saisie manuelle)."""
     member = subject_member(db, viewer, body.crew_code)
     device = None
     if body.device_serial:
@@ -89,7 +89,7 @@ def vital_series(
     include_artifacts: bool = False,
     limit: int = Query(default=2000, ge=1, le=20000),
 ) -> VitalSeries:
-    """Time series of one metric for charts (default: last 24 h of mission time)."""
+    """Série temporelle d'une mesure pour les graphes (défaut : 24 dernières h de mission)."""
     member = visible_member(db, viewer, code)
     end = end or mission_now(db)
     start = start or end - timedelta(hours=24)
@@ -132,7 +132,7 @@ def radiation(
     viewer: CurrentMember,
     hours: int = Query(default=72, ge=1, le=24 * 30),
 ) -> RadiationOut:
-    """Cumulative dose, current rate and projection to the end of the mission (F5)."""
+    """Dose cumulée, débit actuel et projection jusqu'à la fin de la mission (F5)."""
     member = visible_member(db, viewer, code)
     doses = list(
         db.scalars(

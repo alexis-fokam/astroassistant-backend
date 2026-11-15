@@ -1,7 +1,7 @@
-"""Timestamped, append-only audit trail (spec F14.1, §7, §9 audit_log).
+"""Journal d'audit horodaté, en ajout seul (F14.1, §7, §9 audit_log).
 
-Each entry is chained to the previous one by SHA-256 (``prev_hash`` → ``entry_hash``);
-on SQLite, triggers reject UPDATE and DELETE on the table.
+Chaque entrée est chaînée à la précédente par SHA-256 (``prev_hash`` → ``entry_hash``) ;
+sous SQLite, des triggers refusent UPDATE et DELETE sur la table.
 """
 
 from __future__ import annotations
@@ -34,7 +34,7 @@ class AuditLog(Base):
     at: Mapped[datetime] = mapped_column(
         default=utcnow, index=True, comment="Horodatage de l'action (UTC)"
     )
-    # No ON DELETE: a crew profile referenced by the audit trail cannot be deleted.
+    # Pas de ON DELETE : un profil référencé par le journal d'audit ne peut pas être supprimé.
     actor_id: Mapped[int | None] = mapped_column(
         ForeignKey("crew_members.id"),
         index=True,
@@ -69,10 +69,10 @@ class AuditLog(Base):
         entity_id: int | None,
         details: dict[str, Any],
     ) -> str:
-        """Hash of one entry, chained to the previous one (verifiable chain).
+        """Empreinte d'une entrée, chaînée à la précédente (chaîne vérifiable).
 
-        The timestamp is normalised to naive UTC: SQLite returns naive datetimes, so the
-        hash must not depend on whether ``at`` carries a timezone.
+        L'horodatage est ramené en UTC naïf : SQLite renvoie des dates naïves, donc
+        l'empreinte ne doit pas dépendre de la présence d'un fuseau dans ``at``.
         """
         if at.tzinfo is not None:
             at = at.astimezone(UTC).replace(tzinfo=None)
