@@ -2,7 +2,7 @@
 
 > Document généré par `python -m app.docs` à partir des modèles SQLAlchemy (`backend/app/models`). Ne pas modifier à la main.
 
-Généré le 14/11/2026 à 22:03.
+Généré le 15/11/2026 à 10:46.
 
 ## Synthèse
 
@@ -14,7 +14,7 @@ Généré le 14/11/2026 à 22:03.
 | Contraintes CHECK métier | 57 |
 | Index secondaires | 54 |
 | Énumérations | 22 |
-| Lignes après `python -m app.seed` | 22 446 |
+| Lignes après `python -m app.seed` | 22 751 |
 
 ### Conventions
 
@@ -41,7 +41,7 @@ Généré le 14/11/2026 à 22:03.
 | Bien-être | [`pvt_results`](#pvt_results) | 60 | Résultat d'un test de vigilance psychomotrice de 3 minutes (F8, §9 pvt_result). |
 | Bien-être | [`sleep_sessions`](#sleep_sessions) | 56 | Période de sommeil mesurée ou déclarée (F7.1, §9 sleep_session). |
 | Radiations | [`radiation_doses`](#radiation_doses) | 1404 | Relevé dosimétrique d'un astronaute : débit et cumuls mission/carrière (F5.1, F5.2). |
-| Radiations | [`space_weather_events`](#space_weather_events) | 200 | Événement de météo spatiale : éruption, SPE, CME (F5.3, F5.4), réel (DONKI) ou simulé. |
+| Radiations | [`space_weather_events`](#space_weather_events) | 505 | Événement de météo spatiale : éruption, SPE, CME (F5.3, F5.4), réel (DONKI) ou simulé. |
 | Données ouvertes | [`cruise_dose_samples`](#cruise_dose_samples) | 5117 | Débit de dose réel mesuré par Curiosity RAD pendant le transit vers Mars (référence F5). |
 | Données ouvertes | [`dataset_sources`](#dataset_sources) | 8 | Jeu de données ouvert utilisé par le projet : origine, licence, date de récupération. |
 | Données ouvertes | [`proton_flux_readings`](#proton_flux_readings) | 4026 | Flux de protons intégral mesuré par les satellites GOES de la NOAA (alerte précoce F5.4). |
@@ -534,7 +534,7 @@ Modèle `RadiationDose` · 10 colonnes · 1404 lignes dans la base de démonstra
 
 Événement de météo spatiale : éruption, SPE, CME (F5.3, F5.4), réel (DONKI) ou simulé.
 
-Modèle `SpaceWeatherEvent` · 12 colonnes · 200 lignes dans la base de démonstration.
+Modèle `SpaceWeatherEvent` · 12 colonnes · 505 lignes dans la base de démonstration.
 
 | Colonne | Type | Null | Défaut | Clés | Description |
 |---|---|:---:|---|---|---|

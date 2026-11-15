@@ -46,6 +46,29 @@ acquitter une alerte, enregistrer un usage de pharmacie, clôturer une urgence o
 L'horloge de mission suit la dernière télémétrie reçue : avec la base de démo, l'API répond
 à J+142 · 14:05, comme le frontend.
 
+## Moteur IA (`app/engine/`, cahier des charges §6)
+
+Toutes les 5 s (`AV_PIPELINE_INTERVAL_SECONDS`), le pipeline reprend chaque membre dont de
+nouvelles mesures sont arrivées :
+
+1. **Nettoyage** : valeurs hors plage physiologique ou de qualité < 0,5 écartées (`config.yaml`).
+2. **Indicateurs** : valeur actuelle (5 min), moyennes 1 h et 24 h, z-scores robustes par
+   rapport à la baseline individuelle, ratio VFC/baseline, dette de sommeil, séances manquées,
+   PVT, check-in, débit et dose de carrière (`features.py`).
+3. **Règles cliniques** en YAML (`rules.yaml`), avec les mêmes codes que les protocoles
+   (`HRV-01`, `SANS-01`, `EX-MISSED-01`, `RAD-SPE-01`…). Une règle WARNING doit tenir sur deux
+   mesures consécutives ; une règle CRITICAL déclenche immédiatement.
+4. **Isolation Forest** par astronaute, entraîné sur sa propre baseline (`anomaly.py`).
+5. **Scores 0-100** par domaine avec les 3 facteurs explicatifs, score global et statut
+   (`scoring.py`) ; alertes créées sans doublon par `app/services/alerts.py`.
+
+Les seuils de radiation viennent du notebook `analyse_radiations_nasa.ipynb`. Sur la base de
+démo, le moteur retrouve seul l'histoire de J+142 : AV-01 en WARNING (séances manquées), AV-02
+en WARNING (VFC basse), AV-03 en CRITICAL (tachycardie et désaturation), AV-04 en WARNING
+(suspicion de SANS). Routes : `GET /api/v1/engine/status`, `POST /api/v1/engine/run` (CMO),
+`GET /api/v1/alerts/{id}/explanation`, `GET /api/v1/crew/{code}/domains/{domain}`.
+Désactiver la tâche de fond : `AV_PIPELINE_ENABLED=false`.
+
 ## Tests et lint
 
 ```bash
