@@ -96,3 +96,56 @@ def test_contact_window_scenario_sends_a_packet(client: TestClient, cmo) -> None
     assert any(p["kind"] == "daily_summary" and p["sent_at"] for p in packets)
     anomalies = client.get("/api/v1/sim/anomalies", headers=cmo).json()
     assert {a["code"] for a in anomalies} >= {"tachycardia", "radiation", "fever"}
+
+
+# --------------------------------------------------------------------- communication delay
+def test_ground_instruction_arrives_after_the_delay(client: TestClient, cmo) -> None:  # noqa: F811
+    astronaut = login(client, "AV-02")
+    body = {
+        "crew_code": "AV-02",
+        "subject": "Hydratation",
+        "body": "Boire 500 ml de plus aujourd'hui.",
+    }
+    sent = client.post("/api/v1/ground/instructions", headers=cmo, json=body).json()
+    assert sent["in_transit"] is True  # Mars transit: 12 min one way
+    onboard = client.get("/api/v1/sync/messages", headers=astronaut).json()
+    assert all(m["subject"] != "Hydratation" for m in onboard)
+
+    start(client, cmo, "S1", speed=60)  # 2 simulated minutes per tick
+    client.post("/api/v1/sim/tick", headers=cmo, params={"count": 7})
+    onboard = client.get("/api/v1/sync/messages", headers=astronaut).json()
+    assert any(m["subject"] == "Hydratation" and not m["in_transit"] for m in onboard)
+    ground = client.get("/api/v1/ground/instructions", headers=cmo).json()
+    assert any(m["subject"] == "Hydratation" for m in ground)
+
+
+def test_packets_and_alerts_show_ground_reception_time(client: TestClient, cmo) -> None:  # noqa: F811
+    from datetime import datetime
+
+    start(client, cmo, "S6", speed=60)
+    packet = next(
+        p
+        for p in client.get(
+            "/api/v1/sync/packets", headers=cmo, params={"queued_only": False}
+        ).json()
+        if p["kind"] == "daily_summary" and p["sent_at"]
+    )
+    delay = datetime.fromisoformat(packet["received_at_ground"]) - datetime.fromisoformat(
+        packet["sent_at"]
+    )
+    assert delay.total_seconds() == 720 and packet["in_transit"] is True
+    alert = client.get("/api/v1/alerts", headers=cmo).json()[0]
+    gap = datetime.fromisoformat(alert["ground_received_at"]) - datetime.fromisoformat(
+        alert["triggered_at"]
+    )
+    assert gap.total_seconds() == 720
+
+
+def test_mission_profile_sets_the_delay(client: TestClient, cmo) -> None:  # noqa: F811
+    astronaut = login(client, "AV-02")
+    patch = {"destination": "moon"}
+    assert client.patch("/api/v1/mission", headers=astronaut, json=patch).status_code == 403
+    mission = client.patch("/api/v1/mission", headers=cmo, json=patch).json()
+    assert mission["destination"] == "moon" and mission["one_way_latency_s"] == 3
+    mars = client.patch("/api/v1/mission", headers=cmo, json={"destination": "mars_surface"}).json()
+    assert mars["one_way_latency_s"] == 1320 and mars["day_length_min"] == 1477

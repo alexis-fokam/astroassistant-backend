@@ -22,6 +22,10 @@ class PacketOut(OrmModel):
     created_at: datetime
     sent_at: datetime | None
     acknowledged_at: datetime | None
+    received_at_ground: datetime | None = Field(
+        description="Arrivée au sol : envoi + latence aller (délai de communication)"
+    )
+    in_transit: bool
 
 
 class ExportRequest(BaseModel):
@@ -57,6 +61,22 @@ class GroundMessageOut(OrmModel):
     sent_at: datetime | None
     received_at: datetime
     read_at: datetime | None
+    in_transit: bool = Field(description="Encore en route vers le vaisseau (délai)")
+
+
+class InstructionIn(BaseModel):
+    """Instruction written on the ground; it reaches the crew after the one-way delay."""
+
+    crew_code: str | None = Field(default=None, description="Vide : tout l'équipage")
+    subject: str = Field(min_length=1, max_length=160)
+    body: str = Field(min_length=1, max_length=4000)
+    author: str = Field(default="Dr M. Reyes · Houston", max_length=120)
+
+
+class MissionPatch(BaseModel):
+    """Mission profile (ISS, Moon, Mars): sets the communication delay."""
+
+    destination: Literal["low_earth_orbit", "moon", "mars_transit", "mars_surface"]
 
 
 class ContactWindowOut(OrmModel):

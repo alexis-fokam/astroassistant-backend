@@ -31,6 +31,7 @@ from app.schemas.ground import (
     GroundMessageOut,
     ImportRequest,
     InjectIn,
+    InstructionIn,
     PacketOut,
     ScenarioOut,
     ScenarioStart,
@@ -39,7 +40,14 @@ from app.schemas.ground import (
 )
 from app.services import audit
 from app.services.sync import export_queue, queue_packet
-from app.services.views import crew_summary, message_out, mission_now, packet_out, sim_run_out
+from app.services.views import (
+    crew_summary,
+    message_out,
+    mission_latency,
+    mission_now,
+    packet_out,
+    sim_run_out,
+)
 from app.sim import live
 from app.sim.controller import controller
 
@@ -118,7 +126,7 @@ def import_message(body: ImportRequest, db: DbSession, viewer: CurrentMember) ->
         is_instruction=body.is_instruction,
         sha256=digest,
         sent_at=body.sent_at,
-        received_at=datetime.now(UTC),
+        received_at=mission_now(db),  # imported on board: it has arrived
     )
     db.add(message)
     audit.record(db, "ground.import", actor=viewer, entity=message, subject=body.subject)
@@ -130,6 +138,8 @@ def import_message(body: ImportRequest, db: DbSession, viewer: CurrentMember) ->
 def messages(db: DbSession, viewer: CurrentMember) -> list[GroundMessageOut]:
     """Ground messages: crew-wide ones plus those addressed to the viewer (all for the CMO)."""
     query = select(GroundMessage).order_by(GroundMessage.received_at.desc())
+    # Messages still travelling from Earth are not on board yet (communication delay).
+    query = query.where(GroundMessage.received_at <= mission_now(db))
     if not is_cmo(viewer):
         query = query.where(
             (GroundMessage.crew_member_id.is_(None)) | (GroundMessage.crew_member_id == viewer.id)
@@ -145,6 +155,39 @@ def mark_read(message_id: int, db: DbSession, viewer: CurrentMember) -> GroundMe
     message.read_at = message.read_at or datetime.now(UTC)
     db.commit()
     return message_out(db, message)
+
+
+@router.post(
+    "/ground/instructions",
+    response_model=GroundMessageOut,
+    status_code=status.HTTP_201_CREATED,
+    tags=["ground"],
+)
+def send_instruction(body: InstructionIn, db: DbSession, viewer: CurrentMember) -> GroundMessageOut:
+    """Ground dashboard: send an instruction; it reaches the crew after the one-way delay."""
+    recipient = get_crew_member(db, body.crew_code) if body.crew_code else None
+    sent = mission_now(db)
+    message = GroundMessage(
+        crew_member_id=recipient.id if recipient else None,
+        author=body.author,
+        subject=body.subject,
+        body=body.body,
+        is_instruction=True,
+        sha256=hashlib.sha256(f"{body.body}|{sent.isoformat()}".encode()).hexdigest(),
+        sent_at=sent,
+        received_at=sent + mission_latency(db),
+    )
+    db.add(message)
+    audit.record(db, "ground.send", actor=viewer, entity=message, subject=body.subject)
+    db.commit()
+    return message_out(db, message)
+
+
+@router.get("/ground/instructions", response_model=list[GroundMessageOut], tags=["ground"])
+def ground_instructions(db: DbSession, _: CurrentMember) -> list[GroundMessageOut]:
+    """Ground view: every instruction, including those still in transit."""
+    query = select(GroundMessage).order_by(GroundMessage.sent_at.desc())
+    return [message_out(db, m) for m in db.scalars(query)]
 
 
 @router.get("/sync/windows", response_model=list[ContactWindowOut], tags=["sync"])

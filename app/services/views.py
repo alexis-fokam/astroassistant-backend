@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from datetime import UTC, datetime
+from datetime import UTC, datetime, timedelta
 
 from sqlalchemy import func, select
 from sqlalchemy.orm import Session
@@ -46,6 +46,14 @@ def mission_now(db: Session) -> datetime:
     return as_utc(latest) or datetime.now(UTC)
 
 
+def mission_latency(db: Session) -> timedelta:
+    """One-way Earth-crew delay of the active mission (spec: 4-24 min for Mars)."""
+    from app.models import Mission
+
+    seconds = db.scalar(select(Mission.one_way_latency_s).where(Mission.is_active.is_(True)))
+    return timedelta(seconds=seconds or 0)
+
+
 def latest_scores(db: Session, member: CrewMember) -> dict[RiskDomain, RiskScore]:
     """Most recent mission score of each domain."""
     newest = db.scalar(
@@ -74,7 +82,8 @@ def active_alerts(db: Session, member: CrewMember | None = None) -> list[Alert]:
     return alerts
 
 
-def alert_out(alert: Alert) -> AlertOut:
+def alert_out(alert: Alert, latency: timedelta | None = None) -> AlertOut:
+    """``latency`` adds the time the alert reaches the ground (spec: ground dashboard M4)."""
     return AlertOut.model_validate(
         {
             **{c: getattr(alert, c) for c in AlertOut.model_fields if hasattr(alert, c)},
@@ -84,6 +93,7 @@ def alert_out(alert: Alert) -> AlertOut:
             else None,
             "acknowledged_by": alert.acknowledged_by.code if alert.acknowledged_by else None,
             "triggered_at": as_utc(alert.triggered_at),
+            "ground_received_at": as_utc(alert.triggered_at) + latency if latency else None,
             "acknowledged_at": as_utc(alert.acknowledged_at),
             "resolved_at": as_utc(alert.resolved_at),
         }
@@ -188,6 +198,8 @@ def emergency_out(db: Session, event: EmergencyEvent) -> EmergencyOut:
 
 
 def packet_out(db: Session, packet: SyncPacket) -> PacketOut:
+    sent = as_utc(packet.sent_at)
+    arrival = sent + mission_latency(db) if sent else None
     return PacketOut(
         id=packet.id,
         crew_code=_code(db, packet.crew_member_id),
@@ -199,6 +211,8 @@ def packet_out(db: Session, packet: SyncPacket) -> PacketOut:
         created_at=as_utc(packet.created_at),
         sent_at=as_utc(packet.sent_at),
         acknowledged_at=as_utc(packet.acknowledged_at),
+        received_at_ground=arrival,
+        in_transit=arrival is not None and arrival > mission_now(db),
     )
 
 
@@ -214,6 +228,7 @@ def message_out(db: Session, message: GroundMessage) -> GroundMessageOut:
         sent_at=as_utc(message.sent_at),
         received_at=as_utc(message.received_at),
         read_at=as_utc(message.read_at),
+        in_transit=as_utc(message.received_at) > mission_now(db),
     )
 
 

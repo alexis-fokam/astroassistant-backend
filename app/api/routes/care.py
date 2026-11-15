@@ -56,6 +56,7 @@ from app.services.views import (
     as_utc,
     crew_status,
     emergency_out,
+    mission_latency,
     mission_now,
     run_out,
 )
@@ -87,7 +88,8 @@ def list_alerts(
         if member is not None:
             query = query.where(Alert.crew_member_id == member.id)
         alerts = list(db.scalars(query))
-    return [alert_out(a) for a in alerts[:limit]]
+    latency = mission_latency(db)
+    return [alert_out(a, latency) for a in alerts[:limit]]
 
 
 @router.get("/alerts/{alert_id}", response_model=AlertOut, tags=["alerts"])
@@ -96,7 +98,7 @@ def get_alert(alert_id: int, db: DbSession, viewer: CurrentMember) -> AlertOut:
     if alert is None:
         raise HTTPException(status.HTTP_404_NOT_FOUND, "Alerte introuvable")
     visible_member(db, viewer, alert.crew_member.code)
-    return alert_out(alert)
+    return alert_out(alert, mission_latency(db))
 
 
 @router.patch("/alerts/{alert_id}", response_model=AlertOut, tags=["alerts"])
