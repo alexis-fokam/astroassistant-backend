@@ -52,9 +52,9 @@ Toutes les 5 secondes, pour chaque astronaute qui a reçu de nouvelles mesures, 
 |---|---|---|
 | Curiosity RAD, NASA PDS (5 117 mesures, 2011-2012) | Réelles | Bruit de fond et seuil de tempête (`RAD-SPE-01`) ; profil de dose de l'historique de démo |
 | NASA DONKI (502 événements) et NOAA GOES | Réelles | Validation des pics de dose ; alerte précoce (`GOES-S1-01`) |
-| BIDMC, PhysioNet (53 patients) | Réelles | Distributions de SpO₂, FC et FR (§4) |
-| Sleep-EDF Expanded, PhysioNet | Réelles | Sommeil d'adultes sains : seuil des nuits courtes (§4) |
-| WESAD, université de Siegen (15 personnes) | Réelles | Sensibilité et fausses alertes de la règle VFC/stress (§4) |
+| BIDMC, PhysioNet (53 patients) — Pimentel et al., IEEE TBME 2017 | Réelles | Distributions de SpO₂, FC et FR (§4) |
+| Sleep-EDF Expanded, PhysioNet — Kemp et al., IEEE TBME 2000 | Réelles | Sommeil d'adultes sains : seuil des nuits courtes (§4) |
+| WESAD, université de Siegen (15 personnes) — Schmidt et al., ICMI 2018 | Réelles | Sensibilité et fausses alertes de la règle VFC/stress (§4) |
 | Historique de démo (14 jours, 4 astronautes) | **Fictives** | Tests d'acceptation de bout en bout uniquement |
 
 Aucune donnée physiologique individuelle d'astronaute n'est publique. L'équipage de démonstration est donc fictif, et les seuils sont justifiés par des données terrestres réelles ou par la littérature.
@@ -68,14 +68,20 @@ Aucune donnée physiologique individuelle d'astronaute n'est publique. L'équipa
 | Tempête solaire | `RAD-SPE-01` se déclenche immédiatement ; `GOES-S1-01` se déclenche après deux relevés GOES consécutifs | `pytest tests/test_engine.py` |
 | Temps de calcul | ≈ 85 ms par astronaute, modèles déjà entraînés (cible < 200 ms) | `POST /api/v1/engine/run` |
 | Couverture des tests du moteur | 93 % (cible ≥ 70 %) | `pytest --cov=app.engine` |
-| BIDMC, Sleep-EDF | *À exécuter* | `python -m app.datasets fetch bidmc`, `python -m app.datasets fetch sleep-edf`, puis `python -m app.engine.calibration bidmc sleep` |
+| **BIDMC** (53 patients de soins intensifs, 25 365 s) | `CARDIO-CRIT-01` se déclenche chez **0 patient sur 53**. `SPO2-CRIT-01` se déclenche chez **3 patients sur 53** (3,8 % du temps), tous réellement en hypoxémie. La SpO₂ médiane est de 98 %, et 17 % du temps passe sous 94 % | `python -m app.engine.calibration bidmc` |
+| **Sleep-EDF** (102 nuits d'adultes sains, épisode de sommeil principal) | Sommeil médian **6,8 h**, efficacité médiane **93 %**, 15 réveils médians. **22,5 % des nuits durent moins de 6 h** : une nuit courte isolée est banale, d'où l'exigence de 3 nuits consécutives dans `HRV-01` | `python -m app.engine.calibration sleep` |
 | WESAD : sensibilité et taux de fausses alertes de `HRV-01` | *À exécuter, après téléchargement manuel de WESAD* | `python -m app.engine.calibration wesad` |
 
 Les résultats chiffrés de la calibration sont écrits dans `docs/calibration.json`.
 
+**Ce que la calibration a confirmé.**
+- **Spécificité des règles critiques.** Combiner tachycardie et désaturation évite les alertes chez des patients pourtant malades. Seules les vraies hypoxémies (≤ 90 %) déclenchent une alerte critique.
+- **Seuil de sommeil.** Avec 22,5 % des nuits courtes chez des adultes sains, une alerte sur une seule nuit en déclencherait environ une fois par semaine et par astronaute. Exiger 3 nuits consécutives ramène ce risque à environ 1 % si les nuits sont indépendantes.
+- **Aucun seuil modifié.** Les seuils du moteur restent ceux de `config.yaml` et `rules.yaml`.
+
 ## 5. Limites connues
 
-- **Seuils encore à confirmer.** Tant que l'évaluation sur WESAD n'a pas tourné, le seuil de 80 % de la VFC reste une valeur de la littérature.
+- **Seuil de la VFC encore à confirmer.** Tant que l'évaluation sur WESAD n'a pas tourné, le seuil de 80 % de la VFC reste une valeur de la littérature. Les seuils de SpO₂, de fréquence cardiaque et de sommeil, eux, ont été vérifiés sur BIDMC et Sleep-EDF.
 - **Populations différentes.** Les données terrestres (étudiants pour WESAD, patients de soins intensifs pour BIDMC, adultes sains pour Sleep-EDF) ne reproduisent pas la physiologie en microgravité. Elles servent à **calibrer des ordres de grandeur**, pas à valider le moteur pour le vol.
 - **Mesures de radiation partielles.** Curiosity RAD n'a été mesuré qu'un jour sur trois, et le blindage du rover n'est pas celui d'un habitat.
 - **Isolation Forest.** Il faut au moins 72 h de données propres par astronaute avant que le modèle puisse fonctionner.

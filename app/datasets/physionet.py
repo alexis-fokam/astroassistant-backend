@@ -95,7 +95,7 @@ def read_bidmc(path: Path) -> dict[str, list[float]]:
 
 @dataclass(frozen=True)
 class SleepNight:
-    """Metrics over the sleep period (first to last sleep epoch, 30 s epochs).
+    """Metrics over the main sleep episode (30 s epochs, daytime naps excluded).
 
     Lights-off times are not in the hypnograms, so sleep latency is not computed.
     """
@@ -125,15 +125,40 @@ def read_hypnogram_annotations(path: Path) -> list[tuple[float, float, str]]:
     return events
 
 
+SLEEP = ("n1", "n2", "n3", "rem")
+# Wake longer than this ends a sleep episode (recordings last ~20 h and include naps).
+EPISODE_BREAK_EPOCHS = 120  # 60 min of 30 s epochs
+
+
+def main_sleep_episode(epochs: list[str]) -> list[str]:
+    """Longest sleep episode: sleep epochs joined by wake/unscored gaps under 60 min."""
+    episodes: list[tuple[int, int]] = []
+    start = last = None
+    for i, stage in enumerate(epochs):
+        if stage not in SLEEP:
+            continue
+        if start is None:
+            start = last = i
+        elif i - last > EPISODE_BREAK_EPOCHS:
+            episodes.append((start, last))
+            start = i
+        last = i
+    if start is not None:
+        episodes.append((start, last))
+    if not episodes:
+        return []
+    first, end = max(episodes, key=lambda e: sum(s in SLEEP for s in epochs[e[0] : e[1] + 1]))
+    return epochs[first : end + 1]
+
+
 def summarize_night(path: Path) -> SleepNight | None:
     events = read_hypnogram_annotations(path)
     epochs: list[str] = []
     for _, duration, stage in events:
         epochs.extend([SLEEP_STAGES.get(stage, "unscored")] * int(duration // 30))
-    asleep = [i for i, s in enumerate(epochs) if s in ("n1", "n2", "n3", "rem")]
-    if not asleep:
+    period = main_sleep_episode(epochs)
+    if not period:
         return None
-    period = epochs[asleep[0] : asleep[-1] + 1]
     sleep_epochs = sum(s in ("n1", "n2", "n3", "rem") for s in period)
     awakenings, previous = 0, None
     for stage in period:

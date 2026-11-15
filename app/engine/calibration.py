@@ -18,6 +18,7 @@ Sensitivity = stress windows flagged; false-alarm rate = baseline + amusement wi
 from __future__ import annotations
 
 import argparse
+import csv
 import json
 import pickle
 from pathlib import Path
@@ -57,6 +58,35 @@ def calibrate_bidmc() -> dict:
         "spo2": _percentiles(pooled.get("SpO2", [])),
         "spo2_below_94_pct": round(float((spo2 < 94).mean() * 100), 2),
         "spo2_below_90_pct": round(float((spo2 <= 90).mean() * 100), 2),
+        **_bidmc_rule_rates(files),
+    }
+
+
+def _bidmc_rule_rates(files: list[Path]) -> dict:
+    """Share of seconds, and of patients, where the engine's critical cardio rules hold."""
+    seconds = cardio = spo2_crit = 0
+    patients_cardio = patients_spo2 = 0
+    for path in files:
+        hr, spo2 = [], []
+        with path.open(encoding="utf-8") as handle:
+            for row in csv.DictReader(handle):
+                row = {k.strip(): (v or "").strip() for k, v in row.items()}
+                if row.get("HR") and row.get("SpO2"):
+                    hr.append(float(row["HR"]))
+                    spo2.append(float(row["SpO2"]))
+        hr_arr, spo2_arr = np.asarray(hr), np.asarray(spo2)
+        hit_cardio = (hr_arr > 120) & (spo2_arr < 94)
+        hit_spo2 = spo2_arr <= 90
+        seconds += len(hr_arr)
+        cardio += int(hit_cardio.sum())
+        spo2_crit += int(hit_spo2.sum())
+        patients_cardio += bool(hit_cardio.any())
+        patients_spo2 += bool(hit_spo2.any())
+    return {
+        "cardio_crit_01_seconds_pct": round(100 * cardio / seconds, 2),
+        "cardio_crit_01_patients": patients_cardio,
+        "spo2_crit_01_seconds_pct": round(100 * spo2_crit / seconds, 2),
+        "spo2_crit_01_patients": patients_spo2,
     }
 
 
