@@ -1,3 +1,8 @@
+import os
+
+# The background risk engine is driven explicitly in tests.
+os.environ.setdefault("AV_PIPELINE_ENABLED", "false")
+
 import pytest
 from sqlalchemy import create_engine, event
 from sqlalchemy.orm import Session

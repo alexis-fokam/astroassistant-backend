@@ -19,8 +19,8 @@ plausible:
 min_quality: 0.5
 
 windows:
-  now_minutes: 15          # "current" value: mean of the last 15 min
-  confirm_minutes: 15      # second evaluation for WARNING confirmation (§6.3)
+  now_minutes: 5           # "current" value: mean of the last 5 min
+  confirm_minutes: 5       # previous measurement, for WARNING confirmation (§6.3)
   baseline_days: 14        # individual baseline window (F2.1)
   baseline_gap_days: 3     # most recent days excluded from the baseline
   checkin_hours: 36        # a check-in older than this is ignored
@@ -45,6 +45,10 @@ global:
     behavioral: 0.25
     immune: 0.10
   worst_domain_share: 0.5
+  # The global score never shows a lower band than the status it carries.
+  status_floor:
+    warning: 40
+    critical: 70
 
 # A confirmed rule lifts its domain score to at least this floor.
 rule_floor:
@@ -65,14 +69,14 @@ domains:
     - {feature: dose_rate_ratio, low: 0.8, high: 2.0, weight: 0.7, label: "Débit de dose / seuil de tempête"}
     - {feature: career_pct, low: 40, high: 90, weight: 0.4, label: "Dose de carrière (% de la limite)"}
   musculoskeletal:
-    - {feature: missed_resistance_streak, low: 0, high: 3, weight: 0.55, label: "Séances de résistance manquées"}
-    - {feature: back_pain, low: 0, high: 3, weight: 0.25, label: "Douleurs dorsales"}
-    - {feature: activity_24h, low: 2.0, high: 1.2, weight: 0.2, label: "Activité moyenne (MET)"}
+    - {feature: missed_resistance_streak, low: 0, high: 3, weight: 0.4, label: "Séances de résistance manquées"}
+    - {feature: back_pain, low: 0, high: 3, weight: 0.15, label: "Douleurs dorsales"}
+    - {feature: activity_24h, low: 2.0, high: 1.2, weight: 0.15, label: "Activité moyenne (MET)"}
   behavioral:
-    - {feature: hrv_ratio, low: 0.95, high: 0.6, weight: 0.35, label: "VFC / baseline"}
-    - {feature: short_nights_3n, low: 0, high: 3, weight: 0.25, label: "Nuits de moins de 6 h"}
-    - {feature: stress, low: 3, high: 9, weight: 0.2, label: "Stress déclaré"}
-    - {feature: pvt_rt_ratio, low: 1.0, high: 1.3, weight: 0.15, label: "Temps de réaction PVT / habituel"}
+    - {feature: hrv_ratio, low: 0.95, high: 0.6, weight: 0.3, label: "VFC / baseline"}
+    - {feature: short_nights_3n, low: 0, high: 3, weight: 0.2, label: "Nuits de moins de 6 h"}
+    - {feature: stress, low: 3, high: 9, weight: 0.15, label: "Stress déclaré"}
+    - {feature: pvt_rt_ratio, low: 1.0, high: 1.3, weight: 0.1, label: "Temps de réaction PVT / habituel"}
     - {feature: mood, low: 7, high: 2, weight: 0.1, label: "Humeur"}
     - {feature: isolation, low: 4, high: 9, weight: 0.05, label: "Isolement"}
   immune:

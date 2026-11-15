@@ -318,3 +318,31 @@ def test_datasets_are_public(client: TestClient) -> None:
     datasets = {d["code"]: d for d in client.get("/api/v1/datasets").json()}
     assert datasets["nasa-msl-rad"]["record_count"] > 1000
     assert datasets["nasa-msl-rad"]["agency"] == "NASA"
+
+
+# --------------------------------------------------------------------- risk engine
+def test_engine_routes(client: TestClient, astronaut, cmo) -> None:
+    status_body = client.get("/api/v1/engine/status", headers=astronaut).json()
+    assert {r["code"] for r in status_body["rules"]} >= {"HRV-01", "SANS-01", "RAD-SPE-01"}
+    assert client.post("/api/v1/engine/run", headers=astronaut).status_code == 403
+
+    report = client.post("/api/v1/engine/run", headers=cmo).json()
+    levels = {m["code"]: m["status"] for m in report["members"]}
+    assert levels == {
+        "AV-01": "warning",
+        "AV-02": "warning",
+        "AV-03": "critical",
+        "AV-04": "warning",
+    }
+
+    # The status endpoint now serves the engine's scores.
+    status_av02 = client.get("/api/v1/crew/AV-02/status", headers=astronaut).json()
+    assert status_av02["status"] == "warning" and status_av02["top_factors"]
+
+    alerts = client.get("/api/v1/alerts", headers=astronaut).json()
+    hrv = next(a for a in alerts if a["rule_code"] == "HRV-01")
+    explanation = client.get(f"/api/v1/alerts/{hrv['id']}/explanation", headers=astronaut).json()
+    assert explanation["confirmations"] == 2 and "hrv_ratio" in explanation["rule"]
+
+    history = client.get("/api/v1/crew/AV-02/domains/behavioral", headers=astronaut).json()
+    assert history["history"] and history["level"] == "warning"

@@ -21,7 +21,9 @@ def median_mad(values: Sequence[float]) -> tuple[float, float] | None:
     return med, float(np.median(np.abs(arr - med)))
 
 
-def robust_z(value: float | None, median: float | None, mad: float | None, floor: float) -> float | None:
+def robust_z(
+    value: float | None, median: float | None, mad: float | None, floor: float
+) -> float | None:
     """(value - median) / (1.4826 · MAD); ``floor`` avoids dividing by a near-zero MAD."""
     if value is None or median is None:
         return None

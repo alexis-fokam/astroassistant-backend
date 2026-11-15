@@ -839,7 +839,7 @@ class HistoryBuilder:
             level=AlertLevel.WARNING,
             domain=RiskDomain.MUSCULOSKELETAL,
             method=DetectionMethod.THRESHOLD,
-            rule_code="EX-03",
+            rule_code="EX-MISSED-01",
             title="Séances d'exercice manquées",
             message="3 séances ARED consécutives.",
             recommended_protocol_id=self.protocols["PRT-EX-03"].id,

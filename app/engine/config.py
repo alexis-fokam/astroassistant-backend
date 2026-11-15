@@ -71,6 +71,7 @@ class EngineConfig:
     anomaly: dict[str, Any]
     global_weights: dict[str, float]
     worst_domain_share: float
+    status_floor: dict[str, float]
     rule_floor: dict[str, float]
     domains: dict[RiskDomain, tuple[Indicator, ...]]
     rules: tuple[Rule, ...] = field(default=())
@@ -116,6 +117,7 @@ def load_config() -> EngineConfig:
         anomaly=raw["anomaly"],
         global_weights=raw["global"]["weights"],
         worst_domain_share=raw["global"]["worst_domain_share"],
+        status_floor=raw["global"]["status_floor"],
         rule_floor=raw["rule_floor"],
         domains={
             RiskDomain(name): tuple(Indicator(**i) for i in items)

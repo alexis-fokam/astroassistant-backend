@@ -1,5 +1,6 @@
+import asyncio
 from collections.abc import AsyncIterator
-from contextlib import asynccontextmanager
+from contextlib import asynccontextmanager, suppress
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
@@ -7,6 +8,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from app.api import api_router, legacy_router, ws_router
 from app.core.config import get_settings
 from app.core.database import engine
+from app.engine.scheduler import run_forever
 from app.models import Base
 
 settings = get_settings()
@@ -15,7 +17,12 @@ settings = get_settings()
 @asynccontextmanager
 async def lifespan(_app: FastAPI) -> AsyncIterator[None]:
     Base.metadata.create_all(bind=engine)
+    task = asyncio.create_task(run_forever()) if settings.pipeline_enabled else None
     yield
+    if task is not None:
+        task.cancel()
+        with suppress(asyncio.CancelledError):
+            await task
 
 
 app = FastAPI(

@@ -315,7 +315,9 @@ def seed(session: Session, now: datetime | None = None, *, history: bool = True)
         )
         offset = BASELINE_OFFSETS[member.code]
         for metric, (mean, std) in BASELINES.items():
-            value = round(mean * (1 + offset), 2) if metric is not Metric.SPO2 else mean
+            # SpO2 and core temperature are tightly regulated: no per-member offset.
+            fixed = metric in (Metric.SPO2, Metric.CORE_TEMPERATURE)
+            value = mean if fixed else round(mean * (1 + offset), 2)
             session.add(
                 Baseline(
                     crew_member=member,
