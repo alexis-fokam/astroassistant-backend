@@ -376,3 +376,18 @@ def test_mission_exposes_next_contact_time(client: TestClient, astronaut) -> Non
     assert mission["next_contact_time"] and len(mission["next_contact_time"]) == 8
     assert mission["clock"] == "J+142 · 14:05"
     assert 0 <= mission["next_contact_in_s"] <= 12 * 3600
+
+
+def test_vital_card_levels_follow_engine_thresholds() -> None:
+    from types import SimpleNamespace
+
+    from app.models.enums import HealthLevel, Metric
+    from app.services.vitals import level_for
+
+    hrv_baseline = SimpleNamespace(mean=48.0, median=48.0, mad=4.0)
+    assert level_for(Metric.HRV_RMSSD, 31, hrv_baseline) is HealthLevel.WARNING  # 65 %
+    assert level_for(Metric.HRV_RMSSD, 25, hrv_baseline) is HealthLevel.CRITICAL  # 52 %
+    assert level_for(Metric.HRV_RMSSD, 60, hrv_baseline) is HealthLevel.NOMINAL  # a rise is fine
+    assert level_for(Metric.SPO2, 92, None) is HealthLevel.WARNING
+    assert level_for(Metric.SPO2, 90, None) is HealthLevel.CRITICAL
+    assert level_for(Metric.CORE_TEMPERATURE, 38.2, None) is HealthLevel.WARNING

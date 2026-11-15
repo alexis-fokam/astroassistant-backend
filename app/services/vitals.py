@@ -33,7 +33,24 @@ LOWER_IS_WORSE = {Metric.HRV_RMSSD, Metric.SPO2}
 
 
 def level_for(metric: Metric, value: float, baseline: Baseline | None) -> HealthLevel:
-    """Robust z-score against the individual baseline: |z| ≥ 3 critical, ≥ 2 warning."""
+    """Card colour, with the same thresholds as the engine's rules (rules.yaml).
+
+    SpO2 and temperature use clinical thresholds (SPO2-CRIT-01, TEMP-01); HRV its ratio to
+    the individual baseline (HRV-01: < 80 %); other signs a robust z-score (|z| ≥ 2 / 3).
+    """
+    if metric is Metric.SPO2:
+        if value <= 90:
+            return HealthLevel.CRITICAL
+        return HealthLevel.WARNING if value < 94 else HealthLevel.NOMINAL
+    if metric is Metric.CORE_TEMPERATURE:
+        if value >= 39.5:
+            return HealthLevel.CRITICAL
+        return HealthLevel.WARNING if value >= 38.0 else HealthLevel.NOMINAL
+    if metric is Metric.HRV_RMSSD and baseline is not None and baseline.mean:
+        ratio = value / baseline.mean
+        if ratio < 0.6:
+            return HealthLevel.CRITICAL
+        return HealthLevel.WARNING if ratio < 0.8 else HealthLevel.NOMINAL
     if baseline is None or baseline.median is None:
         return HealthLevel.NOMINAL
     z = stats.robust_z(value, baseline.median, baseline.mad, Z_FLOOR.get(metric, 0.5))
