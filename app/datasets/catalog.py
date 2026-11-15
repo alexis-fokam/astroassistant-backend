@@ -1,7 +1,7 @@
-"""Catalogue of every dataset used by Astro Assistant, with provenance and licence.
+"""Catalogue des jeux de données réellement utilisés par Astro Assistant (origine, licence).
 
-Seeded into the ``dataset_sources`` table so each imported row can be traced back to
-its origin (spec §12, judging criterion "use of space agency data").
+Inséré dans la table ``dataset_sources`` pour que chaque ligne importée remonte à sa source
+(cahier des charges §12, critère du jury « utilisation des données des agences spatiales »).
 """
 
 from dataclasses import dataclass
@@ -52,19 +52,6 @@ CATALOG: list[DatasetInfo] = [
         bundled=True,
     ),
     DatasetInfo(
-        code="nasa-osdr-i4",
-        name="Inspiration4 mission data (OSDR)",
-        agency="NASA",
-        url="https://osdr.nasa.gov/bio/repo/search?q=inspiration4",
-        licence="Open data, OSDR terms",
-        usage=(
-            "Orders of magnitude of in-flight physiology and "
-            "cognition used to calibrate the simulator."
-        ),
-        size="varies",
-        bundled=False,
-    ),
-    DatasetInfo(
         code="wesad",
         name="WESAD — Wearable Stress and Affect Detection",
         agency="Univ. Siegen / UCI",
@@ -85,16 +72,6 @@ CATALOG: list[DatasetInfo] = [
         bundled=True,
     ),
     DatasetInfo(
-        code="physionet-bidsleep",
-        name="Multi-night wearable sleep dataset (Apple Watch + EEG labels)",
-        agency="PhysioNet",
-        url="https://www.physionet.org/content/bidsleep-dataset/",
-        licence="PhysioNet open access",
-        usage="Realistic night-time heart rate and motion for the telemetry simulator (F7, F15).",
-        size="varies",
-        bundled=False,
-    ),
-    DatasetInfo(
         code="physionet-bidmc",
         name="BIDMC PPG and Respiration Dataset (numerics, 1 Hz)",
         agency="PhysioNet",
@@ -103,16 +80,6 @@ CATALOG: list[DatasetInfo] = [
         usage="SpO2, heart and respiratory rate distributions to calibrate thresholds (F1, §6).",
         size="~0.5 MB (numerics only)",
         bundled=True,
-    ),
-    DatasetInfo(
-        code="monash-pvt",
-        name="PVT under 40 h sleep deprivation (Monash University)",
-        agency="Monash University",
-        url="https://researchdata.edu.au/shortened-pst-prediction-laboratory/false",
-        licence="CC BY-NC-ND 4.0",
-        usage="Reference reaction times and lapses for the vigilance test (F8).",
-        size="varies",
-        bundled=False,
     ),
 ]
 
