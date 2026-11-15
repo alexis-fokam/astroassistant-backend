@@ -14,7 +14,7 @@ from datetime import UTC, datetime, timedelta
 from sqlalchemy import func, select
 from sqlalchemy.orm import Session
 
-from app.engine import anomaly, features, scoring
+from app.engine import anomaly, baselines, features, scoring
 from app.engine.config import EngineConfig, Rule, load_config
 from app.models import CrewMember, FeatureSnapshot, RiskScore, SimRun
 from app.models.enums import RiskDomain, SimRunStatus
@@ -88,6 +88,8 @@ def process_member(
     if not force and (latest is None or (last_run is not None and last_run >= latest)):
         return MemberReport(code=member.code, skipped=True)
 
+    refreshed = baselines.refresh(db, data, at, cfg)
+
     # Two consecutive evaluations: WARNING rules must hold on both (spec §6.3).
     previous_at = at - timedelta(minutes=cfg.windows["confirm_minutes"])
     current = features.compute(data, at, cfg)
@@ -112,6 +114,7 @@ def process_member(
             "_rules": [r.code for r in rules],
             "_pending": pending,
             "_model": cfg.model_version,
+            "_baselines_refreshed": refreshed,
         },
     )
     db.add(snapshot)

@@ -14,7 +14,7 @@ from __future__ import annotations
 
 import argparse
 import hashlib
-from datetime import date, datetime, timedelta
+from datetime import UTC, date, datetime, timedelta
 from pathlib import Path
 
 import yaml
@@ -327,6 +327,8 @@ def seed(session: Session, now: datetime | None = None, *, history: bool = True)
                     median=value,
                     mad=round(std * 0.6745, 3),
                     sample_count=1240,
+                    # Pre-flight baseline; the engine refreshes it from in-flight data (F2.1).
+                    computed_at=datetime.combine(MISSION_START, datetime.min.time(), UTC),
                 )
             )
     session.add(

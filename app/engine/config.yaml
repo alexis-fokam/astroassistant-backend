@@ -2,7 +2,7 @@
 # Thresholds come from the exploratory analyses (notebooks/) and the clinical literature;
 # weights are adjusted during calibration.
 
-model_version: "risk-engine 1.0.0"
+model_version: "risk-engine 1.1.0"
 
 # Physiologically plausible ranges: readings outside are flagged as artefacts (§6.1).
 plausible:
@@ -68,10 +68,12 @@ domains:
   radiation:
     - {feature: dose_rate_ratio, low: 0.8, high: 2.0, weight: 0.7, label: "Débit de dose / seuil de tempête"}
     - {feature: career_pct, low: 40, high: 90, weight: 0.4, label: "Dose de carrière (% de la limite)"}
+    - {feature: proton_flux_10mev, low: 1, high: 100, weight: 0.3, label: "Flux de protons GOES ≥ 10 MeV (pfu)"}
   musculoskeletal:
     - {feature: missed_resistance_streak, low: 0, high: 3, weight: 0.4, label: "Séances de résistance manquées"}
     - {feature: back_pain, low: 0, high: 3, weight: 0.15, label: "Douleurs dorsales"}
     - {feature: activity_24h, low: 2.0, high: 1.2, weight: 0.15, label: "Activité moyenne (MET)"}
+    - {feature: bone_loss_projection_pct, low: 2.0, high: 6.0, weight: 0.2, label: "Perte osseuse projetée en fin de mission (%)"}
   behavioral:
     - {feature: hrv_ratio, low: 0.95, high: 0.6, weight: 0.3, label: "VFC / baseline"}
     - {feature: short_nights_3n, low: 0, high: 3, weight: 0.2, label: "Nuits de moins de 6 h"}

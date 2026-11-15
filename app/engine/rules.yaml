@@ -64,6 +64,17 @@
   title: VFC basse persistante
   message: "VFC à {hrv_ratio_pct:.0f} % de la baseline, sommeil {sleep_hours_3n:.1f} h en moyenne sur 3 nuits."
 
+- code: HRV-TREND-01
+  domain: behavioral
+  level: warning
+  method: trend
+  when: [[hrv_slope_24h, "<=", -0.15], [hrv_ratio, "<", 0.9]]
+  suppressed_by: [HRV-01]
+  metric: hrv_rmssd
+  observed: hrv_24h
+  title: VFC en baisse continue
+  message: "VFC en baisse de {hrv_slope_day:.1f} ms/jour sur 24 h ({hrv_ratio_pct:.0f} % de la baseline)."
+
 - code: PVT-01
   domain: behavioral
   level: warning
@@ -105,6 +116,17 @@
   protocol: PRT-RAD-02
   title: Débit de dose anormal
   message: "Débit {dose_rate_msv_h:.3f} mSv/h, au-delà du seuil de tempête solaire (2,5 mSv/jour)."
+
+- code: GOES-S1-01
+  domain: radiation
+  level: warning
+  method: threshold
+  when: [[proton_flux_10mev, ">=", 10]]
+  observed: proton_flux_10mev
+  threshold: 10
+  protocol: PRT-RAD-02
+  title: Tempête de radiation solaire en cours (NOAA S1)
+  message: "Flux de protons ≥ 10 MeV à {proton_flux_10mev:.0f} pfu (GOES) : préparer l'abri et surveiller le dosimètre."
 
 - code: RAD-CAREER-01
   domain: radiation

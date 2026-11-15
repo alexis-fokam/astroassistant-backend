@@ -1,7 +1,10 @@
 import os
+import tempfile
 
 # The background risk engine is driven explicitly in tests.
 os.environ.setdefault("AV_PIPELINE_ENABLED", "false")
+# Trained models go to a throwaway folder, never into data/models.
+os.environ.setdefault("AV_MODELS_DIR", tempfile.mkdtemp(prefix="astro-models-"))
 
 import pytest
 from sqlalchemy import create_engine, event

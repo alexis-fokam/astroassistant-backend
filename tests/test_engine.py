@@ -225,3 +225,87 @@ def test_artifacts_are_rejected(demo: Session) -> None:
     report = run_once(demo, at=at)
     av02 = next(m for m in report.members if m.code == "AV-02")
     assert "CARDIO-CRIT-01" not in av02.rules and av02.status != "critical"
+
+
+# --------------------------------------------------------------------- engine completion
+def test_baselines_are_refreshed_from_flight_data(demo: Session) -> None:
+    from app.models import Baseline
+
+    run_once(demo)
+    av02 = _member(demo, "AV-02")
+    hrv = demo.scalars(
+        select(Baseline).where(
+            Baseline.crew_member_id == av02.id, Baseline.metric == Metric.HRV_RMSSD
+        )
+    ).one()
+    assert hrv.computed_at.replace(tzinfo=None) == DEMO_NOW.replace(tzinfo=None)
+    assert hrv.sample_count > 48 and hrv.sample_count != 1240
+    # The gap keeps the recent drift out of the baseline: it stays close to the pre-drift value.
+    assert 44 < hrv.mean < 54
+
+
+def test_anomaly_models_are_persisted_with_joblib(demo: Session) -> None:
+    from pathlib import Path
+
+    from app.core.config import get_settings
+
+    run_once(demo)
+    files = sorted(Path(get_settings().models_dir).glob("isolation_forest_AV-0*_*.joblib"))
+    assert {f.name.split("_")[2] for f in files} >= {"AV-01", "AV-02", "AV-03", "AV-04"}
+
+
+def test_goes_storm_raises_the_early_warning(demo: Session) -> None:
+    from app.models import DatasetSource, ProtonFluxReading
+
+    source = demo.scalars(
+        select(DatasetSource).where(DatasetSource.code == "noaa-goes-protons")
+    ).one()
+    at = DEMO_NOW + timedelta(minutes=10)
+    # GOES publishes every 5 min: two consecutive readings above 10 pfu confirm the storm.
+    for minutes, flux in ((5, 180.0), (0, 250.0)):
+        demo.add(
+            ProtonFluxReading(
+                source_id=source.id,
+                measured_at=at - timedelta(minutes=minutes),
+                satellite=18,
+                energy_band=">=10 MeV",
+                flux_pfu=flux,
+            )
+        )
+    for member in demo.scalars(select(CrewMember)):
+        demo.add(
+            VitalReading(
+                crew_member_id=member.id,
+                metric=Metric.HEART_RATE,
+                value=66,
+                recorded_at=at,
+                received_at=at,
+            )
+        )
+    demo.commit()
+    report = run_once(demo, at=at)
+    assert all("GOES-S1-01" in m.rules for m in report.members)
+    alert = demo.scalars(select(Alert).where(Alert.rule_code == "GOES-S1-01")).first()
+    assert alert.recommended_protocol.code == "PRT-RAD-02" and "250 pfu" in alert.message
+
+
+def test_hrv_trend_and_bone_projection_features() -> None:
+    rules = load_config().rules
+    fired = {r.code for r in evaluate(rules, {"hrv_slope_24h": -0.3, "hrv_ratio": 0.85})}
+    assert "HRV-TREND-01" in fired
+    # Superseded by the persistent-low-HRV rule when both hold.
+    both = {r.code for r in evaluate(rules, {"hrv_slope_24h": -0.3, "hrv_ratio": 0.7, "stress": 8})}
+    assert "HRV-01" in both and "HRV-TREND-01" not in both
+
+
+def test_bone_loss_projection_reflects_adherence(demo: Session) -> None:
+    from app.models import FeatureSnapshot
+
+    run_once(demo)
+    model = load_config().model_version
+    projections = {}
+    for snapshot in demo.scalars(select(FeatureSnapshot)):
+        if snapshot.features.get("_model") == model:
+            code = demo.get(CrewMember, snapshot.crew_member_id).code
+            projections[code] = snapshot.features["bone_loss_projection_pct"]
+    assert projections["AV-01"] > projections["AV-02"]  # three missed ARED sessions

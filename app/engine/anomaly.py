@@ -8,10 +8,13 @@ from __future__ import annotations
 
 import math
 from datetime import datetime, timedelta
+from pathlib import Path
 
+import joblib
 import numpy as np
 from sklearn.ensemble import IsolationForest
 
+from app.core.config import get_settings
 from app.engine.config import EngineConfig
 from app.engine.features import MemberData, naive_utc
 from app.models.enums import Metric
@@ -47,6 +50,10 @@ def _model(data: MemberData, at: datetime, cfg: EngineConfig) -> IsolationForest
     key = (data.member.id, end.strftime("%Y-%m-%d"), len(metrics))
     if key in _CACHE:
         return _CACHE[key]
+    path = model_path(data.member.code, end)
+    if path.exists():
+        _CACHE[key] = joblib.load(path)
+        return _CACHE[key]
     matrix = hourly_matrix(data, metrics, start, end)
     if len(matrix) < cfg.anomaly["min_training_hours"]:
         return None
@@ -55,8 +62,15 @@ def _model(data: MemberData, at: datetime, cfg: EngineConfig) -> IsolationForest
         contamination=cfg.anomaly["contamination"],
         random_state=cfg.anomaly["random_state"],
     ).fit(matrix)
+    path.parent.mkdir(parents=True, exist_ok=True)
+    joblib.dump(model, path)
     _CACHE[key] = model
     return model
+
+
+def model_path(code: str, end: datetime) -> Path:
+    """One model per member and training window (spec §8: models persisted with joblib)."""
+    return Path(get_settings().models_dir) / f"isolation_forest_{code}_{end:%Y%m%d}.joblib"
 
 
 def score(

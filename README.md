@@ -69,6 +69,18 @@ en WARNING (VFC basse), AV-03 en CRITICAL (tachycardie et désaturation), AV-04 
 `GET /api/v1/alerts/{id}/explanation`, `GET /api/v1/crew/{code}/domains/{domain}`.
 Désactiver la tâche de fond : `AV_PIPELINE_ENABLED=false`.
 
+Fiche du moteur pour le jury (données, règles, origine des seuils, performances, limites) :
+[`docs/fiche-moteur-ia.md`](docs/fiche-moteur-ia.md). Calibration sur données réelles :
+
+```bash
+python -m app.datasets fetch bidmc        # PhysioNet BIDMC, ~1 Mo
+python -m app.datasets fetch sleep-edf    # PhysioNet Sleep-EDF (hypnogrammes), ~1 Mo
+python -m app.engine.calibration all      # écrit docs/calibration.json
+```
+
+WESAD (~2,5 Go) se télécharge à la main depuis
+https://www.eti.uni-siegen.de/ubicomp/home/datasets/icmi18/ dans `data/external/wesad/`.
+
 ## Tests et lint
 
 ```bash

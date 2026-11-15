@@ -21,6 +21,7 @@ from app.models import (
     Checkin,
     CrewMember,
     ExerciseSession,
+    ProtonFluxReading,
     PvtResult,
     RadiationDose,
     SleepSession,
@@ -46,6 +47,11 @@ CHECKIN_FIELDS = (
     "crew_relations",
 )
 # Minimal dispersion used by robust z-scores, per metric (avoids z → ∞ when MAD ≈ 0).
+GOES_LOOKBACK_H = 3  # GOES readings older than this are not "current"
+# Hip bone mineral density loss without countermeasures, %/month (LeBlanc et al., 2000;
+# NASA HRP "Risk of early onset osteoporosis"); resistance exercise removes most of it.
+BONE_LOSS_PCT_MONTH = 1.25
+EXERCISE_PROTECTION = 0.8
 Z_FLOOR = {Metric.HEART_RATE: 2.0, Metric.SYSTOLIC_BP: 3.0, Metric.HRV_RMSSD: 2.0}
 
 
@@ -82,6 +88,7 @@ class MemberData:
     checkins: list[Checkin]
     doses: list[RadiationDose]
     artifacts: int = 0
+    proton_flux: list[tuple[datetime, float]] = field(default_factory=list)
 
 
 def is_plausible(metric: Metric, value: float, cfg: EngineConfig) -> bool:
@@ -161,6 +168,18 @@ def load_member(
         checkins=recent(Checkin, Checkin.submitted_at, 4),
         doses=recent(RadiationDose, RadiationDose.recorded_at, 2),
         artifacts=artifacts,
+        proton_flux=[
+            (naive_utc(t), flux)
+            for t, flux in db.execute(
+                select(ProtonFluxReading.measured_at, ProtonFluxReading.flux_pfu)
+                .where(
+                    ProtonFluxReading.energy_band == ">=10 MeV",
+                    ProtonFluxReading.measured_at >= at - timedelta(hours=GOES_LOOKBACK_H),
+                    ProtonFluxReading.measured_at <= at,
+                )
+                .order_by(ProtonFluxReading.measured_at)
+            )
+        ],
     )
 
 
@@ -217,6 +236,8 @@ def compute(data: MemberData, at: datetime, cfg: EngineConfig) -> Features:
         f["hrv_slope_24h"] = stats.slope_per_hour(
             [(t - at).total_seconds() / 3600 for t, _ in day], [v for _, v in day]
         )
+        if f["hrv_slope_24h"] is not None:
+            f["hrv_slope_day"] = f["hrv_slope_24h"] * 24
 
     _, sys_median, sys_mad = _baseline(data, Metric.SYSTOLIC_BP, at, cfg)
     systolic = data.series.get(Metric.SYSTOLIC_BP)
@@ -245,6 +266,21 @@ def compute(data: MemberData, at: datetime, cfg: EngineConfig) -> Features:
             break
         streak += 1
     f["missed_resistance_streak"] = float(streak)
+    done = [
+        s
+        for s in data.resistance
+        if naive_utc(s.scheduled_at) <= at and s.status is not SessionStatus.PLANNED
+    ]
+    if done:
+        adherence = sum(s.status is SessionStatus.COMPLETED for s in done) / len(done)
+        mission = data.member.mission
+        rate = BONE_LOSS_PCT_MONTH * (1 - EXERCISE_PROTECTION * adherence)
+        f["exercise_adherence_14d"] = adherence
+        f["bone_loss_rate_pct_month"] = rate
+        # Hip BMD loss projected at the end of the mission if the current adherence persists.
+        f["bone_loss_projection_pct"] = (
+            rate * mission.planned_duration_days / 30 if mission else None
+        )
 
     # Vigilance (F8): last PVT compared with the member's usual reaction time.
     pvts = [p for p in data.pvts if naive_utc(p.taken_at) <= at]
@@ -283,6 +319,10 @@ def compute(data: MemberData, at: datetime, cfg: EngineConfig) -> Features:
         f["neutron_fraction"] = last_dose.neutron_fraction
         f["career_pct"] = 100 * last_dose.career_cumulative_msv / data.member.career_dose_limit_msv
         f["mission_dose_msv"] = last_dose.mission_cumulative_msv
+
+    # Space weather early warning (F5.4): NOAA GOES >= 10 MeV proton flux.
+    flux = [v for t, v in data.proton_flux if at - timedelta(hours=GOES_LOOKBACK_H) <= t <= at]
+    f["proton_flux_10mev"] = max(flux) if flux else None
 
     f["artifacts_rejected"] = float(data.artifacts)
     return {k: (round(v, 4) if isinstance(v, float) else v) for k, v in f.items()}

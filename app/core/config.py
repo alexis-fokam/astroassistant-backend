@@ -20,6 +20,8 @@ class Settings(BaseSettings):
     pipeline_interval_seconds: int = 5
     # Run the risk engine in the background (disabled in tests).
     pipeline_enabled: bool = True
+    # Trained anomaly models (joblib).
+    models_dir: str = str(BASE_DIR / "data" / "models")
 
     # Signing key of the session tokens issued after PIN login (spec §7). Override in .env.
     secret_key: str = "dev-only-change-me"

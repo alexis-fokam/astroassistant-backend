@@ -2,7 +2,7 @@
 
 > Document généré par `python -m app.docs` à partir des modèles SQLAlchemy (`backend/app/models`). Ne pas modifier à la main.
 
-Généré le 15/11/2026 à 10:54.
+Généré le 15/11/2026 à 11:14.
 
 ## Synthèse
 
@@ -14,7 +14,7 @@ Généré le 15/11/2026 à 10:54.
 | Contraintes CHECK métier | 57 |
 | Index secondaires | 54 |
 | Énumérations | 22 |
-| Lignes après `python -m app.seed` | 22 751 |
+| Lignes après `python -m app.seed` | 22 752 |
 
 ### Conventions
 
@@ -43,7 +43,7 @@ Généré le 15/11/2026 à 10:54.
 | Radiations | [`radiation_doses`](#radiation_doses) | 1404 | Relevé dosimétrique d'un astronaute : débit et cumuls mission/carrière (F5.1, F5.2). |
 | Radiations | [`space_weather_events`](#space_weather_events) | 505 | Événement de météo spatiale : éruption, SPE, CME (F5.3, F5.4), réel (DONKI) ou simulé. |
 | Données ouvertes | [`cruise_dose_samples`](#cruise_dose_samples) | 5117 | Débit de dose réel mesuré par Curiosity RAD pendant le transit vers Mars (référence F5). |
-| Données ouvertes | [`dataset_sources`](#dataset_sources) | 8 | Jeu de données ouvert utilisé par le projet : origine, licence, date de récupération. |
+| Données ouvertes | [`dataset_sources`](#dataset_sources) | 9 | Jeu de données ouvert utilisé par le projet : origine, licence, date de récupération. |
 | Données ouvertes | [`proton_flux_readings`](#proton_flux_readings) | 4026 | Flux de protons intégral mesuré par les satellites GOES de la NOAA (alerte précoce F5.4). |
 | Moteur IA | [`feature_snapshots`](#feature_snapshots) | 240 | Indicateurs agrégés sur une fenêtre (moyennes, pentes, z-scores) à un passage du pipeline. |
 | Moteur IA | [`risk_scores`](#risk_scores) | 1440 | Score de risque 0-100 d'un domaine à un instant (F2.5, F2.6, §9 risk_score). |
@@ -596,7 +596,7 @@ Modèle `CruiseDoseSample` · 6 colonnes · 5117 lignes dans la base de démonst
 
 Jeu de données ouvert utilisé par le projet : origine, licence, date de récupération.
 
-Modèle `DatasetSource` · 10 colonnes · 8 lignes dans la base de démonstration.
+Modèle `DatasetSource` · 10 colonnes · 9 lignes dans la base de démonstration.
 
 | Colonne | Type | Null | Défaut | Clés | Description |
 |---|---|:---:|---|---|---|
