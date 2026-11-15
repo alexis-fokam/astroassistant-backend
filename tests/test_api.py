@@ -1,4 +1,4 @@
-"""REST API (spec §10) against a copy of the seeded demo database."""
+"""API REST (§10) testée sur une copie de la base de démo remplie."""
 
 from __future__ import annotations
 
@@ -30,7 +30,7 @@ def _engine(path: Path):
 
 @pytest.fixture(scope="session")
 def demo_db(tmp_path_factory) -> Path:
-    """Seed once, then each test works on its own copy of the file."""
+    """Remplir une fois, puis chaque test travaille sur sa propre copie du fichier."""
     path = tmp_path_factory.mktemp("demo") / "demo.db"
     engine = _engine(path)
     Base.metadata.create_all(engine)
@@ -230,7 +230,7 @@ def test_protocol_runs_list_respects_rbac(client: TestClient, astronaut, cmo) ->
         ).status_code
         == 403
     )
-    # "runs" must not be mistaken for a protocol code.
+    # « runs » ne doit pas être pris pour un code de protocole.
     assert client.get("/api/v1/protocols/PRT-STRESS-01", headers=astronaut).status_code == 200
 
 
@@ -355,7 +355,7 @@ def test_engine_routes(client: TestClient, astronaut, cmo) -> None:
         "AV-04": "warning",
     }
 
-    # The status endpoint now serves the engine's scores.
+    # La route de statut sert maintenant les scores du moteur.
     status_av02 = client.get("/api/v1/crew/AV-02/status", headers=astronaut).json()
     assert status_av02["status"] == "warning" and status_av02["top_factors"]
 
@@ -384,7 +384,7 @@ def test_latest_vitals_respect_rbac(client: TestClient, astronaut, cmo) -> None:
     hr = own.json()["vitals"]["heart_rate"]
     assert hr["unit"] == "bpm" and hr["value"] is not None and len(hr["points"]) == 36
     assert hr["normal_band"]["low"] < hr["normal_band"]["high"]
-    # An astronaut must not read another member's vitals (spec §7).
+    # Un astronaute ne doit pas lire les constantes d'un autre membre (§7).
     assert client.get("/api/v1/crew/AV-03/vitals/latest", headers=astronaut).status_code == 403
     assert client.get("/api/v1/crew/AV-03/vitals/latest", headers=cmo).status_code == 200
     assert client.get("/api/v1/crew/AV-99/vitals/latest", headers=cmo).status_code == 404
@@ -407,7 +407,7 @@ def test_vital_card_levels_follow_engine_thresholds() -> None:
     hrv_baseline = SimpleNamespace(mean=48.0, median=48.0, mad=4.0)
     assert level_for(Metric.HRV_RMSSD, 31, hrv_baseline) is HealthLevel.WARNING  # 65 %
     assert level_for(Metric.HRV_RMSSD, 25, hrv_baseline) is HealthLevel.CRITICAL  # 52 %
-    assert level_for(Metric.HRV_RMSSD, 60, hrv_baseline) is HealthLevel.NOMINAL  # a rise is fine
+    assert level_for(Metric.HRV_RMSSD, 60, hrv_baseline) is HealthLevel.NOMINAL  # hausse : OK
     assert level_for(Metric.SPO2, 92, None) is HealthLevel.WARNING
     assert level_for(Metric.SPO2, 90, None) is HealthLevel.CRITICAL
     assert level_for(Metric.CORE_TEMPERATURE, 38.2, None) is HealthLevel.WARNING
@@ -424,7 +424,7 @@ def test_history_lists_respect_rbac_and_pagination(client: TestClient, astronaut
     checkins = client.get("/api/v1/checkins/AV-02", headers=astronaut).json()["items"]
     stamps = [c["submitted_at"] for c in checkins]
     assert stamps == sorted(stamps, reverse=True)
-    assert checkins[0]["stress"] == 7  # S2 story: stress declared at 7/10
+    assert checkins[0]["stress"] == 7  # histoire S2 : stress déclaré à 7/10
     page2 = client.get(
         "/api/v1/sleep/AV-02", headers=astronaut, params={"limit": 2, "offset": 2}
     ).json()

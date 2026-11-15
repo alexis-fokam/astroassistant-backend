@@ -1,4 +1,4 @@
-"""Data dictionary: every column documented, every table rendered."""
+"""Dictionnaire de données : chaque colonne documentée, chaque table rendue."""
 
 from app.docs.dictionary import DOMAINS, build, table_domain, table_models
 from app.models import Base

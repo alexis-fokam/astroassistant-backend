@@ -1,7 +1,7 @@
-"""Shared foundation of the SQLAlchemy models: declarative base, conventions, mixins.
+"""Socle commun des modèles SQLAlchemy : base déclarative, conventions, mixins.
 
-Every column carries a ``comment``: it is written into the database schema and is the
-single source of the generated data dictionary (``python -m app.docs``).
+Chaque colonne porte un ``comment`` : il est écrit dans le schéma de la base et sert de
+source unique au dictionnaire de données généré (``python -m app.docs``).
 """
 
 from datetime import UTC, datetime
@@ -12,7 +12,7 @@ from sqlalchemy import JSON, DateTime, MetaData, TypeDecorator
 from sqlalchemy import Enum as SAEnum
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column
 
-# Stable constraint names (ready for future Alembic migrations).
+# Noms de contraintes stables (prêts pour de futures migrations Alembic).
 NAMING_CONVENTION = {
     "ix": "ix_%(column_0_label)s",
     "uq": "uq_%(table_name)s_%(column_0_name)s",
@@ -27,11 +27,12 @@ def utcnow() -> datetime:
 
 
 class UTCDateTime(TypeDecorator):
-    """Timezone-aware UTC datetimes on every database.
+    """Dates UTC avec fuseau sur toutes les bases.
 
-    SQLite does not store time zones and returns naive datetimes; every datetime of the
-    schema is UTC, so values are normalised to UTC on write and tagged UTC on read. The API
-    then always serialises ``...+00:00`` and clients never misread a time as local.
+    SQLite ne stocke pas les fuseaux et renvoie des dates naïves ; toutes les dates du
+    schéma sont en UTC : elles sont ramenées en UTC à l'écriture et marquées UTC à la
+    lecture. L'API sérialise donc toujours ``...+00:00`` et aucun client ne lit une heure
+    locale par erreur.
     """
 
     impl = DateTime(timezone=True)
@@ -49,7 +50,7 @@ class UTCDateTime(TypeDecorator):
 
 
 class Base(DeclarativeBase):
-    """Declarative base of every Astro Assistant model."""
+    """Base déclarative de tous les modèles d'Astro Assistant."""
 
     metadata = MetaData(naming_convention=NAMING_CONVENTION)
     type_annotation_map = {
@@ -60,7 +61,7 @@ class Base(DeclarativeBase):
 
 
 def enum_type[E: StrEnum](enum_cls: type[E]) -> SAEnum:
-    """Enum stored as VARCHAR (value, not name) plus a CHECK constraint (SQLite/Postgres)."""
+    """Énumération stockée en VARCHAR (valeur, pas nom) avec une contrainte CHECK."""
     return SAEnum(
         enum_cls,
         native_enum=False,

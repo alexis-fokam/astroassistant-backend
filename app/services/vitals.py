@@ -1,7 +1,7 @@
-"""Latest vital signs for the crew dashboard (GET /crew/{code}/vitals/latest).
+"""Dernières constantes pour le tableau de bord (GET /crew/{code}/vitals/latest).
 
-Consistent with the risk engine: same cleaning (plausible ranges, minimum quality,
-simulation runs excluded), same individual baselines and same robust z-score.
+Cohérent avec le moteur de risque : même nettoyage (plages plausibles, qualité minimale,
+simulations exclues), mêmes références individuelles et même z-score robuste.
 """
 
 from __future__ import annotations
@@ -18,7 +18,7 @@ from app.schemas.telemetry import CrewVitalsLatest, NormalBand, VitalLatestItem,
 from app.services.views import as_utc
 
 POINTS = 36
-# Metrics shown on the dashboard; activity and cabin CO2 are context, not vital signs.
+# Mesures affichées sur le tableau de bord ; activité et CO2 cabine sont du contexte.
 DASHBOARD_METRICS = (
     Metric.HEART_RATE,
     Metric.HRV_RMSSD,
@@ -28,15 +28,15 @@ DASHBOARD_METRICS = (
     Metric.SYSTOLIC_BP,
     Metric.DIASTOLIC_BP,
 )
-# HRV is protective: only a drop is abnormal. SpO2 likewise: only a fall.
+# La VFC protège : seule une baisse est anormale. Pareil pour la SpO2 : seule une chute.
 LOWER_IS_WORSE = {Metric.HRV_RMSSD, Metric.SPO2}
 
 
 def level_for(metric: Metric, value: float, baseline: Baseline | None) -> HealthLevel:
-    """Card colour, with the same thresholds as the engine's rules (rules.yaml).
+    """Couleur de la carte, avec les mêmes seuils que les règles du moteur (rules.yaml).
 
-    SpO2 and temperature use clinical thresholds (SPO2-CRIT-01, TEMP-01); HRV its ratio to
-    the individual baseline (HRV-01: < 80 %); other signs a robust z-score (|z| ≥ 2 / 3).
+    SpO2 et température suivent des seuils cliniques (SPO2-CRIT-01, TEMP-01) ; la VFC son
+    ratio à la référence (HRV-01 : < 80 %) ; les autres un z-score robuste (|z| ≥ 2 / 3).
     """
     if metric is Metric.SPO2:
         if value <= 90:
@@ -57,7 +57,7 @@ def level_for(metric: Metric, value: float, baseline: Baseline | None) -> Health
     if z is None:
         return HealthLevel.NOMINAL
     if metric in LOWER_IS_WORSE:
-        z = -z  # a rise of HRV or SpO2 is never a risk
+        z = -z  # une hausse de VFC ou de SpO2 n'est jamais un risque
     elif metric not in (Metric.CORE_TEMPERATURE,):
         z = abs(z)
     if z >= 3:
@@ -68,7 +68,7 @@ def level_for(metric: Metric, value: float, baseline: Baseline | None) -> Health
 
 
 def trend_pct(values: list[float]) -> float | None:
-    """Change of the last value against the mean of the window, in %."""
+    """Variation de la dernière valeur par rapport à la moyenne de la fenêtre, en %."""
     if len(values) < 2:
         return None
     reference = sum(values[:-1]) / (len(values) - 1)

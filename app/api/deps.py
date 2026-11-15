@@ -57,7 +57,7 @@ def get_crew_member(db: Session, code: str) -> CrewMember:
 
 
 def visible_member(db: Session, viewer: CrewMember, code: str) -> CrewMember:
-    """An astronaut only sees their own data; the CMO sees the whole crew (spec §7)."""
+    """Un astronaute ne voit que ses propres données ; le CMO voit tout l'équipage (§7)."""
     target = get_crew_member(db, code)
     if target.id != viewer.id and not is_cmo(viewer):
         raise HTTPException(status.HTTP_403_FORBIDDEN, "Accès limité à vos propres données")
@@ -65,5 +65,5 @@ def visible_member(db: Session, viewer: CrewMember, code: str) -> CrewMember:
 
 
 def subject_member(db: Session, viewer: CrewMember, code: str | None) -> CrewMember:
-    """Member a write applies to: oneself by default, anyone for the CMO."""
+    """Membre concerné par une écriture : soi-même par défaut, n'importe qui pour le CMO."""
     return viewer if code is None or code == viewer.code else visible_member(db, viewer, code)

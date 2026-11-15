@@ -1,4 +1,4 @@
-"""Crew (local PIN-protected profiles), sensors and individual baselines."""
+"""Équipage (profils locaux protégés par PIN), capteurs et références individuelles."""
 
 from __future__ import annotations
 

@@ -1,4 +1,4 @@
-"""On-board medicine: CMO consultation notes (spec F9.3) and pharmacy (F11)."""
+"""Médecine à bord : notes de consultation du CMO (F9.3) et pharmacie (F11)."""
 
 from __future__ import annotations
 

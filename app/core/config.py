@@ -18,16 +18,16 @@ class Settings(BaseSettings):
 
     # Intervalle du pipeline IA (secondes) — cahier des charges §8.1
     pipeline_interval_seconds: int = 5
-    # Run the risk engine in the background (disabled in tests).
+    # Fait tourner le moteur de risque en arrière-plan (désactivé dans les tests).
     pipeline_enabled: bool = True
     # Trained anomaly models (joblib).
     models_dir: str = str(BASE_DIR / "data" / "models")
 
-    # Signing key of the session tokens issued after PIN login (spec §7). Override in .env.
+    # Clé de signature des jetons de session émis après le PIN (§7). À surcharger dans .env.
     secret_key: str = "dev-only-change-me"
     token_ttl_hours: int = 12
 
-    # NASA open APIs (DONKI). DEMO_KEY works but is rate limited; get a free key at api.nasa.gov.
+    # API ouvertes NASA (DONKI). DEMO_KEY est limitée ; clé gratuite sur api.nasa.gov.
     nasa_api_key: str = "DEMO_KEY"
 
 

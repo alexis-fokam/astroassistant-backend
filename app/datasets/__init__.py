@@ -1,11 +1,11 @@
-"""Open datasets used by Astro Assistant (spec §12).
+"""Jeux de données ouverts utilisés par Astro Assistant (cahier des charges §12).
 
-- ``donki``: NASA DONKI space-weather events (solar particle events, CMEs).
-- ``goes``: NOAA GOES integral proton flux (solar radiation storm alerts).
-- ``msl_rad``: NASA Curiosity RAD dose rate measured during the cruise to Mars.
-- ``catalog``: larger external datasets (physiology, sleep, vigilance) fetched on demand.
+- ``donki`` : événements de météo spatiale NASA DONKI (particules solaires, CME).
+- ``goes`` : flux intégral de protons NOAA GOES (alertes de tempête radiative).
+- ``msl_rad`` : débit de dose Curiosity RAD mesuré pendant le trajet vers Mars.
+- ``catalog`` : grands jeux externes (physiologie, sommeil, stress) téléchargés à la demande.
 
-Small NASA extracts are versioned under ``data/nasa/`` so the demo runs offline;
-large external datasets go to ``data/external/`` (git-ignored).
-Run ``python -m app.datasets --help`` for the command line.
+Les petits extraits NASA sont versionnés dans ``data/nasa/`` pour une démo hors ligne ;
+les grands jeux externes vont dans ``data/external/`` (ignoré par git).
+Lancer ``python -m app.datasets --help`` pour la ligne de commande.
 """

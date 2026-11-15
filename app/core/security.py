@@ -1,7 +1,8 @@
-"""Local profile security (spec §7): PIN hashing and signed session tokens.
+"""Sécurité des profils locaux (§7) : hachage des PIN et jetons de session signés.
 
-Standard library only. PINs are hashed with PBKDF2-SHA256. After login the API issues a
-stateless token ``<member id>.<expiry>.<HMAC-SHA256>`` signed with ``AV_SECRET_KEY``.
+Bibliothèque standard uniquement. Les PIN sont hachés en PBKDF2-SHA256. Après connexion,
+l'API émet un jeton sans état ``<id du membre>.<expiration>.<HMAC-SHA256>`` signé avec
+``AV_SECRET_KEY``.
 """
 
 import base64
@@ -15,7 +16,7 @@ _ITERATIONS = 200_000
 
 
 def hash_pin(pin: str) -> str:
-    """Return ``pbkdf2_sha256$<iterations>$<hex salt>$<hex digest>``."""
+    """Renvoie ``pbkdf2_sha256$<itérations>$<sel hex>$<empreinte hex>``."""
     salt = secrets.token_bytes(16)
     digest = hashlib.pbkdf2_hmac("sha256", pin.encode(), salt, _ITERATIONS)
     return f"{_ALGORITHM}${_ITERATIONS}${salt.hex()}${digest.hex()}"
@@ -44,7 +45,7 @@ def create_token(member_id: int, secret: str, ttl_seconds: int, now: float | Non
 
 
 def read_token(token: str, secret: str, now: float | None = None) -> int | None:
-    """Member id carried by a valid, unexpired token; None otherwise."""
+    """Id du membre porté par un jeton valide et non expiré ; None sinon."""
     try:
         member_id, expires, signature = token.split(".")
         payload = f"{member_id}.{expires}"

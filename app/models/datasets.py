@@ -1,4 +1,4 @@
-"""Provenance of open datasets and the reference measurements imported from them (spec §12)."""
+"""Origine des jeux de données ouverts et mesures de référence importées (§12)."""
 
 from __future__ import annotations
 

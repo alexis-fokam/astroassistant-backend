@@ -1,4 +1,4 @@
-"""Read helpers: mission clock, crew status and ORM → schema conversions."""
+"""Aides de lecture : horloge de mission, statut de l'équipage et conversions ORM → schéma."""
 
 from __future__ import annotations
 
@@ -28,17 +28,17 @@ LEVEL_ORDER = {AlertLevel.CRITICAL: 0, AlertLevel.WARNING: 1, AlertLevel.INFO: 2
 
 
 def as_utc(value: datetime | None) -> datetime | None:
-    """SQLite returns naive datetimes; every stored datetime is UTC."""
+    """SQLite renvoie des dates naïves ; chaque date stockée est en UTC."""
     if value is None or value.tzinfo is not None:
         return value
     return value.replace(tzinfo=UTC)
 
 
 def mission_now(db: Session) -> datetime:
-    """Mission clock: time of the latest mission telemetry, or the wall clock if none.
+    """Horloge de mission : heure de la dernière mesure de mission, sinon l'heure réelle.
 
-    The demo database holds a fixed history (J+142); using its last reading keeps every
-    relative value (mission day, "since", projections) consistent with that story.
+    La base de démo contient un historique fixe (J+142) ; partir de sa dernière mesure garde
+    toutes les valeurs relatives (jour de mission, « depuis », projections) cohérentes.
     """
     latest = db.scalar(
         select(func.max(VitalReading.recorded_at)).where(VitalReading.sim_run_id.is_(None))
@@ -47,7 +47,7 @@ def mission_now(db: Session) -> datetime:
 
 
 def mission_latency(db: Session) -> timedelta:
-    """One-way Earth-crew delay of the active mission (spec: 4-24 min for Mars)."""
+    """Délai aller Terre-équipage de la mission active (cahier des charges : 4-24 min pour Mars)."""
     from app.models import Mission
 
     seconds = db.scalar(select(Mission.one_way_latency_s).where(Mission.is_active.is_(True)))
@@ -55,7 +55,7 @@ def mission_latency(db: Session) -> timedelta:
 
 
 def latest_scores(db: Session, member: CrewMember) -> dict[RiskDomain, RiskScore]:
-    """Most recent mission score of each domain."""
+    """Score de mission le plus récent de chaque domaine."""
     newest = db.scalar(
         select(func.max(RiskScore.computed_at)).where(
             RiskScore.crew_member_id == member.id, RiskScore.sim_run_id.is_(None)
@@ -83,7 +83,7 @@ def active_alerts(db: Session, member: CrewMember | None = None) -> list[Alert]:
 
 
 def alert_out(alert: Alert, latency: timedelta | None = None) -> AlertOut:
-    """``latency`` adds the time the alert reaches the ground (spec: ground dashboard M4)."""
+    """``latency`` ajoute l'heure d'arrivée de l'alerte au sol (tableau de bord sol M4)."""
     return AlertOut.model_validate(
         {
             **{c: getattr(alert, c) for c in AlertOut.model_fields if hasattr(alert, c)},

@@ -16,7 +16,7 @@ class DatasetInfo:
     licence: str
     usage: str
     size: str
-    # True when the dataset is fetched and versioned by `python -m app.datasets`.
+    # Vrai quand le jeu est téléchargé et versionné par `python -m app.datasets`.
     bundled: bool
 
 

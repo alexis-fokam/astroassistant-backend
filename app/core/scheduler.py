@@ -1,7 +1,7 @@
-"""Low-frequency housekeeping jobs (APScheduler).
+"""Tâches de maintenance peu fréquentes (APScheduler).
 
-The risk pipeline runs separately every few seconds (``app.engine.scheduler``); the jobs
-here run once a day.
+Le pipeline de risque tourne à part toutes les quelques secondes (``app.engine.scheduler``) ;
+les tâches d'ici tournent une fois par jour.
 """
 
 import logging
@@ -18,7 +18,7 @@ scheduler = AsyncIOScheduler()
 
 
 async def verify_audit_chain() -> None:
-    """Nightly integrity check of the SHA-256 audit chain (spec F14.1)."""
+    """Vérification nocturne de l'intégrité de la chaîne d'audit SHA-256 (F14.1)."""
     with SessionLocal() as db:
         valid, entries, broken_at = audit.verify(db)
     if valid:

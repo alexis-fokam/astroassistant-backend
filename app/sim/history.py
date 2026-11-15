@@ -1,19 +1,18 @@
-"""Deterministic fictional mission history for the demo database.
+"""Historique de mission fictif et déterministe pour la base de démo.
 
-Generates the last ``HISTORY_DAYS`` days of the Artemis-M mission (up to J+142, the
-clock shown by the frontend) for the four fictional crew members, so every table of
-the schema holds coherent data:
+Génère les ``HISTORY_DAYS`` derniers jours de la mission Artemis-M (jusqu'à J+142, l'horloge
+affichée par le frontend) pour les quatre membres fictifs, afin que chaque table du schéma
+contienne des données cohérentes :
 
-* AV-01 skips three resistance sessions → musculoskeletal WARNING (scenario S5);
-* AV-02 accumulates sleep debt with a falling HRV → behavioural WARNING (S2);
-* AV-03 develops tachycardia with desaturation → CRITICAL alert and emergency (EMRG-01);
-* AV-04 reports blurred vision and headaches → SANS suspicion (S4);
-* two days ago the whole crew sheltered during a replay of the September 2017 solar
-  particle event (S3).
+* AV-01 saute trois séances de résistance → WARNING musculo-squelettique (scénario S5) ;
+* AV-02 accumule une dette de sommeil avec une VFC en baisse → WARNING comportemental (S2) ;
+* AV-03 développe une tachycardie avec désaturation → alerte CRITICAL et urgence (EMRG-01) ;
+* AV-04 signale vision floue et céphalées → suspicion de SANS (S4) ;
+* il y a deux jours, tout l'équipage s'est abrité pendant le rejeu de l'événement à
+  particules solaires de septembre 2017 (S3).
 
-Background radiation follows the real Curiosity RAD cruise profile when the CSV is
-available. All randomness comes from ``random.Random(seed)``: the same seed always
-produces the same database.
+Le fond de radiation suit le vrai profil de Curiosity RAD quand le CSV est disponible.
+Tout l'aléa vient de ``random.Random(seed)`` : la même graine produit toujours la même base.
 """
 
 from __future__ import annotations
@@ -86,13 +85,13 @@ DEMO_NOW = datetime(2026, 10, 13, 14, 5, tzinfo=UTC)  # J+142 · 14:05 (frontend
 HISTORY_DAYS = 14
 MODEL_VERSION = "risk-engine 0.4.0"
 
-# Mean cruise dose equivalent when no RAD file is available (Zeitlin 2013: 1.84 mSv/day).
+# Équivalent de dose moyen en croisière sans fichier RAD (Zeitlin 2013 : 1,84 mSv/jour).
 FALLBACK_DOSE_MSV_H = 1.84 / 24
 SPE_PEAK_MSV_H = 1.82
-# Shielding factor of each member's sleeping quarter relative to the RAD instrument.
+# Facteur de blindage de la cabine de chaque membre par rapport à l'instrument RAD.
 SHIELDING = {"AV-01": 0.94, "AV-02": 1.0, "AV-03": 0.97, "AV-04": 0.95}
 
-# Final domain scores at DEMO_NOW, identical to the frontend mock (crew.ts).
+# Scores finaux par domaine à DEMO_NOW, identiques aux données de démo du frontend (crew.ts).
 FINAL_SCORES = {
     "AV-01": {"cardio": 22, "radiation": 24, "musculoskeletal": 52, "behavioral": 30, "immune": 15},
     "AV-02": {"cardio": 61, "radiation": 22, "musculoskeletal": 35, "behavioral": 68, "immune": 18},
@@ -100,7 +99,7 @@ FINAL_SCORES = {
     "AV-04": {"cardio": 30, "radiation": 23, "musculoskeletal": 26, "behavioral": 34, "immune": 20},
 }
 FINAL_GLOBAL = {"AV-01": 41, "AV-02": 54, "AV-03": 81, "AV-04": 47}
-# Hours before DEMO_NOW at which a domain starts drifting towards its final score.
+# Heures avant DEMO_NOW où un domaine commence à dériver vers son score final.
 ONSET_H = {
     ("AV-01", "musculoskeletal"): 72,
     ("AV-02", "behavioral"): 80,
@@ -119,7 +118,7 @@ def level_for(score: float) -> HealthLevel:
 
 
 def global_score(domains: dict[str, float]) -> float:
-    """Aggregate: weighted max/mean, forced to the max when a domain is critical."""
+    """Agrégat : max/moyenne pondérés, forcé au max quand un domaine est critique."""
     top, mean = max(domains.values()), sum(domains.values()) / len(domains)
     return round(top if top >= 70 else 0.6 * top + 0.4 * mean, 1)
 
@@ -240,14 +239,14 @@ class HistoryBuilder:
                         member, device, Metric.ACTIVITY_LEVEL, t, value=self._met(code, t)
                     )
                 )
-            # 5-minute resolution over the last two hours (live dashboard).
+            # Résolution de 5 minutes sur les deux dernières heures (tableau de bord en direct).
             for t in self.hours(5, start=fine_start):
                 if t.minute == 0:
                     continue
                 for metric in (Metric.HEART_RATE, Metric.HRV_RMSSD, Metric.SPO2):
                     rows.append(self._vital_row(member, device, metric, t))
             device.last_seen_at = self.now
-        # One artefact rejected by the cleaning step (§6.1): strap slipped on AV-01.
+        # Un artefact rejeté par le nettoyage (§6.1) : sangle déplacée sur AV-01.
         rows.append(
             self._vital_row(
                 self.crew["AV-01"],
@@ -294,7 +293,7 @@ class HistoryBuilder:
 
     # ------------------------------------------------------------------ radiation
     def cruise_profile(self) -> list[float]:
-        """Hourly dose equivalent (mSv/h) taken from the real RAD cruise, else a constant."""
+        """Équivalent de dose horaire (mSv/h) tiré du vrai trajet RAD, sinon une constante."""
         if MSL_RAD_CSV.exists():
             samples = msl_rad.load(MSL_RAD_CSV)
             if samples:
@@ -329,7 +328,7 @@ class HistoryBuilder:
                 offset = (t - self.spe_start).total_seconds() / 3600
                 event_id = None
                 if 0 <= offset <= 6:
-                    # Sheltered in the storm shelter: peak attenuated after the 10-minute deadline.
+                    # Abrités dans l'abri anti-tempête : pic atténué après le délai de 10 minutes.
                     shape = math.exp(-((offset - 1.33) ** 2) / 1.2)
                     rate = max(rate, SPE_PEAK_MSV_H * shape * (0.35 if offset > 0.17 else 1))
                     neutron, event_id = round(self.rng.uniform(0.03, 0.06), 3), spe.id
@@ -358,7 +357,7 @@ class HistoryBuilder:
             d0 = self.start + timedelta(days=day)
             for code, member in self.crew.items():
                 late = self.hours_before_now(d0) <= 72
-                # Sleep night of d0 → d0+1 (AV-02: < 6 h on the last three nights).
+                # Nuit de d0 → d0+1 (AV-02 : < 6 h les trois dernières nuits).
                 bed = d0 + timedelta(hours=22, minutes=self.rng.randint(0, 40))
                 hours = (
                     5.4 + self.rng.uniform(0, 0.4)
@@ -380,7 +379,7 @@ class HistoryBuilder:
                             "source": DataSource.SENSOR,
                         }
                     )
-                # Exercise: resistance (ARED) at 08:00, aerobic at 17:00.
+                # Exercice : résistance (ARED) à 08:00, aérobie à 17:00.
                 for hour, kind in (
                     (8, ExerciseKind.RESISTANCE),
                     (17, self.rng.choice([ExerciseKind.TREADMILL, ExerciseKind.CYCLE])),
@@ -423,7 +422,7 @@ class HistoryBuilder:
                             else None,
                         }
                     )
-                # Morning PVT (degraded for AV-02 under sleep debt).
+                # PVT du matin (dégradé pour AV-02 en dette de sommeil).
                 taken = d0 + timedelta(hours=7, minutes=30)
                 if taken <= self.now:
                     tired = code == "AV-02" and late
@@ -441,7 +440,7 @@ class HistoryBuilder:
                             "false_starts": self.rng.randint(0, 1),
                         }
                     )
-                # Meals and water.
+                # Repas et eau.
                 for hour, kind, kcal in (
                     (7, IntakeKind.MEAL, 650),
                     (12, IntakeKind.MEAL, 900),
@@ -475,7 +474,7 @@ class HistoryBuilder:
                                 "water_ml": 500,
                             }
                         )
-                # Daily check-in at 21:00.
+                # Check-in quotidien à 21:00.
                 at = d0 + timedelta(hours=21)
                 if at <= self.now:
                     checkins.append(self._checkin(code, member, at))
@@ -484,7 +483,7 @@ class HistoryBuilder:
         self.session.execute(PvtResult.__table__.insert(), pvts)
         self.session.execute(IntakeLog.__table__.insert(), intakes)
         self.session.execute(Checkin.__table__.insert(), checkins)
-        # Audit only the clinically relevant check-ins to keep the trail readable.
+        # N'auditer que les check-ins cliniquement utiles, pour garder le journal lisible.
         for row in checkins:
             if row["stress"] >= 7 or row["vision_change"] >= 2:
                 self.log(
@@ -508,7 +507,7 @@ class HistoryBuilder:
             "duration_seconds": r.randint(45, 85),
             "headache": r.choice([0, 0, 0, 1]),
             "vision_change": 0,
-            "congestion": r.choice([0, 1, 1, 2]),  # fluid shift is common in weightlessness
+            "congestion": r.choice([0, 1, 1, 2]),  # fréquent en apesanteur
             "back_pain": r.choice([0, 0, 1]),
             "nausea": 0,
             "dizziness": 0,
@@ -749,7 +748,7 @@ class HistoryBuilder:
         n = self.now
         alerts: list[Alert] = []
 
-        # Routine information alert, early in the window.
+        # Alerte d'information de routine, au début de la fenêtre.
         info = self.alert(
             "AV-03",
             self.start + timedelta(days=2, hours=10),
@@ -766,7 +765,7 @@ class HistoryBuilder:
         self.resolve(info, info.triggered_at + timedelta(days=2))
         alerts.append(info)
 
-        # S3 replay: CRITICAL radiation alert for each member, all resolved after shelter.
+        # Rejeu de S3 : alerte radiation CRITICAL pour chaque membre, toutes résolues après l'abri.
         for code in self.crew:
             a = self.alert(
                 code,
@@ -914,7 +913,7 @@ class HistoryBuilder:
         )
         alerts.append(crit)
 
-        # An older, closed emergency (motion sickness at the start of the window).
+        # Une urgence plus ancienne et clôturée (mal des transports au début de la fenêtre).
         old = self.add(
             EmergencyEvent(
                 patient_id=self.crew["AV-02"].id,
@@ -1115,7 +1114,7 @@ class HistoryBuilder:
                 )
             )
             target = self.crew[member or "AV-03"]
-            # A few tagged readings: deleting the run cascades to them (F15).
+            # Quelques mesures étiquetées : supprimer l'exécution les supprime en cascade (F15).
             self.session.add_all(
                 VitalReading(
                     crew_member_id=target.id,
@@ -1168,5 +1167,5 @@ class HistoryBuilder:
 def generate_history(
     session: Session, now: datetime = DEMO_NOW, days: int = HISTORY_DAYS, seed: int = 142
 ) -> None:
-    """Fill every operational table with a coherent fictional history ending at ``now``."""
+    """Remplir chaque table opérationnelle avec un historique fictif cohérent jusqu'à ``now``."""
     HistoryBuilder(session, now=now, days=days, seed=seed).build()

@@ -1,4 +1,4 @@
-"""AI risk engine (spec §6): cleaning, baselines, features, clinical rules, Isolation Forest,
-domain scores with explanations, and alerts. Configuration in ``config.yaml`` and
-``rules.yaml``; entry point ``pipeline.run_once``.
+"""Moteur de risque IA (§6) : nettoyage, références, indicateurs, règles cliniques,
+Isolation Forest, scores par domaine expliqués et alertes. Configuration dans ``config.yaml``
+et ``rules.yaml`` ; point d'entrée ``pipeline.run_once``.
 """

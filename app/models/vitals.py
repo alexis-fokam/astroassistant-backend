@@ -1,4 +1,4 @@
-"""Raw data: sensor readings and the crew's daily check-in."""
+"""Données brutes : mesures des capteurs et check-in quotidien de l'équipage."""
 
 from __future__ import annotations
 
@@ -66,9 +66,9 @@ class VitalReading(Base):
     device: Mapped[Device | None] = relationship()
 
 
-# Symptoms rated 0-3 (none, mild, moderate, severe) and self-rated scales 0-10 (spec F3.2).
-# dizziness, skin_issue and crew_relations cover NASA HRP risks: sensorimotor/vestibular,
-# host-microorganism interactions and inadequate teamwork.
+# Symptômes notés de 0 à 3 (aucun, léger, modéré, sévère) et ressentis de 0 à 10 (F3.2).
+# dizziness, skin_issue et crew_relations couvrent des risques NASA HRP : sensorimoteur,
+# interactions hôte-microorganismes et travail d'équipe insuffisant.
 _SYMPTOMS = (
     "headache",
     "vision_change",

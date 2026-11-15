@@ -2,6 +2,6 @@ from pydantic import BaseModel, ConfigDict
 
 
 class OrmModel(BaseModel):
-    """Response model read straight from SQLAlchemy objects."""
+    """Modèle de réponse lu directement depuis les objets SQLAlchemy."""
 
     model_config = ConfigDict(from_attributes=True)

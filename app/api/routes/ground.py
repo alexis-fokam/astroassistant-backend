@@ -1,4 +1,4 @@
-"""Ground link, simulator control, audit trail and open datasets (F10, F14, F15, §12)."""
+"""Liaison sol, simulateur, journal d'audit et jeux ouverts (F10, F14, F15, §12)."""
 
 from __future__ import annotations
 
@@ -59,7 +59,7 @@ router = APIRouter()
     "/sync/export", response_model=ExportOut, status_code=status.HTTP_201_CREATED, tags=["sync"]
 )
 def export(body: ExportRequest, db: DbSession, viewer: CurrentMember) -> ExportOut:
-    """Build a daily summary packet and return the export queue (F10.1, F10.2)."""
+    """Construire le paquet de synthèse du jour et renvoyer la file d'export (F10.1, F10.2)."""
     members = (
         [get_crew_member(db, body.crew_code)]
         if body.crew_code
@@ -109,7 +109,7 @@ def packets(
     tags=["sync"],
 )
 def import_message(body: ImportRequest, db: DbSession, viewer: CurrentMember) -> GroundMessageOut:
-    """Import an instruction from the ground; its SHA-256 is checked when provided (F10.4)."""
+    """Importer une consigne du sol ; son SHA-256 est vérifié s'il est fourni (F10.4)."""
     digest = hashlib.sha256(body.body.encode()).hexdigest()
     if body.sha256 and body.sha256.lower() != digest:
         raise HTTPException(
@@ -126,7 +126,7 @@ def import_message(body: ImportRequest, db: DbSession, viewer: CurrentMember) ->
         is_instruction=body.is_instruction,
         sha256=digest,
         sent_at=body.sent_at,
-        received_at=mission_now(db),  # imported on board: it has arrived
+        received_at=mission_now(db),  # importée à bord : elle est arrivée
     )
     db.add(message)
     audit.record(db, "ground.import", actor=viewer, entity=message, subject=body.subject)
@@ -136,9 +136,9 @@ def import_message(body: ImportRequest, db: DbSession, viewer: CurrentMember) ->
 
 @router.get("/sync/messages", response_model=list[GroundMessageOut], tags=["sync"])
 def messages(db: DbSession, viewer: CurrentMember) -> list[GroundMessageOut]:
-    """Ground messages: crew-wide ones plus those addressed to the viewer (all for the CMO)."""
+    """Messages du sol : ceux de tout l'équipage et ceux du lecteur (tous pour le CMO)."""
     query = select(GroundMessage).order_by(GroundMessage.received_at.desc())
-    # Messages still travelling from Earth are not on board yet (communication delay).
+    # Les messages encore en route depuis la Terre ne sont pas à bord (délai de communication).
     query = query.where(GroundMessage.received_at <= mission_now(db))
     if not is_cmo(viewer):
         query = query.where(
@@ -164,7 +164,7 @@ def mark_read(message_id: int, db: DbSession, viewer: CurrentMember) -> GroundMe
     tags=["ground"],
 )
 def send_instruction(body: InstructionIn, db: DbSession, viewer: CurrentMember) -> GroundMessageOut:
-    """Ground dashboard: send an instruction; it reaches the crew after the one-way delay."""
+    """Tableau de bord sol : envoyer une consigne ; elle arrive après le délai aller."""
     recipient = get_crew_member(db, body.crew_code) if body.crew_code else None
     sent = mission_now(db)
     message = GroundMessage(
@@ -185,7 +185,7 @@ def send_instruction(body: InstructionIn, db: DbSession, viewer: CurrentMember) 
 
 @router.get("/ground/instructions", response_model=list[GroundMessageOut], tags=["ground"])
 def ground_instructions(db: DbSession, _: CurrentMember) -> list[GroundMessageOut]:
-    """Ground view: every instruction, including those still in transit."""
+    """Vue sol : toutes les consignes, y compris celles encore en transit."""
     query = select(GroundMessage).order_by(GroundMessage.sent_at.desc())
     return [message_out(db, m) for m in db.scalars(query)]
 
@@ -218,7 +218,7 @@ def scenarios(db: DbSession, _: CurrentMember) -> list[SimScenario]:
     tags=["simulation"],
 )
 async def start_scenario(body: ScenarioStart, db: DbSession, viewer: CurrentMember) -> SimRunOut:
-    """Start a live demo run of S1-S6 (F15): telemetry every 2 s, analysed by the engine."""
+    """Lancer une démo en direct de S1-S6 (F15) : mesures toutes les 2 s, analysées par l'IA."""
     scenario = db.scalars(select(SimScenario).where(SimScenario.code == body.code)).first()
     if scenario is None:
         raise HTTPException(status.HTTP_404_NOT_FOUND, f"Scénario {body.code} inconnu")
@@ -284,7 +284,7 @@ async def stop_run(run_id: int, db: DbSession, viewer: CurrentMember) -> SimRunO
 
 @router.get("/sim/anomalies", tags=["simulation"])
 def anomalies(_: CurrentMember) -> list[dict]:
-    """Anomalies the jury can inject, with the rules the engine is expected to raise."""
+    """Anomalies que le jury peut injecter, avec les règles que le moteur doit lever."""
     return [
         {
             "code": a.code,
@@ -298,13 +298,13 @@ def anomalies(_: CurrentMember) -> list[dict]:
 
 @router.get("/sim/state", tags=["simulation"])
 def sim_state(_: CurrentMember) -> dict:
-    """Current run: simulated clock, speed, active anomalies and event log."""
+    """Exécution en cours : horloge simulée, vitesse, anomalies actives et journal."""
     return live.snapshot(controller.state, controller.running)
 
 
 @router.post("/sim/inject", tags=["simulation"])
 def inject(body: InjectIn, db: DbSession, _: CurrentMember) -> dict:
-    """Inject an anomaly into the running simulation (start a scenario first)."""
+    """Injecter une anomalie dans la simulation en cours (lancer d'abord un scénario)."""
     if controller.state.run_id is None:
         raise HTTPException(
             status.HTTP_409_CONFLICT, "Lancez d'abord un scénario (POST /sim/scenario)"
@@ -318,7 +318,7 @@ def inject(body: InjectIn, db: DbSession, _: CurrentMember) -> dict:
 
 @router.post("/sim/tick", tags=["simulation"])
 def sim_tick(db: DbSession, _: CurrentMember, count: int = Query(default=1, ge=1, le=60)) -> dict:
-    """Advance the simulation by ``count`` ticks now (demo step, tests)."""
+    """Avancer la simulation de ``count`` pas maintenant (étape de démo, tests)."""
     if controller.state.run_id is None:
         raise HTTPException(
             status.HTTP_409_CONFLICT, "Lancez d'abord un scénario (POST /sim/scenario)"
@@ -341,7 +341,7 @@ def audit_trail(
     action: str | None = None,
     limit: int = Query(default=100, ge=1, le=1000),
 ) -> list[AuditLog]:
-    """Most recent entries first (CMO only)."""
+    """Entrées les plus récentes d'abord (CMO uniquement)."""
     query = select(AuditLog).order_by(AuditLog.id.desc()).limit(limit)
     if action:
         query = query.where(AuditLog.action.startswith(action))
@@ -350,12 +350,12 @@ def audit_trail(
 
 @router.get("/audit/verify", response_model=AuditVerifyOut, tags=["audit"])
 def audit_verify(db: DbSession, _: CurrentCmo) -> AuditVerifyOut:
-    """Recompute the SHA-256 chain to prove the trail was not altered."""
+    """Recalculer la chaîne SHA-256 pour prouver que le journal n'a pas été modifié."""
     valid, entries, broken_at = audit.verify(db)
     return AuditVerifyOut(valid=valid, entries=entries, broken_at=broken_at)
 
 
 @router.get("/datasets", response_model=list[DatasetOut], tags=["datasets"])
 def datasets(db: DbSession) -> list[DatasetSource]:
-    """Open datasets used by the project, with provenance (public, spec §12)."""
+    """Jeux de données ouverts utilisés par le projet, avec leur origine (public, §12)."""
     return list(db.scalars(select(DatasetSource).order_by(DatasetSource.code)))

@@ -1,5 +1,5 @@
-"""Countermeasures and daily life: exercise (F6), sleep (F7), vigilance PVT (F8),
-nutrition and hydration (F13)."""
+"""Contre-mesures et vie quotidienne : exercice (F6), sommeil (F7), vigilance PVT (F8),
+nutrition et hydratation (F13)."""
 
 from __future__ import annotations
 

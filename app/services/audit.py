@@ -1,4 +1,4 @@
-"""Append entries to the SHA-256 chained audit trail (spec F14.1)."""
+"""Ajouter des entrées au journal d'audit chaîné par SHA-256 (F14.1)."""
 
 from __future__ import annotations
 
@@ -22,8 +22,8 @@ def record(
     at: datetime | None = None,
     **details: Any,
 ) -> AuditLog:
-    """Chain a new entry to the last one. The caller commits."""
-    session.flush()  # the entity needs its id
+    """Chaîner une nouvelle entrée à la dernière. L'appelant fait le commit."""
+    session.flush()  # l'entité a besoin de son id
     prev = (
         session.scalars(select(AuditLog.entry_hash).order_by(AuditLog.id.desc())).first()
         or GENESIS_HASH
@@ -47,7 +47,7 @@ def record(
 
 
 def verify(session: Session) -> tuple[bool, int, int | None]:
-    """Recompute the whole chain: (valid, entries checked, id of the first broken entry)."""
+    """Recalculer toute la chaîne : (valide, entrées vérifiées, id de la 1re entrée cassée)."""
     prev, count = GENESIS_HASH, 0
     for entry in session.scalars(select(AuditLog).order_by(AuditLog.id)):
         expected = AuditLog.compute_hash(

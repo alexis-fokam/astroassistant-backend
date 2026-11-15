@@ -1,4 +1,4 @@
-"""Ground link, simulation, audit and dataset payloads."""
+"""Données échangées : liaison sol, simulation, audit et jeux ouverts."""
 
 from __future__ import annotations
 
@@ -39,7 +39,7 @@ class ExportOut(BaseModel):
 
 
 class ImportRequest(BaseModel):
-    """Instruction received from the ground (F10.4)."""
+    """Consigne reçue du sol (F10.4)."""
 
     author: str = Field(max_length=120)
     subject: str | None = Field(default=None, max_length=160)
@@ -65,7 +65,7 @@ class GroundMessageOut(OrmModel):
 
 
 class InstructionIn(BaseModel):
-    """Instruction written on the ground; it reaches the crew after the one-way delay."""
+    """Consigne écrite au sol ; elle arrive à l'équipage après le délai aller."""
 
     crew_code: str | None = Field(default=None, description="Vide : tout l'équipage")
     subject: str = Field(min_length=1, max_length=160)
@@ -74,7 +74,7 @@ class InstructionIn(BaseModel):
 
 
 class MissionPatch(BaseModel):
-    """Mission profile (ISS, Moon, Mars): sets the communication delay."""
+    """Profil de mission (ISS, Lune, Mars) : fixe le délai de communication."""
 
     destination: Literal["low_earth_orbit", "moon", "mars_transit", "mars_surface"]
 
@@ -104,7 +104,7 @@ class ScenarioStart(BaseModel):
 
 
 class InjectIn(BaseModel):
-    """Inject an anomaly live (jury demo): the AI must detect it within seconds."""
+    """Injecter une anomalie en direct (démo jury) : l'IA doit la détecter en quelques secondes."""
 
     anomaly: Literal[
         "tachycardia", "desaturation", "fever", "hrv_drop", "radiation", "sans", "deconditioning"

@@ -1,7 +1,7 @@
-"""Per-member history lists for the dashboards: check-ins, sleep, exercise, PVT.
+"""Historiques par membre pour les tableaux de bord : check-ins, sommeil, exercice, PVT.
 
-Design from @gazonsn-del's PR #8 (pagination, newest first), integrated with the shared
-access rule: an astronaut reads their own history, the CMO reads the whole crew (spec §7).
+Conception reprise de la PR #8 de @gazonsn-del (pagination, plus récents d'abord), avec la
+règle d'accès commune : un astronaute lit son historique, le CMO celui de tout l'équipage (§7).
 """
 
 from __future__ import annotations

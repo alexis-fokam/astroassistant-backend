@@ -1,11 +1,11 @@
-"""Command line for the open datasets.
+"""Ligne de commande des jeux de données ouverts.
 
-python -m app.datasets fetch donki      # NASA DONKI (SEP + CME), reference windows
-python -m app.datasets fetch goes       # NOAA GOES proton flux snapshot
-python -m app.datasets fetch msl-rad    # Curiosity RAD cruise dose (streams ~9 GB, resumable)
-python -m app.datasets fetch bidmc      # PhysioNet BIDMC numerics (~1 MB, calibration)
-python -m app.datasets fetch sleep-edf  # PhysioNet Sleep-EDF hypnograms (~1 MB, calibration)
-python -m app.datasets catalog          # list every dataset and where to get it
+python -m app.datasets fetch donki      # NASA DONKI (SEP + CME), fenêtres de référence
+python -m app.datasets fetch goes       # instantané du flux de protons NOAA GOES
+python -m app.datasets fetch msl-rad    # dose de croisière Curiosity RAD (~9 Go en flux, reprise)
+python -m app.datasets fetch bidmc      # PhysioNet BIDMC numériques (~1 Mo, calibration)
+python -m app.datasets fetch sleep-edf  # hypnogrammes PhysioNet Sleep-EDF (~1 Mo, calibration)
+python -m app.datasets catalog          # liste chaque jeu et où le trouver
 """
 
 from __future__ import annotations

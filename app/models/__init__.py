@@ -1,7 +1,7 @@
-"""SQLAlchemy models of Astro Assistant (spec §9).
+"""Modèles SQLAlchemy d'Astro Assistant (cahier des charges §9).
 
-Every model is imported here so it is registered in ``Base.metadata`` before
-``Base.metadata.create_all`` (see ``app.main``).
+Chaque modèle est importé ici pour être enregistré dans ``Base.metadata`` avant
+``Base.metadata.create_all`` (voir ``app.main``).
 """
 
 from app.models.alerts import Alert, EmergencyEvent

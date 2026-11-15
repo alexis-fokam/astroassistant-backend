@@ -1,4 +1,4 @@
-"""Protocol library: YAML content of a loaded version and material availability (F4, F11.2)."""
+"""Bibliothèque de protocoles : YAML d'une version et matériel disponible (F4, F11.2)."""
 
 from __future__ import annotations
 
@@ -16,7 +16,7 @@ from app.schemas.care import ProtocolMaterialOut, ProtocolOut, ProtocolStepOut
 
 @lru_cache(maxsize=64)
 def _read_yaml(path: str, checksum: str) -> dict[str, Any]:
-    # The checksum is part of the cache key: a reloaded version is read again.
+    # L'empreinte fait partie de la clé de cache : une version rechargée est relue.
     return yaml.safe_load((BASE_DIR / path).read_text(encoding="utf-8")) or {}
 
 

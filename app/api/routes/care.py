@@ -1,4 +1,4 @@
-"""Alerts, protocols, pharmacy, emergency and reports (spec F2, F4, F9, F11, F12)."""
+"""Alertes, protocoles, pharmacie, urgences et rapports (F2, F4, F9, F11, F12)."""
 
 from __future__ import annotations
 
@@ -75,7 +75,7 @@ def list_alerts(
     crew: str | None = None,
     limit: int = Query(default=100, ge=1, le=500),
 ) -> list[AlertOut]:
-    """CMO queue, sorted by severity then age (F9.2). An astronaut sees only their own."""
+    """File du CMO, triée par gravité puis ancienneté (F9.2). Un astronaute voit les siennes."""
     member = visible_member(db, viewer, crew) if crew else None
     if member is None and not is_cmo(viewer):
         member = viewer
@@ -103,7 +103,7 @@ def get_alert(alert_id: int, db: DbSession, viewer: CurrentMember) -> AlertOut:
 
 @router.patch("/alerts/{alert_id}", response_model=AlertOut, tags=["alerts"])
 async def update_alert(alert_id: int, body: AlertPatch, db: DbSession, cmo: CurrentCmo) -> AlertOut:
-    """Acknowledge with a comment, or resolve (CMO only)."""
+    """Acquitter avec un commentaire, ou résoudre (CMO uniquement)."""
     alert = db.get(Alert, alert_id)
     if alert is None:
         raise HTTPException(status.HTTP_404_NOT_FOUND, "Alerte introuvable")
@@ -152,7 +152,7 @@ def list_runs(
     ),
     limit: int = Query(default=50, ge=1, le=200),
 ) -> list[RunListItem]:
-    """Protocol executions, most recent first. An astronaut only sees their own (spec §7)."""
+    """Exécutions de protocoles, plus récentes d'abord. Un astronaute voit les siennes (§7)."""
     member = visible_member(db, viewer, crew) if crew else (None if is_cmo(viewer) else viewer)
     query = select(ProtocolRun).order_by(ProtocolRun.started_at.desc()).limit(limit)
     if member is not None:
@@ -182,7 +182,7 @@ def list_runs(
 
 @router.get("/protocols/{code}", response_model=ProtocolOut, tags=["protocols"])
 def get_protocol(code: str, db: DbSession, _: CurrentMember) -> ProtocolOut:
-    """Steps, exit criterion and material availability of the active version."""
+    """Étapes, critère de sortie et disponibilité du matériel de la version active."""
     return library.protocol_out(_protocol_or_404(db, code))
 
 
@@ -216,7 +216,7 @@ def start_run(code: str, body: RunCreate, db: DbSession, viewer: CurrentMember) 
 
 @router.patch("/protocols/runs/{run_id}", response_model=RunOut, tags=["protocols"])
 def update_run(run_id: int, body: RunPatch, db: DbSession, viewer: CurrentMember) -> RunOut:
-    """Validate a step (in order), then complete or abort the run (F4.5)."""
+    """Valider une étape (dans l'ordre), puis terminer ou interrompre l'exécution (F4.5)."""
     run = db.get(ProtocolRun, run_id)
     if run is None:
         raise HTTPException(status.HTTP_404_NOT_FOUND, "Exécution introuvable")
@@ -274,7 +274,7 @@ def inventory(db: DbSession, _: CurrentMember) -> list[InventoryItemOut]:
     "/inventory", response_model=UsageOut, status_code=status.HTTP_201_CREATED, tags=["inventory"]
 )
 def record_usage(body: UsageIn, db: DbSession, cmo: CurrentCmo) -> UsageOut:
-    """Record a pharmacy use and decrement the stock (CMO only, F11.3)."""
+    """Enregistrer une utilisation en pharmacie et décrémenter le stock (CMO, F11.3)."""
     item = db.scalars(select(InventoryItem).where(InventoryItem.code == body.item_code)).first()
     if item is None:
         raise HTTPException(status.HTTP_404_NOT_FOUND, "Article inconnu")
@@ -318,7 +318,7 @@ def record_usage(body: UsageIn, db: DbSession, cmo: CurrentCmo) -> UsageOut:
 async def trigger_emergency(
     body: EmergencyIn, db: DbSession, viewer: CurrentMember
 ) -> EmergencyOut:
-    """Emergency mode (F12): any crew member can trigger it, for anyone on board."""
+    """Mode urgence (F12) : tout membre d'équipage peut le déclencher, pour n'importe qui."""
     patient = get_crew_member(db, body.patient_code) if body.patient_code else viewer
     event = EmergencyEvent(
         patient_id=patient.id,
@@ -371,7 +371,7 @@ def emergency_step(event_id: int, code: str, db: DbSession, viewer: CurrentMembe
 def close_emergency(
     event_id: int, body: EmergencyClose, db: DbSession, cmo: CurrentCmo
 ) -> EmergencyOut:
-    """Close with an outcome and a summary (CMO only, U-04)."""
+    """Clôturer avec une issue et un résumé (CMO uniquement, U-04)."""
     event = _active_emergency(db, event_id)
     event.status, event.closed_at, event.closed_by_id = (
         EmergencyStatus.CLOSED,
@@ -401,7 +401,7 @@ def report(
     viewer: CurrentMember,
     period: Literal["day", "week", "month"] = "week",
 ) -> ReportOut:
-    """Synthesis of one member over a period, ending at the mission clock."""
+    """Synthèse d'un membre sur une période, se terminant à l'horloge de mission."""
     member = visible_member(db, viewer, code)
     end = mission_now(db)
     start = end - timedelta(days={"day": 1, "week": 7, "month": 30}[period])

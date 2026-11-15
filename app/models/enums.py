@@ -1,4 +1,4 @@
-"""Business enumerations shared by models, schemas and the engine."""
+"""Énumérations métier partagées par les modèles, les schémas et le moteur."""
 
 from enum import StrEnum
 
@@ -20,10 +20,10 @@ class CrewRole(StrEnum):
 
 
 class AccessRole(StrEnum):
-    """Local profile rights (spec §7, RBAC): an astronaut only sees their own data."""
+    """Droits des profils locaux (§7, RBAC) : un astronaute ne voit que ses propres données."""
 
     ASTRONAUT = "astronaut"
-    CMO = "cmo"  # Crew Medical Officer: access to the whole crew
+    CMO = "cmo"  # Médecin de bord (CMO) : accès à tout l'équipage
 
 
 class DeviceKind(StrEnum):
@@ -38,9 +38,9 @@ class DeviceKind(StrEnum):
 
 
 class Metric(StrEnum):
-    """Physiological time series. The unit is fixed by the metric (see METRIC_UNITS).
+    """Séries physiologiques. L'unité est fixée par la mesure (voir METRIC_UNITS).
 
-    Radiation dose has its own table (``radiation_doses``), cumulative values included.
+    La dose de radiation a sa propre table (``radiation_doses``), valeurs cumulées comprises.
     """
 
     HEART_RATE = "heart_rate"
@@ -73,7 +73,7 @@ class DataSource(StrEnum):
     SENSOR = "sensor"
     SIMULATOR = "simulator"
     MANUAL = "manual"
-    DATASET = "dataset"  # imported from an open dataset (see dataset_sources)
+    DATASET = "dataset"  # importée d'un jeu de données ouvert (voir dataset_sources)
 
 
 class HealthLevel(StrEnum):
@@ -85,7 +85,7 @@ class HealthLevel(StrEnum):
 
 
 class RiskDomain(StrEnum):
-    """Risk domains scored by the engine (F2.5); GLOBAL is the aggregate (F2.6)."""
+    """Domaines de risque notés par le moteur (F2.5) ; GLOBAL est l'agrégat (F2.6)."""
 
     GLOBAL = "global"
     CARDIO = "cardio"
@@ -96,14 +96,14 @@ class RiskDomain(StrEnum):
 
 
 class DetectionMethod(StrEnum):
-    """Origin of an alert (F2.2-F2.4), shown in the explanation (F2.7)."""
+    """Origine d'une alerte (F2.2-F2.4), affichée dans l'explication (F2.7)."""
 
     THRESHOLD = "threshold"  # clinical threshold
     ROBUST_ZSCORE = "robust_zscore"  # median / MAD vs baseline
     ISOLATION_FOREST = "isolation_forest"  # multivariate
     TREND = "trend"  # slope over a sliding window
-    CHECKIN = "checkin"  # check-in answers (F3.4)
-    MANUAL = "manual"  # reported by the CMO
+    CHECKIN = "checkin"  # réponses du check-in (F3.4)
+    MANUAL = "manual"  # signalée par le CMO
 
 
 class AlertLevel(StrEnum):
@@ -130,7 +130,7 @@ class EmergencyStatus(StrEnum):
 
 
 class MissionDestination(StrEnum):
-    """Mission profile chosen at setup (A-03); drives latency and day/night cycle."""
+    """Profil de mission choisi à la configuration (A-03) : latence et cycle jour/nuit."""
 
     LOW_EARTH_ORBIT = "low_earth_orbit"
     MOON = "moon"

@@ -1,4 +1,4 @@
-"""Runs the live simulator in the background (one demo run at a time)."""
+"""Fait tourner le simulateur en direct en arrière-plan (une démo à la fois)."""
 
 from __future__ import annotations
 
@@ -22,7 +22,7 @@ class SimController:
         return self._task is not None and not self._task.done()
 
     def launch(self) -> None:
-        """Start the background loop (disabled in tests: they call ``tick`` directly)."""
+        """Démarrer la boucle de fond (désactivée en test : les tests appellent ``tick``)."""
         if self.running or not get_settings().pipeline_enabled:
             return
         self._task = asyncio.get_event_loop().create_task(self._loop())
@@ -55,7 +55,7 @@ class SimController:
                 await manager.broadcast({"type": "sim", **live.snapshot(self.state, True)})
             except asyncio.CancelledError:
                 raise
-            except Exception:  # keep the demo alive; the next tick retries
+            except Exception:  # garder la démo en vie ; le pas suivant réessaie
                 log.exception("Simulator tick failed")
             await asyncio.sleep(live.TICK_SECONDS)
 

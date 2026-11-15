@@ -1,4 +1,4 @@
-"""Background loop running the risk pipeline every ``AV_PIPELINE_INTERVAL_SECONDS`` (§8.1)."""
+"""Boucle de fond lançant le pipeline toutes les ``AV_PIPELINE_INTERVAL_SECONDS`` (§8.1)."""
 
 from __future__ import annotations
 
@@ -45,6 +45,6 @@ async def run_forever() -> None:
             await broadcast(report)
         except asyncio.CancelledError:
             raise
-        except Exception:  # keep the loop alive; the next tick retries
+        except Exception:  # garder la boucle en vie ; le pas suivant réessaie
             log.exception("Risk pipeline failed")
         await asyncio.sleep(interval)

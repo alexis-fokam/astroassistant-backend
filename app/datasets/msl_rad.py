@@ -1,13 +1,14 @@
-"""NASA Curiosity RAD: absorbed dose rate measured inside the spacecraft on the way to Mars.
+"""NASA Curiosity RAD : débit de dose absorbée mesuré dans le vaisseau en route vers Mars.
 
-Source: PDS Planetary Plasma Interactions node, volume MSL-M-RAD-3-RDR-V1.0, directory
-``DATA/CRUISE`` (one ~40 MB ASCII file per day, December 2011 to July 2012).
-Each observation (~8.5 min) carries ``[DOSIMETRY_TOTAL_DOSE_B]`` and ``[DOSIMETRY_TOTAL_DOSE_E]``
-in microgray per hour (RAD RDR SIS). Files are streamed and only the dose rates are kept,
-so the full cruise fits in a small CSV.
+Source : nœud PDS Planetary Plasma Interactions, volume MSL-M-RAD-3-RDR-V1.0, dossier
+``DATA/CRUISE`` (un fichier ASCII d'environ 40 Mo par jour, de décembre 2011 à juillet 2012).
+Chaque observation (~8,5 min) porte ``[DOSIMETRY_TOTAL_DOSE_B]`` et
+``[DOSIMETRY_TOTAL_DOSE_E]`` en microgray par heure (RAD RDR SIS). Les fichiers sont lus en
+flux et seuls les débits de dose sont gardés : tout le trajet tient dans un petit CSV.
 
-Dose equivalent: during cruise RAD measured an average quality factor of about 3.8
-(Zeitlin et al., Science 2013), used to convert absorbed dose (Gy) to dose equivalent (Sv).
+Équivalent de dose : pendant le trajet, RAD a mesuré un facteur de qualité moyen d'environ
+3,8 (Zeitlin et al., Science 2013), utilisé pour passer de la dose absorbée (Gy) à
+l'équivalent de dose (Sv).
 """
 
 from __future__ import annotations
@@ -48,12 +49,12 @@ def list_cruise_files() -> list[str]:
 
 
 def parse_utc(value: str) -> datetime:
-    """RAD times are ``YYYY-DOY HH:MM:SS``."""
+    """Les dates RAD sont au format ``AAAA-JJJ HH:MM:SS`` (jour de l'année)."""
     return datetime.strptime(value.strip('"'), "%Y-%j %H:%M:%S").replace(tzinfo=UTC)
 
 
 def parse_lines(lines: Iterable[str]) -> Iterator[DoseSample]:
-    """Extract one dose sample per observation from an RDR text stream."""
+    """Extraire un échantillon de dose par observation d'un flux texte RDR."""
     section = None
     utc: datetime | None = None
     dose_b: float | None = None
@@ -75,19 +76,19 @@ def parse_lines(lines: Iterable[str]) -> Iterator[DoseSample]:
         elif section == "DOSIMETRY_TOTAL_DOSE_E":
             section = None
             dose_e = float(stripped)
-            # Negative or zero values flag invalid observations in RDR files.
+            # Une valeur négative ou nulle signale une observation RDR invalide.
             if utc and dose_b is not None and dose_b > 0 and dose_e > 0:
                 yield DoseSample(utc, dose_b, dose_e)
 
 
 def file_date(name: str) -> date:
-    """Observation day encoded in a cruise file name (``RAD_RDR_YYYY_DDD_...``)."""
+    """Jour d'observation codé dans le nom d'un fichier (``RAD_RDR_YYYY_DDD_...``)."""
     _, _, year, doy, *_ = name.split("_")
     return datetime.strptime(f"{year}-{doy}", "%Y-%j").date()
 
 
 def fetch_file(name: str, retries: int = 4) -> list[DoseSample]:
-    """Stream one cruise file; the PDS server sometimes resets long transfers, so retry."""
+    """Lire un fichier du trajet ; le serveur PDS coupe parfois les longs transferts : réessayer."""
     for attempt in range(retries):
         try:
             return list(parse_lines(iter_lines(ROOT + name)))
@@ -101,7 +102,7 @@ def fetch_file(name: str, retries: int = 4) -> list[DoseSample]:
 
 
 def _resume_point(output: Path) -> date | None:
-    """Last day already in the CSV; its rows are dropped so that day is fetched again."""
+    """Dernier jour déjà dans le CSV ; ses lignes sont retirées pour le retélécharger."""
     if not output.exists():
         return None
     with output.open(encoding="utf-8") as handle:
@@ -118,10 +119,10 @@ def _resume_point(output: Path) -> date | None:
 
 
 def finalize(output: Path = MSL_RAD_CSV) -> int:
-    """Sort the CSV by time and drop repeated observations.
+    """Trier le CSV par date et retirer les observations répétées.
 
-    RDR files interleave several observation sequences and some observations appear
-    twice, so raw rows are neither ordered nor unique. Returns the number of rows kept.
+    Les fichiers RDR entremêlent plusieurs séquences et certaines observations apparaissent
+    deux fois : les lignes brutes ne sont ni ordonnées ni uniques. Renvoie le nombre gardé.
     """
     with output.open(encoding="utf-8") as handle:
         rows = list(csv.reader(handle))[1:]
@@ -137,10 +138,10 @@ def finalize(output: Path = MSL_RAD_CSV) -> int:
 def fetch(
     every_nth_day: int = 1, output: Path = MSL_RAD_CSV, *, resume: bool = True
 ) -> tuple[Path, int]:
-    """Stream cruise files (optionally one day out of N) and write the dose CSV.
+    """Lire les fichiers du trajet (éventuellement un jour sur N) et écrire le CSV de dose.
 
-    With ``resume`` (default) an interrupted download continues from the last day in
-    the CSV instead of starting over. A file that keeps failing is skipped and reported.
+    Avec ``resume`` (par défaut), un téléchargement interrompu reprend au dernier jour du
+    CSV au lieu de recommencer. Un fichier qui échoue sans cesse est sauté et signalé.
     """
     ensure_dir(output.parent)
     files = list_cruise_files()[::every_nth_day]

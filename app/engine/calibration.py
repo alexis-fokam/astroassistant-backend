@@ -1,19 +1,20 @@
-"""Calibration and evaluation of the risk engine on real physiological data.
+"""Calibration et évaluation du moteur de risque sur des données physiologiques réelles.
 
-    python -m app.engine.calibration bidmc      # SpO2 / heart-rate / respiration ranges
-    python -m app.engine.calibration sleep      # healthy sleep (Sleep-EDF hypnograms)
-    python -m app.engine.calibration wesad      # HRV-01 sensitivity / false-alarm rate
-    python -m app.engine.calibration wesad-extract  # raw WESAD → HRV windows CSV (data/physionet)
+    python -m app.engine.calibration bidmc      # plages SpO2 / FC / respiration
+    python -m app.engine.calibration sleep      # sommeil sain (hypnogrammes Sleep-EDF)
+    python -m app.engine.calibration wesad      # sensibilité / fausses alertes de HRV-01
+    python -m app.engine.calibration wesad-extract  # WESAD brut → CSV de VFC (data/physionet)
 
-Results are written to ``docs/calibration.json`` and summarized in
-``docs/fiche-moteur-ia.md``. Data come from ``data/external/`` (see
-``app/datasets/physionet.py``); WESAD must be downloaded by hand.
+Les résultats sont écrits dans ``docs/calibration.json`` et résumés dans
+``docs/fiche-moteur-ia.md``. Les données viennent de ``data/external/`` (voir
+``app/datasets/physionet.py``) ; WESAD se télécharge à la main.
 
-WESAD protocol (Schmidt et al., ICMI 2018): 15 subjects, chest ECG at 700 Hz, labels
-1 = baseline, 2 = stress (Trier Social Stress Test), 3 = amusement. For each subject we
-compute RMSSD on 60 s windows, take the median RMSSD of the baseline period as the
-individual baseline, and apply the engine's HRV rule ``RMSSD < ratio × baseline``.
-Sensitivity = stress windows flagged; false-alarm rate = baseline + amusement windows flagged.
+Protocole WESAD (Schmidt et al., ICMI 2018) : 15 sujets, ECG thoracique à 700 Hz, labels
+1 = repos, 2 = stress (Trier Social Stress Test), 3 = amusement. Pour chaque sujet, on
+calcule le RMSSD sur des fenêtres de 60 s, on prend le RMSSD médian du repos comme
+référence individuelle, et on applique la règle VFC du moteur ``RMSSD < ratio × référence``.
+Sensibilité = fenêtres de stress signalées ; fausses alertes = fenêtres de repos et
+d'amusement signalées.
 """
 
 from __future__ import annotations
@@ -64,7 +65,7 @@ def calibrate_bidmc() -> dict:
 
 
 def _bidmc_rule_rates(files: list[Path]) -> dict:
-    """Share of seconds, and of patients, where the engine's critical cardio rules hold."""
+    """Part des secondes, et des patients, où les règles cardio critiques du moteur sont vraies."""
     seconds = cardio = spo2_crit = 0
     patients_cardio = patients_spo2 = 0
     for path in files:
@@ -111,7 +112,7 @@ def calibrate_sleep() -> dict:
 
 # --------------------------------------------------------------------- WESAD
 def rr_intervals(ecg: np.ndarray, fs: int = ECG_HZ) -> np.ndarray:
-    """R-peak detection: band-pass filter, then peaks at least 0.33 s apart (≤ 180 bpm)."""
+    """Pics R : filtre passe-bande, puis pics espacés d'au moins 0,33 s (≤ 180 bpm)."""
     from scipy.signal import butter, filtfilt, find_peaks
 
     b, a = butter(3, [5 / (fs / 2), 15 / (fs / 2)], btype="band")
@@ -134,7 +135,7 @@ CONDITIONS = {1: "baseline", 2: "stress", 3: "amusement"}
 
 
 def subject_windows(path: Path) -> list[tuple[int, float, float]]:
-    """(label, start s, RMSSD) for each 60 s window with a single label among 1, 2, 3."""
+    """(label, début s, RMSSD) pour chaque fenêtre de 60 s portant un seul label parmi 1, 2, 3."""
     with path.open("rb") as handle:
         data = pickle.load(handle, encoding="latin1")
     ecg = np.asarray(data["signal"]["chest"]["ECG"]).ravel()
@@ -153,10 +154,10 @@ def subject_windows(path: Path) -> list[tuple[int, float, float]]:
 
 
 def extract_wesad_windows(output: Path = physionet.WESAD_WINDOWS_CSV) -> Path:
-    """Raw WESAD (2.5 GB) → small CSV of RMSSD per 60 s window (a few hundred kB).
+    """WESAD brut (2,5 Go) → petit CSV de RMSSD par fenêtre de 60 s (quelques centaines de Ko).
 
-    Run it wherever the raw data is (e.g. Google Colab, see notebooks/), then copy the
-    CSV into data/physionet/: the seed imports it and the evaluation reads it.
+    À lancer là où sont les données brutes (par ex. Google Colab, voir notebooks/), puis
+    copier le CSV dans data/physionet/ : le seed l'importe et l'évaluation le lit.
     """
     files = sorted(physionet.WESAD_DIR.glob("S*/S*.pkl"))
     if not files:
@@ -179,7 +180,7 @@ def extract_wesad_windows(output: Path = physionet.WESAD_WINDOWS_CSV) -> Path:
 def load_wesad_windows(
     path: Path = physionet.WESAD_WINDOWS_CSV,
 ) -> dict[str, list[tuple[str, float]]]:
-    """subject → [(condition, RMSSD)] from the extracted CSV."""
+    """sujet → [(condition, RMSSD)] depuis le CSV extrait."""
     subjects: dict[str, list[tuple[str, float]]] = {}
     with path.open(encoding="utf-8") as handle:
         for row in csv.DictReader(handle):

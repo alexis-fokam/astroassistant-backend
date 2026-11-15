@@ -19,7 +19,7 @@ settings = get_settings()
 @asynccontextmanager
 async def lifespan(_app: FastAPI) -> AsyncIterator[None]:
     Base.metadata.create_all(bind=engine)
-    # Periodic housekeeping jobs (APScheduler) and the risk pipeline every few seconds.
+    # Tâches périodiques (APScheduler) et pipeline de risque toutes les quelques secondes.
     init_scheduler()
     scheduler.start()
     task = asyncio.create_task(run_forever()) if settings.pipeline_enabled else None

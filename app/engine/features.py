@@ -1,7 +1,7 @@
-"""Feature extraction for one crew member at a given instant (spec §6.1, §6.2).
+"""Extraction des indicateurs d'un membre à un instant donné (§6.1, §6.2).
 
-Everything the rules and the scoring need is flattened into one ``dict[str, float | None]``
-so a snapshot can be stored as JSON and explained feature by feature.
+Tout ce dont les règles et le score ont besoin est aplati en un ``dict[str, float | None]``,
+pour stocker un instantané en JSON et l'expliquer indicateur par indicateur.
 """
 
 from __future__ import annotations
@@ -46,23 +46,23 @@ CHECKIN_FIELDS = (
     "energy",
     "crew_relations",
 )
-# Minimal dispersion used by robust z-scores, per metric (avoids z → ∞ when MAD ≈ 0).
-GOES_LOOKBACK_H = 3  # GOES readings older than this are not "current"
+# Dispersion minimale des z-scores robustes, par mesure (évite z → ∞ quand MAD ≈ 0).
+GOES_LOOKBACK_H = 3  # Les relevés GOES plus anciens ne sont pas « actuels »
 # Hip bone mineral density loss without countermeasures, %/month (LeBlanc et al., 2000;
-# NASA HRP "Risk of early onset osteoporosis"); resistance exercise removes most of it.
+# NASA HRP « Risk of early onset osteoporosis ») ; l'exercice de résistance en évite l'essentiel.
 BONE_LOSS_PCT_MONTH = 1.25
 EXERCISE_PROTECTION = 0.8
 Z_FLOOR = {Metric.HEART_RATE: 2.0, Metric.SYSTOLIC_BP: 3.0, Metric.HRV_RMSSD: 2.0}
 
 
 def naive_utc(value: datetime) -> datetime:
-    """SQLite returns naive datetimes; the engine compares everything as naive UTC."""
+    """SQLite renvoie des dates naïves ; le moteur compare tout en UTC naïf."""
     return value.astimezone(UTC).replace(tzinfo=None) if value.tzinfo else value
 
 
 @dataclass
 class Series:
-    """Clean readings of one metric, sorted by time."""
+    """Mesures propres d'une constante, triées par date."""
 
     times: list[datetime] = field(default_factory=list)
     values: list[float] = field(default_factory=list)
@@ -77,7 +77,7 @@ class Series:
 
 @dataclass
 class MemberData:
-    """Everything loaded once per member and pipeline run."""
+    """Tout ce qui est chargé une fois par membre et par exécution du pipeline."""
 
     member: CrewMember
     series: dict[Metric, Series]
@@ -104,7 +104,7 @@ def load_member(
     start = at - timedelta(days=days)
 
     def scoped(column):
-        # Mission data, plus the readings of the running simulation if any.
+        # Données de mission, plus les mesures de la simulation en cours s'il y en a une.
         return or_(column.is_(None), column == sim_run_id) if sim_run_id else column.is_(None)
 
     rows = db.execute(
@@ -184,7 +184,7 @@ def load_member(
 
 
 def _baseline(data: MemberData, metric: Metric, at: datetime, cfg: EngineConfig):
-    """(mean, median, MAD) of the individual baseline: stored row, else recomputed."""
+    """(moyenne, médiane, MAD) de la référence individuelle : ligne stockée, sinon recalcul."""
     stored = data.baselines.get(metric)
     if stored is not None and stored.median is not None:
         return stored.mean, stored.median, stored.mad
@@ -249,7 +249,7 @@ def compute(data: MemberData, at: datetime, cfg: EngineConfig) -> Features:
     f["spo2_baseline"] = spo2_median
     f["activity_24h"] = f.get("activity_level_24h")
 
-    # Sleep (F7): last three completed nights.
+    # Sommeil (F7) : trois dernières nuits terminées.
     nights = [s for s in data.sleeps if naive_utc(s.ended_at) <= at][-3:]
     hours = [
         (naive_utc(s.ended_at) - naive_utc(s.started_at)).total_seconds() / 3600 for s in nights
@@ -257,7 +257,7 @@ def compute(data: MemberData, at: datetime, cfg: EngineConfig) -> Features:
     f["sleep_hours_3n"] = stats.mean(hours)
     f["short_nights_3n"] = float(sum(h < 6 for h in hours)) if hours else None
 
-    # Exercise (F6): consecutive missed resistance sessions, most recent first.
+    # Exercice (F6) : séances de résistance manquées d'affilée, plus récentes d'abord.
     streak = 0
     for session in reversed([s for s in data.resistance if naive_utc(s.scheduled_at) <= at]):
         if session.status is SessionStatus.PLANNED:
@@ -277,12 +277,12 @@ def compute(data: MemberData, at: datetime, cfg: EngineConfig) -> Features:
         rate = BONE_LOSS_PCT_MONTH * (1 - EXERCISE_PROTECTION * adherence)
         f["exercise_adherence_14d"] = adherence
         f["bone_loss_rate_pct_month"] = rate
-        # Hip BMD loss projected at the end of the mission if the current adherence persists.
+        # Perte osseuse de la hanche projetée en fin de mission à assiduité constante.
         f["bone_loss_projection_pct"] = (
             rate * mission.planned_duration_days / 30 if mission else None
         )
 
-    # Vigilance (F8): last PVT compared with the member's usual reaction time.
+    # Vigilance (F8) : dernier PVT comparé au temps de réaction habituel du membre.
     pvts = [p for p in data.pvts if naive_utc(p.taken_at) <= at]
     if pvts:
         last = pvts[-1]
@@ -294,7 +294,7 @@ def compute(data: MemberData, at: datetime, cfg: EngineConfig) -> Features:
         usual = stats.median_mad(previous)
         f["pvt_rt_ratio"] = last.median_rt_ms / usual[0] if usual else None
 
-    # Self-report (F3): latest check-in, plus symptom persistence over three days.
+    # Déclaratif (F3) : dernier check-in, et persistance des symptômes sur trois jours.
     checkins = [c for c in data.checkins if naive_utc(c.submitted_at) <= at]
     recent = [
         c
