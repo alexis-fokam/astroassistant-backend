@@ -35,6 +35,7 @@ class AlertOut(OrmModel):
     factors: list[Any]
     recommended_protocol: str | None
     triggered_at: datetime
+    ground_received_at: datetime | None = None
     acknowledged_at: datetime | None
     acknowledged_by: str | None
     ack_comment: str | None

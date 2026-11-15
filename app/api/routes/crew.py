@@ -5,10 +5,11 @@ from __future__ import annotations
 from fastapi import APIRouter, HTTPException, status
 from sqlalchemy import select
 
-from app.api.deps import CurrentMember, DbSession, is_cmo, visible_member
+from app.api.deps import CurrentCmo, CurrentMember, DbSession, is_cmo, visible_member
 from app.core.config import get_settings
 from app.core.security import create_token, verify_pin
 from app.models import ContactWindow, CrewMember, Mission
+from app.models.enums import MissionDestination
 from app.schemas.crew import (
     CrewProfile,
     CrewStatus,
@@ -18,6 +19,7 @@ from app.schemas.crew import (
     MissionOut,
     TokenResponse,
 )
+from app.schemas.ground import MissionPatch
 from app.schemas.telemetry import CrewVitalsLatest
 from app.services import audit
 from app.services.views import as_utc, crew_profiles, crew_status, crew_summary, mission_now
@@ -76,6 +78,29 @@ def mission(db: DbSession, _: CurrentMember) -> MissionOut:
             else None,
         }
     )
+
+
+LATENCY_BY_DESTINATION = {
+    # One-way light time plus relay overhead, rounded (seconds).
+    "low_earth_orbit": 2,
+    "moon": 3,
+    "mars_transit": 12 * 60,
+    "mars_surface": 22 * 60,
+}
+
+
+@router.patch("/mission", response_model=MissionOut, tags=["mission"])
+def update_mission(body: MissionPatch, db: DbSession, cmo: CurrentCmo) -> MissionOut:
+    """Choose the mission profile (ISS, Moon, Mars); sets the communication delay."""
+    current = db.scalars(select(Mission).where(Mission.is_active.is_(True))).first()
+    if current is None:
+        raise HTTPException(status.HTTP_404_NOT_FOUND, "Aucune mission configurée")
+    current.destination = MissionDestination(body.destination)
+    current.one_way_latency_s = LATENCY_BY_DESTINATION[body.destination]
+    current.day_length_min = 1477 if body.destination == "mars_surface" else 1440
+    audit.record(db, "mission.update", actor=cmo, entity=current, destination=body.destination)
+    db.commit()
+    return mission(db, cmo)
 
 
 @router.get("/crew", response_model=list[CrewSummary], tags=["crew"])

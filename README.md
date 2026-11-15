@@ -81,6 +81,32 @@ python -m app.engine.calibration all      # écrit docs/calibration.json
 WESAD (~2,5 Go) se télécharge à la main depuis
 https://www.eti.uni-siegen.de/ubicomp/home/datasets/icmi18/ dans `data/external/wesad/`.
 
+## Simulateur en direct (démo jury)
+
+Le simulateur (`app/sim/live.py`) produit toutes les 2 s une mesure par constante et par
+astronaute, autour de sa baseline, puis fait tourner le moteur IA : les scores et alertes
+apparaissent en direct sur les tableaux de bord (page **Simulation** du frontend).
+
+- `POST /api/v1/sim/scenario` : lance S1 à S6 (vitesse ×1 à ×1000) ;
+- `POST /api/v1/sim/inject` : injecte une anomalie (tachycardie, chute de SpO₂, fièvre,
+  stress/VFC, tempête solaire, SANS, déconditionnement) sur un astronaute ou tout l'équipage ;
+- `GET /api/v1/sim/state` : horloge simulée, anomalies actives, journal du moteur ;
+- `POST /api/v1/sim/tick`, `POST /api/v1/sim/speed`, `POST /api/v1/sim/runs/{id}/stop`.
+
+Évaluation sur anomalies injectées : `python -m app.engine.evaluation` (détection 100 %,
+0 fausse alerte sur 306 h·astronaute, 36 ms par astronaute ; détails dans
+[`docs/fiche-moteur-ia.md`](docs/fiche-moteur-ia.md)). Après une démo, `python -m app.seed --reset`
+remet l'histoire de référence.
+
+## Délai de communication Terre-équipage
+
+- `PATCH /api/v1/mission` (médecin de bord) : ISS, Lune, transit ou surface de Mars ; fixe la
+  latence aller (2 s, 3 s, 12 min, 22 min) ;
+- les paquets exportés et les alertes indiquent l'heure de mesure à bord et l'heure d'arrivée
+  au sol (`received_at_ground`, `ground_received_at`) ;
+- `POST /api/v1/ground/instructions` : une consigne du sol n'apparaît à bord qu'après la latence
+  (`GET /api/v1/ground/instructions` montre celles encore en route).
+
 ## Tests et lint
 
 ```bash

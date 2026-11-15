@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 from datetime import datetime
-from typing import Any
+from typing import Any, Literal
 
 from pydantic import BaseModel, Field
 
@@ -22,6 +22,10 @@ class PacketOut(OrmModel):
     created_at: datetime
     sent_at: datetime | None
     acknowledged_at: datetime | None
+    received_at_ground: datetime | None = Field(
+        description="Arrivée au sol : envoi + latence aller (délai de communication)"
+    )
+    in_transit: bool
 
 
 class ExportRequest(BaseModel):
@@ -57,6 +61,22 @@ class GroundMessageOut(OrmModel):
     sent_at: datetime | None
     received_at: datetime
     read_at: datetime | None
+    in_transit: bool = Field(description="Encore en route vers le vaisseau (délai)")
+
+
+class InstructionIn(BaseModel):
+    """Instruction written on the ground; it reaches the crew after the one-way delay."""
+
+    crew_code: str | None = Field(default=None, description="Vide : tout l'équipage")
+    subject: str = Field(min_length=1, max_length=160)
+    body: str = Field(min_length=1, max_length=4000)
+    author: str = Field(default="Dr M. Reyes · Houston", max_length=120)
+
+
+class MissionPatch(BaseModel):
+    """Mission profile (ISS, Moon, Mars): sets the communication delay."""
+
+    destination: Literal["low_earth_orbit", "moon", "mars_transit", "mars_surface"]
 
 
 class ContactWindowOut(OrmModel):
@@ -81,6 +101,15 @@ class ScenarioStart(BaseModel):
     crew_code: str | None = None
     speed_factor: float = Field(default=60, ge=1, le=1000)
     seed: int = 42
+
+
+class InjectIn(BaseModel):
+    """Inject an anomaly live (jury demo): the AI must detect it within seconds."""
+
+    anomaly: Literal[
+        "tachycardia", "desaturation", "fever", "hrv_drop", "radiation", "sans", "deconditioning"
+    ]
+    crew_code: str = Field(default="AV-03", description="Code d'un membre, ou « all »")
 
 
 class SpeedIn(BaseModel):

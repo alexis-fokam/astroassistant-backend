@@ -61,6 +61,32 @@ Aucune donnée physiologique individuelle d'astronaute n'est publique. L'équipa
 
 ## 4. Calibration et performances mesurées
 
+### 4.1 Anomalies injectées (indicateurs demandés au jury)
+
+Le simulateur (`app/sim/live.py`) injecte chaque type d'anomalie sur des astronautes qui n'en présentent pas déjà les signes, puis fait tourner le moteur mesure par mesure (`python -m app.engine.evaluation`, résultats dans `docs/evaluation.json`).
+
+| Anomalie injectée | Détectée | Délai médian (temps simulé) | Règle attendue |
+|---|---|---|---|
+| Tachycardie et désaturation | 3/3 | 28 min | `CARDIO-CRIT-01` |
+| Chute de SpO₂ | 3/3 | 18 min | `SPO2-CRIT-01` |
+| Fièvre | 3/3 | 46 min | `TEMP-01` |
+| Stress et dette de sommeil (VFC) | 3/3 | ≈ 15 h (règle sur 24 h) | `HRV-01` |
+| Tempête solaire (tout l'équipage) | 1/1 | 2 min | `RAD-SPE-01` |
+| Suspicion SANS | 3/3 | 6 min | `SANS-01` |
+| Déconditionnement (ARED manquées) | 3/3 | 2 min | `EX-MISSED-01` |
+
+| Indicateur | Résultat |
+|---|---|
+| **Taux de détection** | **100 %** (19 essais sur 19) |
+| **Fausses alertes** | **0** sur 306 heures·astronaute de physiologie normale |
+| **Temps d'inférence** | **36 ms** médian par astronaute (p95 : 81 ms) |
+| **Taille du modèle** | ≈ 1,2 Mo d'Isolation Forest par astronaute + 9 Ko de règles et de configuration |
+
+Ces essais reposent sur les données du simulateur : le résultat est donc **optimiste**. Il montre que la chaîne détecte bien chaque type d'anomalie et ne s'emballe pas sur des données normales. La validation sur données réelles (§4.2) le complète.
+
+### 4.2 Données réelles et scénarios
+
+
 | Mesure | Résultat | Comment le reproduire |
 |---|---|---|
 | Scénarios de la démo (J+142) | Les 4 situations sont retrouvées sans intervention : AV-01 en avertissement (`EX-MISSED-01`), AV-02 en avertissement (`HRV-01`), AV-03 en critique (`CARDIO-CRIT-01`, anomalie 0,77), AV-04 en avertissement (`SANS-01`) | `pytest tests/test_engine.py` |
@@ -86,6 +112,7 @@ Les résultats chiffrés de la calibration sont écrits dans `docs/calibration.j
 - **Mesures de radiation partielles.** Curiosity RAD n'a été mesuré qu'un jour sur trois, et le blindage du rover n'est pas celui d'un habitat.
 - **Isolation Forest.** Il faut au moins 72 h de données propres par astronaute avant que le modèle puisse fonctionner.
 - **Projection osseuse.** C'est un modèle linéaire simple, pas un modèle physiologique.
+- **Évaluation synthétique.** Le taux de détection de 100 % est mesuré sur des anomalies produites par notre propre simulateur ; sur de vraies données de vol, il serait plus bas.
 
 ## 6. Garde-fous
 

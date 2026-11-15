@@ -201,12 +201,13 @@ def run_once(db: Session, at: datetime | None = None, *, force: bool = False) ->
     cfg = load_config()
     started = time.perf_counter()
     at = features.naive_utc(at or mission_clock(db))
-    sim = running_sim(db)
     members = db.scalars(
         select(CrewMember).where(CrewMember.is_active.is_(True)).order_by(CrewMember.code)
     ).all()
     reports = [
-        process_member(db, m, at, cfg, sim_run_id=sim.id if sim else None, force=force)
+        # The live simulator writes mission telemetry (app/sim/live.py): outputs are mission
+        # scores and alerts, shown on every screen.
+        process_member(db, m, at, cfg, force=force)
         for m in members
     ]
     db.commit()

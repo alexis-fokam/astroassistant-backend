@@ -1,0 +1,214 @@
+{
+  "generated_at": "2026-11-15T14:41:09+00:00",
+  "method": "Simulateur Astro Assistant (app/sim/live.py) sur copies de la base de démo",
+  "detection_rate": 1.0,
+  "trials": 19,
+  "by_anomaly": {
+    "tachycardia": {
+      "trials": 3,
+      "detected": 3,
+      "rate": 1.0,
+      "median_minutes_to_alert": 28.0
+    },
+    "desaturation": {
+      "trials": 3,
+      "detected": 3,
+      "rate": 1.0,
+      "median_minutes_to_alert": 18.0
+    },
+    "fever": {
+      "trials": 3,
+      "detected": 3,
+      "rate": 1.0,
+      "median_minutes_to_alert": 46.0
+    },
+    "hrv_drop": {
+      "trials": 3,
+      "detected": 3,
+      "rate": 1.0,
+      "median_minutes_to_alert": 933.3
+    },
+    "radiation": {
+      "trials": 1,
+      "detected": 1,
+      "rate": 1.0,
+      "median_minutes_to_alert": 2.0
+    },
+    "sans": {
+      "trials": 3,
+      "detected": 3,
+      "rate": 1.0,
+      "median_minutes_to_alert": 6.0
+    },
+    "deconditioning": {
+      "trials": 3,
+      "detected": 3,
+      "rate": 1.0,
+      "median_minutes_to_alert": 2.0
+    }
+  },
+  "false_alerts": 0,
+  "nominal_member_hours": 306.0,
+  "false_alerts_per_member_day": 0.0,
+  "nominal_runs": [
+    {
+      "simulated_hours": 1.5,
+      "member_hours": 6.0,
+      "false_alerts": []
+    },
+    {
+      "simulated_hours": 25.0,
+      "member_hours": 100.0,
+      "false_alerts": []
+    },
+    {
+      "simulated_hours": 50.0,
+      "member_hours": 200.0,
+      "false_alerts": []
+    }
+  ],
+  "inference_ms_per_member": {
+    "median": 36.5,
+    "p95": 81.3
+  },
+  "model_size_kb": {
+    "isolation_forest_per_member": 1181.8,
+    "rules_and_config": 8.7
+  },
+  "duration_s": 82.1,
+  "trial_details": [
+    {
+      "anomaly": "tachycardia",
+      "crew": "AV-01",
+      "detected": true,
+      "minutes": 28.0,
+      "ticks": 14
+    },
+    {
+      "anomaly": "tachycardia",
+      "crew": "AV-02",
+      "detected": true,
+      "minutes": 28.0,
+      "ticks": 14
+    },
+    {
+      "anomaly": "tachycardia",
+      "crew": "AV-04",
+      "detected": true,
+      "minutes": 28.0,
+      "ticks": 14
+    },
+    {
+      "anomaly": "desaturation",
+      "crew": "AV-01",
+      "detected": true,
+      "minutes": 18.0,
+      "ticks": 9
+    },
+    {
+      "anomaly": "desaturation",
+      "crew": "AV-02",
+      "detected": true,
+      "minutes": 18.0,
+      "ticks": 9
+    },
+    {
+      "anomaly": "desaturation",
+      "crew": "AV-04",
+      "detected": true,
+      "minutes": 18.0,
+      "ticks": 9
+    },
+    {
+      "anomaly": "fever",
+      "crew": "AV-01",
+      "detected": true,
+      "minutes": 46.0,
+      "ticks": 23
+    },
+    {
+      "anomaly": "fever",
+      "crew": "AV-02",
+      "detected": true,
+      "minutes": 46.0,
+      "ticks": 23
+    },
+    {
+      "anomaly": "fever",
+      "crew": "AV-03",
+      "detected": true,
+      "minutes": 48.0,
+      "ticks": 24
+    },
+    {
+      "anomaly": "hrv_drop",
+      "crew": "AV-01",
+      "detected": true,
+      "minutes": 933.3,
+      "ticks": 28
+    },
+    {
+      "anomaly": "hrv_drop",
+      "crew": "AV-03",
+      "detected": true,
+      "minutes": 900.0,
+      "ticks": 27
+    },
+    {
+      "anomaly": "hrv_drop",
+      "crew": "AV-04",
+      "detected": true,
+      "minutes": 966.7,
+      "ticks": 29
+    },
+    {
+      "anomaly": "radiation",
+      "crew": "all",
+      "detected": true,
+      "minutes": 2.0,
+      "ticks": 1
+    },
+    {
+      "anomaly": "sans",
+      "crew": "AV-01",
+      "detected": true,
+      "minutes": 6.0,
+      "ticks": 3
+    },
+    {
+      "anomaly": "sans",
+      "crew": "AV-02",
+      "detected": true,
+      "minutes": 6.0,
+      "ticks": 3
+    },
+    {
+      "anomaly": "sans",
+      "crew": "AV-03",
+      "detected": true,
+      "minutes": 6.0,
+      "ticks": 3
+    },
+    {
+      "anomaly": "deconditioning",
+      "crew": "AV-02",
+      "detected": true,
+      "minutes": 2.0,
+      "ticks": 1
+    },
+    {
+      "anomaly": "deconditioning",
+      "crew": "AV-03",
+      "detected": true,
+      "minutes": 2.0,
+      "ticks": 1
+    },
+    {
+      "anomaly": "deconditioning",
+      "crew": "AV-04",
+      "detected": true,
+      "minutes": 2.0,
+      "ticks": 1
+    }
+  ]
+}
