@@ -57,6 +57,7 @@ class VitalLatestItem(BaseModel):
     level: HealthLevel = HealthLevel.NOMINAL
     trend_pct: float | None = None
     normal_band: NormalBand | None = None
+    recorded_at: datetime | None = None
     points: list[VitalPoint] = []
 
 

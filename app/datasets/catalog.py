@@ -80,9 +80,9 @@ CATALOG: list[DatasetInfo] = [
         agency="PhysioNet",
         url="https://physionet.org/content/sleep-edfx/1.0.0/",
         licence="Open Data Commons Attribution v1.0",
-        usage="Sleep stages for the sleep score and sleep debt (F7).",
-        size="~8.1 GB",
-        bundled=False,
+        usage="Expert hypnograms of healthy sleepers: sleep duration, short-night threshold (F7).",
+        size="~0.7 MB (hypnograms only; full dataset 8.1 GB)",
+        bundled=True,
     ),
     DatasetInfo(
         code="physionet-bidsleep",
@@ -101,8 +101,8 @@ CATALOG: list[DatasetInfo] = [
         url="https://physionet.org/content/bidmc/1.0.0/",
         licence="Open Data Commons Attribution v1.0",
         usage="SpO2, heart and respiratory rate distributions to calibrate thresholds (F1, §6).",
-        size="~1 MB (numerics only)",
-        bundled=False,
+        size="~0.5 MB (numerics only)",
+        bundled=True,
     ),
     DatasetInfo(
         code="monash-pvt",

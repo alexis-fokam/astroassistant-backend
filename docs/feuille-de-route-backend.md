@@ -62,7 +62,7 @@ uvicorn app.main:app --reload
 | Détail d'une alerte | ~~`GET /alerts/{id}/explanation`~~ ✅ fait | facteurs (libellé, valeur, contribution), règle déclenchée, score d'anomalie, nombre de confirmations |
 | Systèmes | ~~`GET /crew/{code}/domains/{domain}`~~ ✅ fait | historique du score du domaine et facteurs |
 | Historiques | `GET /checkins/{code}`, `GET /sleep/{code}`, `GET /exercises/{code}`, `GET /pvt/{code}` | listes paginées, les plus récentes d'abord |
-| Protocoles | `GET /protocols/runs?crew=&status=` | exécutions en cours et terminées |
+| Protocoles | ~~`GET /protocols/runs?crew=&status=`~~ ✅ fait | exécutions en cours et terminées |
 | Médecin de bord | `GET /consultations/{code}`, `POST /consultations/{code}` | journal médical (F9.3) |
 | Pharmacie | `GET /inventory/usages` | registre des usages |
 | Météo spatiale | `GET /space-weather/events` | événements DONKI et simulés |

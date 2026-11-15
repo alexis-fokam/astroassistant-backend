@@ -214,6 +214,26 @@ def test_protocol_run_follows_steps_in_order(client: TestClient, astronaut) -> N
     assert done["status"] == "completed"
 
 
+def test_protocol_runs_list_respects_rbac(client: TestClient, astronaut, cmo) -> None:
+    mine = client.get("/api/v1/protocols/runs", headers=astronaut).json()
+    assert mine and {r["crew_code"] for r in mine} == {"AV-02"}
+    stress = next(r for r in mine if r["protocol_code"] == "PRT-STRESS-01")
+    assert stress["trigger"].startswith("HRV-01") and stress["total_steps"] == 4
+    assert stress["status"] == "in_progress" and stress["next_step"] == "hrv_check"
+    everyone = client.get("/api/v1/protocols/runs", headers=cmo).json()
+    assert {r["crew_code"] for r in everyone} == {"AV-01", "AV-02", "AV-03", "AV-04"}
+    done = client.get("/api/v1/protocols/runs", headers=cmo, params={"status": "completed"}).json()
+    assert done and all(r["status"] == "completed" for r in done)
+    assert (
+        client.get(
+            "/api/v1/protocols/runs", headers=astronaut, params={"crew": "AV-03"}
+        ).status_code
+        == 403
+    )
+    # "runs" must not be mistaken for a protocol code.
+    assert client.get("/api/v1/protocols/PRT-STRESS-01", headers=astronaut).status_code == 200
+
+
 def test_protocol_materials_reflect_stock(client: TestClient, astronaut) -> None:
     emergency = client.get("/api/v1/protocols/EMRG-01", headers=astronaut).json()
     required = {m["item_code"] for m in emergency["materials"] if not m["optional"]}
@@ -352,9 +372,9 @@ def test_engine_routes(client: TestClient, astronaut, cmo) -> None:
 def test_profiles_are_public_and_carry_no_health_data(client: TestClient) -> None:
     profiles = client.get("/api/v1/profiles").json()
     assert [p["code"] for p in profiles] == ["AV-01", "AV-02", "AV-03", "AV-04"]
-    assert [p["code"] for p in profiles if p["isCmo"]] == ["AV-04"]
+    assert [p["code"] for p in profiles if p["is_cmo"]] == ["AV-04"]
     assert all(
-        set(p) == {"code", "first_name", "last_name", "crew_role", "isCmo"} for p in profiles
+        set(p) == {"code", "first_name", "last_name", "crew_role", "is_cmo"} for p in profiles
     )
 
 
@@ -374,3 +394,20 @@ def test_latest_vitals_respect_rbac(client: TestClient, astronaut, cmo) -> None:
 def test_mission_exposes_next_contact_time(client: TestClient, astronaut) -> None:
     mission = client.get("/api/v1/mission", headers=astronaut).json()
     assert mission["next_contact_time"] and len(mission["next_contact_time"]) == 8
+    assert mission["clock"] == "J+142 · 14:05"
+    assert 0 <= mission["next_contact_in_s"] <= 12 * 3600
+
+
+def test_vital_card_levels_follow_engine_thresholds() -> None:
+    from types import SimpleNamespace
+
+    from app.models.enums import HealthLevel, Metric
+    from app.services.vitals import level_for
+
+    hrv_baseline = SimpleNamespace(mean=48.0, median=48.0, mad=4.0)
+    assert level_for(Metric.HRV_RMSSD, 31, hrv_baseline) is HealthLevel.WARNING  # 65 %
+    assert level_for(Metric.HRV_RMSSD, 25, hrv_baseline) is HealthLevel.CRITICAL  # 52 %
+    assert level_for(Metric.HRV_RMSSD, 60, hrv_baseline) is HealthLevel.NOMINAL  # a rise is fine
+    assert level_for(Metric.SPO2, 92, None) is HealthLevel.WARNING
+    assert level_for(Metric.SPO2, 90, None) is HealthLevel.CRITICAL
+    assert level_for(Metric.CORE_TEMPERATURE, 38.2, None) is HealthLevel.WARNING

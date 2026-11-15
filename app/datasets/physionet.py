@@ -8,7 +8,8 @@
 * WESAD (Univ. Siegen, non-commercial research): must be downloaded by hand after reading
   its terms; see ``app/engine/calibration.py`` for the stress evaluation.
 
-Files go to ``data/external/`` (git-ignored); nothing here is needed to run the app.
+BIDMC and Sleep-EDF extracts (~1.2 MB, ODC-By) are versioned in ``data/physionet/`` and
+imported into the database by the seed; WESAD (~2.5 GB) stays in ``data/external/``.
 """
 
 from __future__ import annotations
@@ -19,13 +20,15 @@ from dataclasses import dataclass
 from pathlib import Path
 
 from app.datasets.http import get_text
-from app.datasets.paths import EXTERNAL_DIR, ensure_dir
+from app.datasets.paths import EXTERNAL_DIR, PHYSIONET_DIR, ensure_dir
 
 BIDMC_ROOT = "https://physionet.org/files/bidmc/1.0.0/bidmc_csv/"
-BIDMC_DIR = EXTERNAL_DIR / "bidmc"
+BIDMC_DIR = PHYSIONET_DIR / "bidmc"
 SLEEP_EDF_ROOT = "https://physionet.org/files/sleep-edfx/1.0.0/sleep-cassette/"
-SLEEP_EDF_DIR = EXTERNAL_DIR / "sleep-edfx"
+SLEEP_EDF_DIR = PHYSIONET_DIR / "sleep-edfx"
 WESAD_DIR = EXTERNAL_DIR / "wesad"
+# HRV per 60 s window extracted from WESAD: small, versioned and imported by the seed.
+WESAD_WINDOWS_CSV = PHYSIONET_DIR / "wesad_hrv_windows.csv"
 
 _HYPNOGRAM_RE = re.compile(r'href="(SC4\d{3}E[0-9A-Z]-Hypnogram\.edf)"')
 # Rechtschaffen & Kales stages as written in the EDF+ annotations.

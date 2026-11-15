@@ -3,6 +3,7 @@
     python -m app.engine.calibration bidmc      # SpO2 / heart-rate / respiration ranges
     python -m app.engine.calibration sleep      # healthy sleep (Sleep-EDF hypnograms)
     python -m app.engine.calibration wesad      # HRV-01 sensitivity / false-alarm rate
+    python -m app.engine.calibration wesad-extract  # raw WESAD → HRV windows CSV (data/physionet)
 
 Results are written to ``docs/calibration.json`` and summarized in
 ``docs/fiche-moteur-ia.md``. Data come from ``data/external/`` (see
@@ -129,8 +130,11 @@ def rmssd(rr: np.ndarray) -> float | None:
     return float(np.sqrt(np.mean(diff**2))) if len(diff) >= 10 else None
 
 
-def subject_windows(path: Path) -> list[tuple[int, float]]:
-    """(label, RMSSD) for each 60 s window with a single label among 1, 2, 3."""
+CONDITIONS = {1: "baseline", 2: "stress", 3: "amusement"}
+
+
+def subject_windows(path: Path) -> list[tuple[int, float, float]]:
+    """(label, start s, RMSSD) for each 60 s window with a single label among 1, 2, 3."""
     with path.open("rb") as handle:
         data = pickle.load(handle, encoding="latin1")
     ecg = np.asarray(data["signal"]["chest"]["ECG"]).ravel()
@@ -140,35 +144,69 @@ def subject_windows(path: Path) -> list[tuple[int, float]]:
     for start in range(0, len(ecg) - step, step):
         window_labels = labels[start : start + step]
         label = int(window_labels[0])
-        if label not in (1, 2, 3) or not (window_labels == label).all():
+        if label not in CONDITIONS or not (window_labels == label).all():
             continue
         value = rmssd(rr_intervals(ecg[start : start + step]))
         if value is not None:
-            windows.append((label, value))
+            windows.append((label, start / ECG_HZ, value))
     return windows
 
 
-def evaluate_wesad(ratios: tuple[float, ...] = (0.6, 0.7, 0.8, 0.9)) -> dict:
+def extract_wesad_windows(output: Path = physionet.WESAD_WINDOWS_CSV) -> Path:
+    """Raw WESAD (2.5 GB) → small CSV of RMSSD per 60 s window (a few hundred kB).
+
+    Run it wherever the raw data is (e.g. Google Colab, see notebooks/), then copy the
+    CSV into data/physionet/: the seed imports it and the evaluation reads it.
+    """
     files = sorted(physionet.WESAD_DIR.glob("S*/S*.pkl"))
     if not files:
         raise SystemExit(
             "WESAD absent : téléchargez-le depuis "
             "https://www.eti.uni-siegen.de/ubicomp/home/datasets/icmi18/ "
-            "puis décompressez-le dans data/external/wesad/"
+            "puis décompressez-le dans data/external/wesad/ (ou utilisez le notebook Colab)"
         )
+    output.parent.mkdir(parents=True, exist_ok=True)
+    with output.open("w", newline="", encoding="utf-8") as handle:
+        writer = csv.writer(handle)
+        writer.writerow(["subject", "condition", "t_offset_s", "rmssd_ms"])
+        for path in files:
+            for label, t, value in subject_windows(path):
+                writer.writerow([path.stem, CONDITIONS[label], t, round(value, 3)])
+            print(f"  {path.stem}: ok")
+    return output
+
+
+def load_wesad_windows(
+    path: Path = physionet.WESAD_WINDOWS_CSV,
+) -> dict[str, list[tuple[str, float]]]:
+    """subject → [(condition, RMSSD)] from the extracted CSV."""
+    subjects: dict[str, list[tuple[str, float]]] = {}
+    with path.open(encoding="utf-8") as handle:
+        for row in csv.DictReader(handle):
+            subjects.setdefault(row["subject"], []).append(
+                (row["condition"], float(row["rmssd_ms"]))
+            )
+    return subjects
+
+
+def evaluate_wesad(
+    ratios: tuple[float, ...] = (0.6, 0.7, 0.8, 0.9), windows_csv: Path | None = None
+) -> dict:
+    windows_csv = windows_csv or physionet.WESAD_WINDOWS_CSV
+    if not windows_csv.exists():
+        extract_wesad_windows(windows_csv)
     subjects = {}
-    for path in files:
-        windows = subject_windows(path)
-        base = [v for label, v in windows if label == 1]
+    for subject, windows in load_wesad_windows(windows_csv).items():
+        base = [v for condition, v in windows if condition == "baseline"]
         if len(base) >= 5:
-            subjects[path.stem] = (median(base), windows)
+            subjects[subject] = (median(base), windows)
     results = []
     for ratio in ratios:
         tp = fn = fp = tn = 0
         for baseline, windows in subjects.values():
-            for label, value in windows:
+            for condition, value in windows:
                 flagged = value < ratio * baseline
-                if label == 2:
+                if condition == "stress":
                     tp, fn = tp + flagged, fn + (not flagged)
                 else:
                     fp, tn = fp + flagged, tn + (not flagged)
@@ -182,9 +220,9 @@ def evaluate_wesad(ratios: tuple[float, ...] = (0.6, 0.7, 0.8, 0.9)) -> dict:
             }
         )
     stress_ratio = [
-        median([v for label, v in w if label == 2]) / b
+        median([v for condition, v in w if condition == "stress"]) / b
         for b, w in subjects.values()
-        if any(label == 2 for label, _ in w)
+        if any(condition == "stress" for condition, _ in w)
     ]
     return {
         "dataset": "WESAD (Univ. Siegen), ECG thoracique 700 Hz, fenêtres de 60 s",
@@ -200,9 +238,12 @@ def main() -> None:
     parser = argparse.ArgumentParser(
         prog="python -m app.engine.calibration", description=__doc__.splitlines()[0]
     )
-    parser.add_argument("target", choices=["bidmc", "sleep", "wesad", "all"])
+    parser.add_argument("target", choices=["bidmc", "sleep", "wesad", "wesad-extract", "all"])
     args = parser.parse_args()
     report = json.loads(OUTPUT.read_text(encoding="utf-8")) if OUTPUT.exists() else {}
+    if args.target == "wesad-extract":
+        print(f"→ {extract_wesad_windows()}")
+        return
     targets = ["bidmc", "sleep", "wesad"] if args.target == "all" else [args.target]
     jobs = {"bidmc": calibrate_bidmc, "sleep": calibrate_sleep, "wesad": evaluate_wesad}
     for target in targets:

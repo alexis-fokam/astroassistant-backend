@@ -7,7 +7,8 @@ from datetime import datetime
 from sqlalchemy import CheckConstraint, ForeignKey, Index, String, Text
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
-from app.models.base import Base, utcnow
+from app.models.base import Base, enum_type, utcnow
+from app.models.enums import Metric
 
 
 class DatasetSource(Base):
@@ -94,3 +95,61 @@ class ProtonFluxReading(Base):
     imported_at: Mapped[datetime] = mapped_column(
         default=utcnow, comment="Date d'import en base (UTC)"
     )
+
+
+class ReferenceVitalSample(Base):
+    """Mesure physiologique réelle d'un jeu de référence terrestre, pour calibrer le moteur (§6).
+
+    BIDMC : FC, FR et SpO₂ à la seconde de patients de soins intensifs ; WESAD : VFC par
+    fenêtre de 60 s selon l'état (repos, stress, amusement).
+    """
+
+    __tablename__ = "reference_vital_samples"
+    __table_args__ = (
+        Index("ix_reference_vital_samples_lookup", "source_id", "metric", "condition"),
+    )
+
+    id: Mapped[int] = mapped_column(primary_key=True, comment="Identifiant technique")
+    source_id: Mapped[int] = mapped_column(
+        ForeignKey("dataset_sources.id", ondelete="CASCADE"), comment="Jeu de données d'origine"
+    )
+    subject: Mapped[str] = mapped_column(
+        String(32), comment="Sujet ou enregistrement anonymisé (ex. bidmc_01, S2)"
+    )
+    condition: Mapped[str] = mapped_column(
+        String(32), comment="Contexte de la mesure : icu, baseline, stress, amusement"
+    )
+    metric: Mapped[Metric] = mapped_column(enum_type(Metric), comment="Constante mesurée")
+    t_offset_s: Mapped[float] = mapped_column(
+        comment="Instant de la mesure en secondes depuis le début de l'enregistrement"
+    )
+    value: Mapped[float] = mapped_column(comment="Valeur (unité fixée par la métrique)")
+
+
+class ReferenceSleepNight(Base):
+    """Nuit de sommeil réelle annotée par des experts (Sleep-EDF), épisode principal (F7)."""
+
+    __tablename__ = "reference_sleep_nights"
+    __table_args__ = (
+        CheckConstraint("efficiency BETWEEN 0 AND 1", name="efficiency_range"),
+        CheckConstraint("total_sleep_h >= 0 AND sleep_period_h >= total_sleep_h", name="durations"),
+    )
+
+    id: Mapped[int] = mapped_column(primary_key=True, comment="Identifiant technique")
+    source_id: Mapped[int] = mapped_column(
+        ForeignKey("dataset_sources.id", ondelete="CASCADE"), comment="Jeu de données d'origine"
+    )
+    record: Mapped[str] = mapped_column(
+        String(16), unique=True, comment="Nuit enregistrée (sujet et nuit, ex. SC4001E)"
+    )
+    sleep_period_h: Mapped[float] = mapped_column(
+        comment="Durée de l'épisode, de l'endormissement au réveil final (h)"
+    )
+    total_sleep_h: Mapped[float] = mapped_column(comment="Temps de sommeil effectif (h)")
+    efficiency: Mapped[float] = mapped_column(comment="Efficacité : sommeil / épisode, de 0 à 1")
+    waso_min: Mapped[float] = mapped_column(comment="Éveil après endormissement (min)")
+    awakenings: Mapped[int] = mapped_column(comment="Nombre de réveils pendant l'épisode")
+    n1_h: Mapped[float] = mapped_column(comment="Sommeil léger N1 (h)")
+    n2_h: Mapped[float] = mapped_column(comment="Sommeil léger N2 (h)")
+    n3_h: Mapped[float] = mapped_column(comment="Sommeil profond N3 (h)")
+    rem_h: Mapped[float] = mapped_column(comment="Sommeil paradoxal (h)")
