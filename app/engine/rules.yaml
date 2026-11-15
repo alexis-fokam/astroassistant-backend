@@ -1,0 +1,128 @@
+# Clinical rules (spec F2.2-F2.4). A rule fires when all its conditions hold.
+# WARNING rules must hold on two consecutive evaluations (§6.3); CRITICAL fire at once.
+# Codes match the `trigger.rules` of the protocol library (app/protocols/*.yaml).
+# Message placeholders use the computed features, e.g. {hr_now:.0f}.
+
+- code: CARDIO-CRIT-01
+  domain: cardio
+  level: critical
+  method: threshold
+  when: [[hr_now, ">", 120], [spo2_now, "<", 94]]
+  metric: heart_rate
+  observed: hr_now
+  threshold: 120
+  protocol: EMRG-01
+  title: Tachycardie et désaturation
+  message: "FC {hr_now:.0f} bpm, SpO₂ {spo2_now:.0f} %."
+
+- code: SPO2-CRIT-01
+  domain: cardio
+  level: critical
+  method: threshold
+  when: [[spo2_now, "<=", 90]]
+  suppressed_by: [CARDIO-CRIT-01]
+  metric: spo2
+  observed: spo2_now
+  threshold: 90
+  protocol: EMRG-01
+  title: Désaturation sévère
+  message: "SpO₂ {spo2_now:.0f} %."
+
+- code: HR-02
+  domain: cardio
+  level: warning
+  method: robust_zscore
+  when: [[hr_z, ">=", 2.5]]
+  suppressed_by: [CARDIO-CRIT-01]
+  metric: heart_rate
+  observed: hr_1h
+  threshold: 2.5
+  title: FC au repos élevée
+  message: "{hr_1h:.0f} bpm, z-score robuste {hr_z:.1f}."
+
+- code: ANOMALY-01
+  domain: cardio
+  level: warning
+  method: isolation_forest
+  when: [[anomaly_score, ">=", 0.85]]
+  suppressed_by: [CARDIO-CRIT-01, SPO2-CRIT-01]
+  observed: anomaly_score
+  threshold: 0.85
+  title: Combinaison inhabituelle des constantes
+  message: "Score d'anomalie {anomaly_score:.2f} : FC, VFC, SpO₂ et respiration sortent du profil habituel."
+
+- code: HRV-01
+  domain: behavioral
+  level: warning
+  method: trend
+  when: [[hrv_ratio, "<", 0.8]]
+  any: [[stress, ">=", 7], [short_nights_3n, ">=", 3]]
+  metric: hrv_rmssd
+  observed: hrv_24h
+  threshold_feature: hrv_threshold
+  protocol: PRT-STRESS-01
+  title: VFC basse persistante
+  message: "VFC à {hrv_ratio_pct:.0f} % de la baseline, sommeil {sleep_hours_3n:.1f} h en moyenne sur 3 nuits."
+
+- code: PVT-01
+  domain: behavioral
+  level: warning
+  method: threshold
+  when: [[pvt_lapses_last, ">=", 3], [pvt_rt_ratio, ">=", 1.15]]
+  suppressed_by: [HRV-01]
+  observed: pvt_rt_last
+  title: Vigilance dégradée
+  message: "PVT : {pvt_lapses_last:.0f} inattentions, temps de réaction {pvt_rt_last:.0f} ms."
+
+- code: EX-MISSED-01
+  domain: musculoskeletal
+  level: warning
+  method: threshold
+  when: [[missed_resistance_streak, ">=", 2]]
+  observed: missed_resistance_streak
+  threshold: 2
+  protocol: PRT-EX-03
+  title: Séances d'exercice manquées
+  message: "{missed_resistance_streak:.0f} séances de résistance (ARED) manquées consécutives."
+
+- code: SANS-01
+  domain: cardio
+  domain_label: Neuro-oculaire
+  level: warning
+  method: checkin
+  when: [[vision_days, ">=", 2], [headache_days, ">=", 2]]
+  protocol: PRT-SANS-01
+  title: Suspicion SANS
+  message: "Vision modifiée et céphalées déclarées {vision_days:.0f} jours de suite."
+
+- code: RAD-SPE-01
+  domain: radiation
+  level: critical
+  method: threshold
+  when: [[dose_rate_msv_h, ">=", 0.104]]
+  observed: dose_rate_msv_h
+  threshold: 0.104
+  protocol: PRT-RAD-02
+  title: Débit de dose anormal
+  message: "Débit {dose_rate_msv_h:.3f} mSv/h, au-delà du seuil de tempête solaire (2,5 mSv/jour)."
+
+- code: RAD-CAREER-01
+  domain: radiation
+  level: warning
+  method: threshold
+  when: [[career_pct, ">=", 80]]
+  observed: career_pct
+  threshold: 80
+  title: Dose de carrière élevée
+  message: "{career_pct:.0f} % de la limite de carrière atteints."
+
+- code: TEMP-01
+  domain: immune
+  level: warning
+  method: threshold
+  when: [[core_temperature_now, ">=", 38.0]]
+  metric: core_temperature
+  observed: core_temperature_now
+  threshold: 38.0
+  title: Fièvre
+  message: "Température {core_temperature_now:.1f} °C."
