@@ -55,10 +55,10 @@ uvicorn app.main:app --reload
 
 | Écran | Endpoint | Contenu attendu |
 |---|---|---|
-| Connexion | `GET /profiles` (**public**) | code, prénom, nom, rôle, `isCmo` |
+| Connexion | ~~`GET /profiles`~~ ✅ fait (PR #6) | code, prénom, nom, rôle, `isCmo` |
 | Connexion | `POST /auth/logout` | invalide la session |
 | En-tête | `GET /mission` (à compléter) | ajouter `missionTime`, `clock` (« J+142 · 14:05 ») et le compte à rebours jusqu'au prochain contact |
-| Tableau de bord astronaute | `GET /crew/{code}/vitals/latest` | pour chaque constante : dernière valeur, unité, niveau, tendance en %, bande normale (baseline ± 2σ), 36 derniers points |
+| Tableau de bord astronaute | ~~`GET /crew/{code}/vitals/latest`~~ ✅ fait (PR #6) | pour chaque constante : dernière valeur, unité, niveau, tendance en %, bande normale (baseline ± 2σ), 36 derniers points |
 | Détail d'une alerte | ~~`GET /alerts/{id}/explanation`~~ ✅ fait | facteurs (libellé, valeur, contribution), règle déclenchée, score d'anomalie, nombre de confirmations |
 | Systèmes | ~~`GET /crew/{code}/domains/{domain}`~~ ✅ fait | historique du score du domaine et facteurs |
 | Historiques | `GET /checkins/{code}`, `GET /sleep/{code}`, `GET /exercises/{code}`, `GET /pvt/{code}` | listes paginées, les plus récentes d'abord |
@@ -90,7 +90,7 @@ Les tests existants doivent rester verts, et la couverture doit dépasser 70 %.
 
 ## Priorités
 
-1. `GET /profiles` et l'heure de mission dans `GET /mission`.
-2. `GET /crew/{code}/vitals/latest`.
+1. ✅ `GET /profiles` et `GET /crew/{code}/vitals/latest` (PR #6). Reste l'horloge « J+142 · 14:05 » dans `GET /mission`.
+2. Les historiques (`/checkins`, `/sleep`, `/exercises`, `/pvt`) et les consultations.
 3. Le simulateur : le moteur IA est prêt et traite déjà les mesures d'une simulation en cours (`sim_run_id`).
 4. Le reste des endpoints, la sécurité, Docker et Alembic.

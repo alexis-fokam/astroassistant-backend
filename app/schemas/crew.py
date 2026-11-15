@@ -45,6 +45,7 @@ class MissionOut(OrmModel):
     day_length_min: int
     mission_day: int
     next_contact_at: datetime | None
+    next_contact_time: str | None
 
 
 class Factor(BaseModel):
@@ -76,3 +77,11 @@ class CrewStatus(BaseModel):
     top_factors: list[Factor]
     recommended_protocol: str | None
     active_alerts: list[AlertOut]
+
+
+class CrewProfile(BaseModel):
+    code: str
+    first_name: str
+    last_name: str
+    crew_role: CrewRole
+    is_cmo: bool = Field(serialization_alias="isCmo")

@@ -10,6 +10,7 @@ from app.core.config import get_settings
 from app.core.security import create_token, verify_pin
 from app.models import ContactWindow, CrewMember, Mission
 from app.schemas.crew import (
+    CrewProfile,
     CrewStatus,
     CrewSummary,
     LoginRequest,
@@ -17,8 +18,10 @@ from app.schemas.crew import (
     MissionOut,
     TokenResponse,
 )
+from app.schemas.telemetry import CrewVitalsLatest
 from app.services import audit
-from app.services.views import crew_status, crew_summary, mission_now
+from app.services.views import crew_profiles, crew_status, crew_summary, mission_now
+from app.services.vitals import crew_vitals_latest
 
 router = APIRouter()
 
@@ -58,11 +61,15 @@ def mission(db: DbSession, _: CurrentMember) -> MissionOut:
         .where(ContactWindow.mission_id == current.id, ContactWindow.ends_at >= now)
         .order_by(ContactWindow.starts_at)
     ).first()
+    next_start = next_window.starts_at if next_window else None
+    next_time = next_start.strftime("%H:%M:%S") if next_start else None
+
     return MissionOut.model_validate(
         {
             **{k: getattr(current, k) for k in MissionOut.model_fields if hasattr(current, k)},
             "mission_day": (now.date() - current.start_date).days,
-            "next_contact_at": next_window.starts_at if next_window else None,
+            "next_contact_at": next_start,
+            "next_contact_time": next_time,
         }
     )
 
@@ -80,3 +87,18 @@ def crew(db: DbSession, viewer: CurrentMember) -> list[CrewSummary]:
 def status_of(code: str, db: DbSession, viewer: CurrentMember) -> CrewStatus:
     """Current status, domain scores, explanation factors and active alerts (§10.1)."""
     return crew_status(db, visible_member(db, viewer, code))
+
+
+@router.get(
+    "/profiles", response_model=list[CrewProfile], response_model_by_alias=True, tags=["auth"]
+)
+def list_profiles(db: DbSession) -> list[CrewProfile]:
+    """Public: profiles shown on the lock screen (no health data)."""
+    return crew_profiles(db)
+
+
+@router.get("/crew/{code}/vitals/latest", response_model=CrewVitalsLatest, tags=["vitals"])
+def get_crew_vitals_latest(code: str, db: DbSession, viewer: CurrentMember) -> CrewVitalsLatest:
+    """Latest value, level, trend, normal band and last 36 points of every vital sign."""
+    # visible_member enforces RBAC: an astronaut only reads their own vitals (spec §7).
+    return crew_vitals_latest(db, visible_member(db, viewer, code))

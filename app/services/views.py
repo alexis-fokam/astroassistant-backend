@@ -21,7 +21,7 @@ from app.models import (
 from app.models.enums import AccessRole, AlertLevel, AlertStatus, RiskDomain
 from app.schemas.alerts import AlertOut, EmergencyOut
 from app.schemas.care import RunOut
-from app.schemas.crew import CrewStatus, CrewSummary, Factor
+from app.schemas.crew import CrewProfile, CrewStatus, CrewSummary, Factor
 from app.schemas.ground import GroundMessageOut, PacketOut, SimRunOut
 
 LEVEL_ORDER = {AlertLevel.CRITICAL: 0, AlertLevel.WARNING: 1, AlertLevel.INFO: 2}
@@ -129,6 +129,25 @@ def crew_status(db: Session, member: CrewMember) -> CrewStatus:
         recommended_protocol=protocol,
         active_alerts=[alert_out(a) for a in alerts],
     )
+
+
+def crew_profiles(db: Session) -> list[CrewProfile]:
+    members = db.scalars(
+        select(CrewMember).where(CrewMember.is_active.is_(True)).order_by(CrewMember.code)
+    ).all()
+
+    profiles: list[CrewProfile] = []
+    for member in members:
+        profiles.append(
+            CrewProfile(
+                code=member.code,
+                first_name=member.first_name,
+                last_name=member.last_name,
+                crew_role=member.crew_role,
+                is_cmo=member.access_role is AccessRole.CMO,
+            )
+        )
+    return profiles
 
 
 def run_out(run: ProtocolRun, step_codes: list[str]) -> RunOut:
